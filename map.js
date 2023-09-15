@@ -21,13 +21,19 @@ export class Map extends HexGrid {
         this.oceanColor = oceanColor;
         this.scene = scene;
         this.graphics = graphics;
-
+        
         this.showGrid = false;
         this.showHexIds = false;
         this.showElevationValues = false;
 
         this.elevations = new Uint8Array(this.maxHexId + 1);
         this.landCover = new Uint8Array(this.maxHexId + 1);
+
+        this.debugTexts = [];
+        for (let hexId = 0; hexId <= this.maxHexId; hexId++){
+            this.debugTexts[hexId] = this.scene.add.text(this.hexCenters[hexId].x-16, this.hexCenters[hexId].y-16, "", { font: '30px monospace', fill: '#b1e1f6' });
+        }
+
         this.generateElevations();
     }
 
@@ -169,16 +175,14 @@ export class Map extends HexGrid {
         for (let hexId = 0; hexId <= this.maxHexId; hexId++) {
             this.drawLandHexagon(hexId, this.elevations[hexId] ,this.hexCenters[hexId].x, this.hexCenters[hexId].y);   
             if (this.showGrid) this.drawHexagonBorder(this.hexCenters[hexId].x, this.hexCenters[hexId].y);
-            if (this.showHexIds) this.debugText(hexId, this.hexCenters[hexId].x, this.hexCenters[hexId].y);
-            if (this.showElevationValues) this.debugText(this.elevations[hexId], this.hexCenters[hexId].x, this.hexCenters[hexId].y);
+            if (this.showHexIds) this.setDebugText(hexId, hexId);
+            if (this.showElevationValues) this.setDebugText(hexId, this.elevations[hexId]);
         }
     }
 
-    debugText(txt, x, y) {
+    setDebugText(hexId, txt) {
         txt = txt.toString();
-        x = x-(txt.length*8);
-        y = y-16;
-        let hexIdText = this.scene.add.text(x, y, txt, { font: '30px monospace', fill: '#b1e1f6' });
+        this.debugTexts[hexId].setText(txt);
         //hexIdText.setResolution(25);
     }
 }

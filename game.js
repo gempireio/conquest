@@ -50,6 +50,7 @@ function preload() {
     nonUIComponents.push(graphics);
 
     map = new Map( GRID_LAYERS, SEA_LEVEL, game_config.backgroundColor, this, graphics );
+    nonUIComponents.push(...map.debugTexts);
     if (SHOW_GRID) map.showGrid = true;
     if (SHOW_HEX_IDS) map.showElevationValues = true;
     if (SHOW_ELEVATION_VALUES) map.showElevationValues = true;
@@ -98,8 +99,6 @@ function preload() {
         loadingText.destroy();
         percentText.destroy();
     });
-
-   
 }
 
 function create() {
