@@ -23,7 +23,8 @@ const game_config = {
 
 let game = new Phaser.Game(game_config);
 
-const GRID_LAYERS = 150;
+const GRID_LAYERS = 100;
+const SEA_LEVEL = 35;
 const MAX_ZOOM = 10;
 const MIN_ZOOM = 15 / GRID_LAYERS;
 const SHOW_GRID = false;
@@ -46,7 +47,7 @@ let screenHeight;
 function preload() {
     graphics = this.add.graphics();
 
-    map = new Map( GRID_LAYERS, 30, game_config.backgroundColor, this, graphics );
+    map = new Map( GRID_LAYERS, SEA_LEVEL, game_config.backgroundColor, this, graphics );
     if (SHOW_GRID) map.showGrid = true;
     if (SHOW_HEX_IDS) map.showElevationValues = true;
     if (SHOW_ELEVATION_VALUES) map.showElevationValues = true;
@@ -112,9 +113,9 @@ function create() {
     // Scroll Wheel event
     this.input.on('wheel', (e) => {
         if (e.deltaY < 0) { // Zoom In
-            zoom *= 1.06;
+            zoom *= 1.08;
         } else { // Zoom Out     
-            zoom *= 0.94;
+            zoom *= 0.92;
         }
 
         // Prevent from zooming in/out too far

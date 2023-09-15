@@ -80,7 +80,7 @@ export class Map extends HexGrid {
     
             // Make outer edges lowest elevation.
             if (this.layerOf(hexId) >= Math.round(this.layers * 0.9)) {
-                this.elevations[hexId] = Math.min(currentValue, this.seaLevel - 1);
+                this.elevations[hexId] = Math.min(currentValue, this.seaLevel / 2);
             }
         }
     
@@ -90,7 +90,7 @@ export class Map extends HexGrid {
 
         // }
     
-        this.smoothElevations(this.maxHexId);
+        this.smoothElevations(this.maxHexId*3);
     
         for (let hexId = 1; hexId <= this.maxHexId; hexId++) {
             let neighborIds = this.neighborsOf(hexId);
@@ -118,6 +118,8 @@ export class Map extends HexGrid {
                 }            
             }
         }
+
+        this.smoothElevations(this.maxHexId*5);
     }
 
     /**
@@ -149,14 +151,14 @@ export class Map extends HexGrid {
         let color;
         if (elevation <= this.seaLevel) { // Ocean
             //color = Phaser.Display.Color.HexStringToColor(this.oceanColor).color;
-            let oceanAlphaHex = 0.8 - (this.layerOf(hexId) / this.layerOf(this.maxHexId) ) // Based on layers
-            let oceanAlphaCircle = 0.5 - (Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)) / Math.sqrt(Math.pow(this.maxX, 2) + Math.pow(this.maxY, 2))); // Based on distance from center/edges x, y coordinates
-            let oceanAlphaElevation = 0.35 - elevation/this.seaLevel/2; // Based on Elevation
-            let oceanAlpha = Math.max( 0, ( oceanAlphaHex + oceanAlphaCircle + oceanAlphaElevation ) / 3 );
-            color = Phaser.Display.Color.GetColor32(0, 180, 220);
+            let oceanAlphaHex = 0.9 - (this.layerOf(hexId) / this.layerOf(this.maxHexId) * 1.3 ) // Based on layers
+            let oceanAlphaCircle = 0.9 - (Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)) / Math.sqrt(Math.pow(this.maxX, 2) + Math.pow(this.maxY, 2)) * 1.5); // Based on distance from center/edges x, y coordinates
+            let oceanAlphaElevation = Math.pow(elevation/this.seaLevel, 3); // Based on Elevation
+            let oceanAlpha = Math.max( 0, ( oceanAlphaHex * 0.1 ) + ( oceanAlphaCircle * 0.15 ) + ( oceanAlphaElevation * 0.75 ) );
+            color = Phaser.Display.Color.GetColor32(0, 120, 120);
             this.graphics.fillStyle(color, oceanAlpha);
         } else { // Land
-            color = Phaser.Display.Color.GetColor(elevation/3.5, 150-(elevation/2), 86-(elevation/3));
+            color = Phaser.Display.Color.GetColor(Math.pow(1.021,elevation), 160-(elevation/1.7), Math.round(180*Math.pow(0.98,elevation)));
             this.graphics.fillStyle(color);
         }
         //color = Phaser.Display.Color.GetColor(elevation/4, 150-(elevation/2), 86-(elevation/3));
