@@ -27,7 +27,8 @@ const GRID_LAYERS = 100;
 const SEA_LEVEL = 35;
 const MAX_ZOOM = 10;
 const MIN_ZOOM = 15 / GRID_LAYERS;
-const SHOW_GRID = false;
+const SHOW_MOUSE_COORDS = true;
+const SHOW_GRID = true;
 const SHOW_HEX_IDS = false;
 const SHOW_ELEVATION_VALUES = false;
 const MINOR_UPDATE_INTERVAL = 300; // milliseconds interval of each minor update
@@ -38,14 +39,15 @@ let zoom = MIN_ZOOM * 1.2;
 let lastMinorUpdate = 0;
 let lasTimerReset = 0;
 
-
-console.log(this);
 let graphics;
 let screenWidth;
 let screenHeight;
+let UIComponents = [];
+let nonUIComponents = [];
 
 function preload() {
     graphics = this.add.graphics();
+    nonUIComponents.push(graphics);
 
     map = new Map( GRID_LAYERS, SEA_LEVEL, game_config.backgroundColor, this, graphics );
     if (SHOW_GRID) map.showGrid = true;
@@ -101,30 +103,40 @@ function preload() {
 }
 
 function create() {
+    
+    this.cursors = this.input.keyboard.createCursorKeys();
+    this.keys = this.input.keyboard.addKeys('W,A,S,D');
+
+    if (SHOW_MOUSE_COORDS) {
+        this.coordLabel = this.add.text(0, 0, '(x, y)', { font: '70px monospace'});
+        this.pointer = this.input.activePointer;
+        UIComponents.push(this.coordLabel);
+    }
+
+    // Main Camera
     this.cameras.main.setBounds(map.minX * 1.02, map.minY * 1.01, map.width * 1.04, map.height * 1.04, true);
-
-    //this.add.image(0, 0, 'map').setOrigin(0);
-
     this.cameras.main.setZoom(zoom);
     this.cameras.main.setRoundPixels(true);
-    //this.cameras.main.centerOn(screenWidth/2, screenHeight/2);
+    this.cameras.main.ignore(UIComponents);
+
+    // UI Camera (Ignore Zoom)
+    const UICam = this.cameras.add(10, 10, screenWidth, screenHeight);
+    UICam.ignore(nonUIComponents);
+
     updateGraphics();
 
     // Scroll Wheel event
     this.input.on('wheel', (e) => {
         if (e.deltaY < 0) { // Zoom In
-            zoom *= 1.08;
+            zoom *= 1.05 + Math.random() * 0.1;
         } else { // Zoom Out     
-            zoom *= 0.92;
+            zoom *= 0.95 - Math.random() * 0.1;
         }
 
         // Prevent from zooming in/out too far
         zoom = Math.max( MIN_ZOOM, Math.min(MAX_ZOOM, zoom) );
         this.cameras.main.setZoom(zoom);
     });
-
-    this.cursors = this.input.keyboard.createCursorKeys();
-    this.keys = this.input.keyboard.addKeys('W,A,S,D');
 }
 
 function update(timestamp, elapsed) {
@@ -143,6 +155,8 @@ function update(timestamp, elapsed) {
     else if (this.keys.S.isDown || this.cursors.down.isDown) {
         cam.scrollY += 10/zoom + 0.2;
     }
+
+    if (SHOW_MOUSE_COORDS) this.coordLabel.setText('(' + this.pointer.x + ', ' + this.pointer.y + ')');
 }
 
 function updateGraphics() {
