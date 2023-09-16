@@ -23,14 +23,12 @@ const game_config = {
 
 let game = new Phaser.Game(game_config);
 
-const GRID_LAYERS = 100;
+const GRID_LAYERS = 200;
 const SEA_LEVEL = 35;
 const MAX_ZOOM = 10;
 const MIN_ZOOM = 15 / GRID_LAYERS;
-const SHOW_MOUSE_COORDS = true;
-const SHOW_GRID = true;
-const SHOW_HEX_IDS = false;
-const SHOW_ELEVATION_VALUES = false;
+const SHOW_GRID = false;
+const SHOW_DEBUG_TEXT = true;
 const MINOR_UPDATE_INTERVAL = 300; // milliseconds interval of each minor update
 const TURN_TIME = 30;
 
@@ -49,11 +47,9 @@ function preload() {
     graphics = this.add.graphics();
     nonUIComponents.push(graphics);
 
-    map = new Map( GRID_LAYERS, SEA_LEVEL, game_config.backgroundColor, this, graphics );
-    nonUIComponents.push(...map.debugTexts);
+    map = new Map( GRID_LAYERS, SEA_LEVEL, game_config.backgroundColor, this, graphics, SHOW_DEBUG_TEXT );
+    if (SHOW_DEBUG_TEXT) nonUIComponents.push(...map.debugTexts);
     if (SHOW_GRID) map.showGrid = true;
-    if (SHOW_HEX_IDS) map.showElevationValues = true;
-    if (SHOW_ELEVATION_VALUES) map.showElevationValues = true;
      
     screenWidth = this.sys.game.canvas.width;
     screenHeight = this.sys.game.canvas.height;
@@ -106,7 +102,7 @@ function create() {
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keys = this.input.keyboard.addKeys('W,A,S,D');
 
-    if (SHOW_MOUSE_COORDS) {
+    if (SHOW_DEBUG_TEXT) {
         this.coordLabel = this.add.text(0, 0, '(x, y)', { font: '70px monospace'});
         this.pointer = this.input.activePointer;
         UIComponents.push(this.coordLabel);
@@ -155,7 +151,7 @@ function update(timestamp, elapsed) {
         cam.scrollY += 10/zoom + 0.2;
     }
 
-    if (SHOW_MOUSE_COORDS) this.coordLabel.setText('(' + this.pointer.x + ', ' + this.pointer.y + ')');
+    if (SHOW_DEBUG_TEXT) this.coordLabel.setText('(' + this.pointer.x + ', ' + this.pointer.y + ')');
 }
 
 function updateGraphics() {

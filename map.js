@@ -15,7 +15,7 @@ export class Map extends HexGrid {
     // rocky
     // ocean
 
-    constructor( layers, seaLevel, oceanColor, scene, graphics ) {
+    constructor( layers, seaLevel, oceanColor, scene, graphics, showDebugText ) {
         super(layers, 100);
         this.seaLevel = seaLevel;
         this.oceanColor = oceanColor;
@@ -23,15 +23,16 @@ export class Map extends HexGrid {
         this.graphics = graphics;
         
         this.showGrid = false;
-        this.showHexIds = false;
-        this.showElevationValues = false;
+        this.showDebugText = showDebugText;
 
         this.elevations = new Uint8Array(this.maxHexId + 1);
         this.landCover = new Uint8Array(this.maxHexId + 1);
-
-        this.debugTexts = [];
-        for (let hexId = 0; hexId <= this.maxHexId; hexId++){
-            this.debugTexts[hexId] = this.scene.add.text(this.hexCenters[hexId].x-16, this.hexCenters[hexId].y-16, "", { font: '30px monospace', fill: '#b1e1f6' });
+        
+        if ( showDebugText ){
+            this.debugTexts = [];
+            for (let hexId = 0; hexId <= this.maxHexId; hexId++){
+                this.debugTexts[hexId] = this.scene.add.text(this.hexCenters[hexId].x-46, this.hexCenters[hexId].y-34, "1", { font: '14px monospace', fill: '#b1e1f6' });
+            }
         }
 
         this.generateElevations();
@@ -167,7 +168,6 @@ export class Map extends HexGrid {
             color = Phaser.Display.Color.GetColor(Math.pow(1.021,elevation), 160-(elevation/1.7), Math.round(180*Math.pow(0.98,elevation)));
             this.graphics.fillStyle(color);
         }
-        //color = Phaser.Display.Color.GetColor(elevation/4, 150-(elevation/2), 86-(elevation/3));
         this.graphics.fillPoints(hexagon.points, true);
     }
 
@@ -175,14 +175,7 @@ export class Map extends HexGrid {
         for (let hexId = 0; hexId <= this.maxHexId; hexId++) {
             this.drawLandHexagon(hexId, this.elevations[hexId] ,this.hexCenters[hexId].x, this.hexCenters[hexId].y);   
             if (this.showGrid) this.drawHexagonBorder(this.hexCenters[hexId].x, this.hexCenters[hexId].y);
-            if (this.showHexIds) this.setDebugText(hexId, hexId);
-            if (this.showElevationValues) this.setDebugText(hexId, this.elevations[hexId]);
+            if (this.showDebugText) this.debugTexts[hexId].setText("ID:   " + hexId + "\nElev: " + this.elevations[hexId]);
         }
-    }
-
-    setDebugText(hexId, txt) {
-        txt = txt.toString();
-        this.debugTexts[hexId].setText(txt);
-        //hexIdText.setResolution(25);
     }
 }
