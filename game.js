@@ -23,7 +23,7 @@ const game_config = {
 
 let game = new Phaser.Game(game_config);
 
-const GRID_LAYERS = 200;
+const GRID_LAYERS = 50;
 const SEA_LEVEL = 35;
 const MAX_ZOOM = 10;
 const MIN_ZOOM = 15 / GRID_LAYERS;
@@ -151,7 +151,7 @@ function update(timestamp, elapsed) {
         cam.scrollY += 10/zoom + 0.2;
     }
 
-    if (SHOW_DEBUG_TEXT) this.coordLabel.setText('(' + this.pointer.x + ', ' + this.pointer.y + ')');
+    if (SHOW_DEBUG_TEXT) this.coordLabel.setText('(' + Math.trunc(this.pointer.x) + ', ' + Math.trunc(this.pointer.y) + ')');
 }
 
 function updateGraphics() {
