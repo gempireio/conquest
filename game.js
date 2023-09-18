@@ -26,14 +26,14 @@ let game = new Phaser.Game(game_config);
 const GRID_LAYERS = 50;
 const SEA_LEVEL = 35;
 const MAX_ZOOM = 10;
-const MIN_ZOOM = 15 / GRID_LAYERS;
+const MIN_ZOOM = 12 / GRID_LAYERS;
 const SHOW_GRID = false;
 const SHOW_DEBUG_TEXT = true;
 const MINOR_UPDATE_INTERVAL = 300; // milliseconds interval of each minor update
 const TURN_TIME = 30;
 
 let map;
-let zoom = MIN_ZOOM * 1.2;
+let zoom = ( MAX_ZOOM + MIN_ZOOM ) / 5;
 let lastMinorUpdate = 0;
 let lasTimerReset = 0;
 
@@ -109,10 +109,11 @@ function create() {
     }
 
     // Main Camera
-    this.cameras.main.setBounds(map.minX * 1.02, map.minY * 1.01, map.width * 1.04, map.height * 1.04, true);
-    this.cameras.main.setZoom(zoom);
+    this.cameras.main.setBounds(map.minX * 1.025, map.minY * 1.025, map.width * 1.05, map.height * 1.05, true);
+    this.cameras.main.setZoom(MIN_ZOOM);
     this.cameras.main.setRoundPixels(true);
     this.cameras.main.ignore(UIComponents);
+    
 
     // UI Camera (Ignore Zoom)
     const UICam = this.cameras.add(10, 10, screenWidth, screenHeight);
@@ -120,17 +121,36 @@ function create() {
 
     updateGraphics();
 
+    // Zoom into start location
+    const tweenConfig = {
+        targets: this.cameras.main,
+        zoom: zoom,
+        duration: 3000,
+        ease: 'Bounce.Out'
+    }
+    
+    this.tweens.add(tweenConfig);
+    //this.cameras.main.shake(100);
+
     // Scroll Wheel event
     this.input.on('wheel', (e) => {
+        let zoomDelta;
         if (e.deltaY < 0) { // Zoom In
-            zoom *= 1.05 + Math.random() * 0.1;
+            zoomDelta = 0.05 + Math.random() * 0.2;
         } else { // Zoom Out     
-            zoom *= 0.95 - Math.random() * 0.1;
+            zoomDelta = -0.05 - Math.random() * 0.2;
         }
-
+        
         // Prevent from zooming in/out too far
-        zoom = Math.max( MIN_ZOOM, Math.min(MAX_ZOOM, zoom) );
-        this.cameras.main.setZoom(zoom);
+        zoom = Math.max( MIN_ZOOM, Math.min(MAX_ZOOM, zoom * (1 + zoomDelta) ) );
+
+        const tweenConfig = {
+            targets: this.cameras.main,
+            zoom: zoom,
+            duration: 300,
+            ease: 'Back.Out'
+        }
+        const tween = this.tweens.add(tweenConfig);
     });
 }
 
