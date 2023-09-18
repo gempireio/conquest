@@ -165,7 +165,7 @@ export class Map extends HexGrid {
             color = Phaser.Display.Color.GetColor32(0, 120, 120);
             this.graphics.fillStyle(color, oceanAlpha);
         } else { // Land
-            color = Phaser.Display.Color.GetColor(Math.pow(1.021,elevation), 160-(elevation/1.7), Math.round(180*Math.pow(0.98,elevation)));
+            color = Phaser.Display.Color.GetColor(Math.pow(1.018,elevation)+(elevation/3), 178-(elevation/1.45), Math.round(180*Math.pow(0.98,elevation)));
             this.graphics.fillStyle(color);
         }
         this.graphics.fillPoints(hexagon.points, true);
