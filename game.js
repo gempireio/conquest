@@ -23,17 +23,17 @@ const game_config = {
 
 let game = new Phaser.Game(game_config);
 
-const GRID_LAYERS = 50;
+const GRID_LAYERS = 100;
 const SEA_LEVEL = 35;
 const MAX_ZOOM = 10;
 const MIN_ZOOM = 12 / GRID_LAYERS;
 const SHOW_GRID = false;
-const SHOW_DEBUG_TEXT = true;
+const SHOW_DEBUG_TEXT = false;
 const MINOR_UPDATE_INTERVAL = 300; // milliseconds interval of each minor update
 const TURN_TIME = 30;
 
 let map;
-let zoom = ( MAX_ZOOM + MIN_ZOOM ) / 5;
+let zoom = ( MAX_ZOOM + MIN_ZOOM ) / 3;
 let lastMinorUpdate = 0;
 let lasTimerReset = 0;
 
@@ -130,7 +130,7 @@ function create() {
     }
     
     this.tweens.add(tweenConfig);
-    //this.cameras.main.shake(100);
+    this.cameras.main.shake(700, 0.003);
 
     // Scroll Wheel event
     this.input.on('wheel', (e) => {
