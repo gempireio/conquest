@@ -5,7 +5,7 @@ A web based turn based strategy game played on a hexagonal map
 
 # completed-features
 - [X] Hexognal grid board with neighboring hex tile functions
-- [X] Randomly generated land map
+- [X] Randomly generated land map with elevation values
 - [X] Zoom and pan controls
 
 # to-do
