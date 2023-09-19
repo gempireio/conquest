@@ -23,18 +23,16 @@ const game_config = {
 
 let game = new Phaser.Game(game_config);
 
-const GRID_LAYERS = 100;
+const GRID_LAYERS = 200;
 const SEA_LEVEL = 35;
 const MAX_ZOOM = 10;
 const MIN_ZOOM = 12 / GRID_LAYERS;
 const SHOW_GRID = false;
 const SHOW_DEBUG_TEXT = false;
-const MINOR_UPDATE_INTERVAL = 300; // milliseconds interval of each minor update
 const TURN_TIME = 30;
 
 let map;
-let zoom = ( MAX_ZOOM + MIN_ZOOM ) / 3;
-let lastMinorUpdate = 0;
+let zoom = 2.5;
 let lasTimerReset = 0;
 
 let graphics;
@@ -125,12 +123,12 @@ function create() {
     const tweenConfig = {
         targets: this.cameras.main,
         zoom: zoom,
-        duration: 3000,
+        duration: 3500,
         ease: 'Bounce.Out'
     }
     
     this.tweens.add(tweenConfig);
-    this.cameras.main.shake(700, 0.003);
+    this.cameras.main.shake(1500, 0.005);
 
     // Scroll Wheel event
     this.input.on('wheel', (e) => {
@@ -171,7 +169,10 @@ function update(timestamp, elapsed) {
         cam.scrollY += 10/zoom + 0.2;
     }
 
-    if (SHOW_DEBUG_TEXT) this.coordLabel.setText('(' + Math.trunc(this.pointer.x) + ', ' + Math.trunc(this.pointer.y) + ')');
+    if (SHOW_DEBUG_TEXT) this.coordLabel.setText(
+        'FPS: ' + Math.trunc(this.game.loop.actualFps) +
+        '\n(' + Math.trunc(this.pointer.x) + ', ' + Math.trunc(this.pointer.y) + ')'
+    );
 }
 
 function updateGraphics() {
