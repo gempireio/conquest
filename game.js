@@ -4,6 +4,7 @@
 // Gempire: Strategic Expanse
 
 import {Map} from './map.js';
+const URL_PARAMS = new URLSearchParams(window.location.search);
 
 const game_config = {
     type: Phaser.WEBGL,
@@ -23,12 +24,12 @@ const game_config = {
 
 let game = new Phaser.Game(game_config);
 
-const GRID_LAYERS = 80;
-const SEA_LEVEL = 35;
+const GRID_LAYERS = URL_PARAMS.get('l') ? parseInt(URL_PARAMS.get('l')) : 60;
+const SEA_LEVEL = URL_PARAMS.get('sl') ? parseInt(URL_PARAMS.get('sl')) : 35;
 const MAX_ZOOM = 10;
 const MIN_ZOOM = 12 / GRID_LAYERS;
-const SHOW_GRID = true;
-const SHOW_DEBUG_TEXT = true;
+const SHOW_GRID = URL_PARAMS.get('grid') ? URL_PARAMS.get('grid') : false;
+const SHOW_DEBUG_TEXT = URL_PARAMS.get('debug') ? URL_PARAMS.get('debug') : false;
 const TURN_TIME = 30;
 
 let map;
@@ -186,6 +187,3 @@ function update(timestamp, elapsed) {
 function updateGraphics() {
     map.drawMap();
 }
-
-
-
