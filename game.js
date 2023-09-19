@@ -23,7 +23,7 @@ const game_config = {
 
 let game = new Phaser.Game(game_config);
 
-const GRID_LAYERS = 200;
+const GRID_LAYERS = 150;
 const SEA_LEVEL = 35;
 const MAX_ZOOM = 10;
 const MIN_ZOOM = 12 / GRID_LAYERS;
@@ -150,6 +150,12 @@ function create() {
         }
         const tween = this.tweens.add(tweenConfig);
     });
+
+    // Looped Timer Events
+    // 20 second Loop
+    this.time.addEvent({ delay: 20000, loop: true, callback: () => {
+        console.log('FPS: ' + this.game.loop.actualFps);
+    }});
 }
 
 function update(timestamp, elapsed) {
