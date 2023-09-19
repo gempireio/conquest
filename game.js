@@ -23,32 +23,26 @@ const game_config = {
 
 let game = new Phaser.Game(game_config);
 
-const GRID_LAYERS = 150;
+const GRID_LAYERS = 80;
 const SEA_LEVEL = 35;
 const MAX_ZOOM = 10;
 const MIN_ZOOM = 12 / GRID_LAYERS;
-const SHOW_GRID = false;
-const SHOW_DEBUG_TEXT = false;
+const SHOW_GRID = true;
+const SHOW_DEBUG_TEXT = true;
 const TURN_TIME = 30;
 
 let map;
 let zoom = 2.5;
 let lasTimerReset = 0;
 
-let graphics;
+let mapGraphics;
 let screenWidth;
 let screenHeight;
 let UIComponents = [];
 let nonUIComponents = [];
 
-function preload() {
-    graphics = this.add.graphics();
-    nonUIComponents.push(graphics);
-
-    map = new Map( GRID_LAYERS, SEA_LEVEL, game_config.backgroundColor, this, graphics, SHOW_DEBUG_TEXT );
-    if (SHOW_DEBUG_TEXT) nonUIComponents.push(...map.debugTexts);
-    if (SHOW_GRID) map.showGrid = true;
-     
+function preload() { 
+    console.log("starting preload");   
     screenWidth = this.sys.game.canvas.width;
     screenHeight = this.sys.game.canvas.height;
 
@@ -80,7 +74,7 @@ function preload() {
     });
     percentText.setOrigin(0.5, 0.5);
 
-    this.load.on('progress', function (progressPercent) {
+    this.load.on('progress', function(progressPercent) {
         percentText.setText(parseInt(progressPercent * 100) + '%');
         progressBar.clear();
         progressBar.fillStyle(0x112233, 1);
@@ -88,47 +82,12 @@ function preload() {
     });
 
     this.load.on('complete', function () {
+        console.log("preload complete");
         progressBar.destroy();
         progressBox.destroy();
         loadingText.destroy();
         percentText.destroy();
     });
-}
-
-function create() {
-    
-    this.cursors = this.input.keyboard.createCursorKeys();
-    this.keys = this.input.keyboard.addKeys('W,A,S,D');
-
-    if (SHOW_DEBUG_TEXT) {
-        this.coordLabel = this.add.text(0, 0, '(x, y)', { font: '70px monospace'});
-        this.pointer = this.input.activePointer;
-        UIComponents.push(this.coordLabel);
-    }
-
-    // Main Camera
-    this.cameras.main.setBounds(map.minX * 1.025, map.minY * 1.025, map.width * 1.05, map.height * 1.05, true);
-    this.cameras.main.setZoom(MIN_ZOOM);
-    this.cameras.main.setRoundPixels(true);
-    this.cameras.main.ignore(UIComponents);
-    
-
-    // UI Camera (Ignore Zoom)
-    const UICam = this.cameras.add(10, 10, screenWidth, screenHeight);
-    UICam.ignore(nonUIComponents);
-
-    updateGraphics();
-
-    // Zoom into start location
-    const tweenConfig = {
-        targets: this.cameras.main,
-        zoom: zoom,
-        duration: 3500,
-        ease: 'Bounce.Out'
-    }
-    
-    this.tweens.add(tweenConfig);
-    this.cameras.main.shake(1500, 0.005);
 
     // Scroll Wheel event
     this.input.on('wheel', (e) => {
@@ -156,6 +115,49 @@ function create() {
     this.time.addEvent({ delay: 20000, loop: true, callback: () => {
         console.log('FPS: ' + this.game.loop.actualFps);
     }});
+
+    mapGraphics = this.add.graphics();
+    nonUIComponents.push(mapGraphics);
+
+    map = new Map( GRID_LAYERS, SEA_LEVEL, game_config.backgroundColor, this, mapGraphics, SHOW_DEBUG_TEXT );
+    if (SHOW_DEBUG_TEXT) nonUIComponents.push(...map.debugTexts);
+    if (SHOW_GRID) map.showGrid = true;
+}
+
+function create() {
+    console.log("starting create");
+    this.cursors = this.input.keyboard.createCursorKeys();
+    this.keys = this.input.keyboard.addKeys('W,A,S,D');
+
+    if (SHOW_DEBUG_TEXT) {
+        this.coordLabel = this.add.text(0, 0, '(x, y)', { font: '70px monospace'});
+        this.pointer = this.input.activePointer;
+        UIComponents.push(this.coordLabel);
+    }
+
+    // Main Camera
+    this.cameras.main.setBounds(map.minX * 1.025, map.minY * 1.025, map.width * 1.05, map.height * 1.05, true);
+    this.cameras.main.setZoom(MIN_ZOOM);
+    this.cameras.main.setRoundPixels(true);
+    this.cameras.main.ignore(UIComponents);
+    
+    // UI Camera (Ignore Zoom)
+    const UICam = this.cameras.add(10, 10, screenWidth, screenHeight);
+    UICam.ignore(nonUIComponents);
+
+    updateGraphics();
+
+    // Zoom into start location
+    const tweenConfig = {
+        targets: this.cameras.main,
+        zoom: zoom,
+        duration: 3500,
+        ease: 'Bounce.Out'
+    }
+    
+    this.tweens.add(tweenConfig);
+    this.cameras.main.shake(1500, 0.005);
+    console.log("create complete");
 }
 
 function update(timestamp, elapsed) {
