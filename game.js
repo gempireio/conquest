@@ -37,6 +37,7 @@ let zoom = 2.5;
 let lasTimerReset = 0;
 
 let mapGraphics;
+let cam;
 let screenWidth;
 let screenHeight;
 let UIComponents = [];
@@ -101,9 +102,9 @@ function preload() {
         
         // Prevent from zooming in/out too far
         zoom = Math.max( MIN_ZOOM, Math.min(MAX_ZOOM, zoom * (1 + zoomDelta) ) );
-
+     
         const tweenConfig = {
-            targets: this.cameras.main,
+            targets: cam,
             zoom: zoom,
             duration: 300,
             ease: 'Back.Out'
@@ -137,10 +138,11 @@ function create() {
     }
 
     // Main Camera
-    this.cameras.main.setBounds(map.minX * 1.025, map.minY * 1.025, map.width * 1.05, map.height * 1.05, true);
-    this.cameras.main.setZoom(MIN_ZOOM);
-    this.cameras.main.setRoundPixels(true);
-    this.cameras.main.ignore(UIComponents);
+    cam = this.cameras.main;
+    cam.setBounds(map.minX * 1.025, map.minY * 1.025, map.width * 1.05, map.height * 1.05, true);
+    cam.setZoom(MIN_ZOOM);
+    cam.setRoundPixels(true);
+    cam.ignore(UIComponents);
     
     // UI Camera (Ignore Zoom)
     const UICam = this.cameras.add(10, 10, screenWidth, screenHeight);
@@ -150,19 +152,18 @@ function create() {
 
     // Zoom into start location
     const tweenConfig = {
-        targets: this.cameras.main,
+        targets: cam,
         zoom: zoom,
         duration: 3500,
         ease: 'Bounce.Out'
     }
     
     this.tweens.add(tweenConfig);
-    this.cameras.main.shake(1500, 0.005);
+    cam.shake(1500, 0.005);
     console.log("create complete");
 }
 
 function update(timestamp, elapsed) {
-    const cam = this.cameras.main;
 
     if (this.keys.A.isDown || this.cursors.left.isDown) {
         cam.scrollX -= 10/zoom + 0.2;
