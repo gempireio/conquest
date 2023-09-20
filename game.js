@@ -104,7 +104,21 @@ function preload() {
         
         // Zoom to mouse pointer
         cam.pan( this.pointer.worldX, this.pointer.worldY, 300 );
-        cam.zoomTo( zoom, 1000 );
+        cam.zoomTo( zoom, 600 );
+    });
+
+    // Click event
+    this.input.on('pointerdown', (e) => {
+        console.log(Phaser.Math.Easing.Back.Out);
+        // Zoom in on double click
+        if( this.time.now - this.lastClick < 400 ){   
+            zoom = Math.min(( zoom * 3 + MAX_ZOOM / 3 ) / 2, MAX_ZOOM);
+            cam.pan( this.pointer.worldX, this.pointer.worldY, 400, Phaser.Math.Easing.Back.Out );  
+            cam.zoomTo( zoom, 500, Phaser.Math.Easing.Bounce.Out);  
+            cam.shake(500, Math.pow(zoom + 1 , -4.5));       
+        }
+        
+        this.lastClick = this.time.now;
     });
 
     // Looped Timer Events
@@ -161,17 +175,17 @@ function create() {
 
 function update(timestamp, elapsed) {
     if (this.keys.A.isDown || this.cursors.left.isDown) {
-        cam.scrollX -= 10/zoom + 0.2;
+        cam.scrollX -= 20/zoom + 0.3;
     }
     else if (this.keys.D.isDown || this.cursors.right.isDown) {
-        cam.scrollX += 10/zoom + 0.2;
+        cam.scrollX += 20/zoom + 0.3;
     }
 
     if (this.keys.W.isDown || this.cursors.up.isDown) {
-        cam.scrollY -= 10/zoom + 0.2;
+        cam.scrollY -= 20/zoom + 0.3;
     }
     else if (this.keys.S.isDown || this.cursors.down.isDown) {
-        cam.scrollY += 10/zoom + 0.2;
+        cam.scrollY += 20/zoom + 0.3;
     }
 
     if (SHOW_DEBUG_TEXT) this.coordLabel.setText(
