@@ -44,7 +44,7 @@ let UIComponents = [];
 let nonUIComponents = [];
 
 function preload() { 
-    console.log("starting preload");   
+    console.log("preload");   
     screenWidth = this.sys.game.canvas.width;
     screenHeight = this.sys.game.canvas.height;
 
@@ -84,11 +84,10 @@ function preload() {
     });
 
     this.load.on('complete', function () {
-        console.log("preload complete");
         progressBar.destroy();
         progressBox.destroy();
         loadingText.destroy();
-        percentText.destroy();
+        percentText.destroy(); 
     });
 
     // Scroll Wheel event
@@ -99,17 +98,13 @@ function preload() {
         } else { // Zoom Out     
             zoomDelta = -0.05 - Math.random() * 0.2;
         }
-        
+
         // Prevent from zooming in/out too far
         zoom = Math.max( MIN_ZOOM, Math.min(MAX_ZOOM, zoom * (1 + zoomDelta) ) );
-     
-        const tweenConfig = {
-            targets: cam,
-            zoom: zoom,
-            duration: 300,
-            ease: 'Back.Out'
-        }
-        const tween = this.tweens.add(tweenConfig);
+        
+        // Zoom to mouse pointer
+        cam.pan( this.pointer.worldX, this.pointer.worldY, 300 );
+        cam.zoomTo( zoom, 1000 );
     });
 
     // Looped Timer Events
@@ -127,16 +122,17 @@ function preload() {
 }
 
 function create() {
-    console.log("starting create");
+    console.log("create");
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keys = this.input.keyboard.addKeys('W,A,S,D');
-
+    this.pointer = this.input.activePointer;
+    
     if (SHOW_DEBUG_TEXT) {
         this.coordLabel = this.add.text(0, 0, '(x, y)', { font: '70px monospace'});
-        this.pointer = this.input.activePointer;
         UIComponents.push(this.coordLabel);
     }
 
+    console.log("add cameras");
     // Main Camera
     cam = this.cameras.main;
     cam.setBounds(map.minX * 1.025, map.minY * 1.025, map.width * 1.05, map.height * 1.05, true);
@@ -148,6 +144,7 @@ function create() {
     const UICam = this.cameras.add(10, 10, screenWidth, screenHeight);
     UICam.ignore(nonUIComponents);
 
+    console.log("draw graphics");
     updateGraphics();
 
     // Zoom into start location
@@ -160,11 +157,9 @@ function create() {
     
     this.tweens.add(tweenConfig);
     cam.shake(1500, 0.005);
-    console.log("create complete");
 }
 
 function update(timestamp, elapsed) {
-
     if (this.keys.A.isDown || this.cursors.left.isDown) {
         cam.scrollX -= 10/zoom + 0.2;
     }
@@ -181,7 +176,8 @@ function update(timestamp, elapsed) {
 
     if (SHOW_DEBUG_TEXT) this.coordLabel.setText(
         'FPS: ' + Math.trunc(this.game.loop.actualFps) +
-        '\n(' + Math.trunc(this.pointer.x) + ', ' + Math.trunc(this.pointer.y) + ')'
+        '\nScreen: (' + Math.trunc(this.pointer.x) + ', ' + Math.trunc(this.pointer.y) + ')' +
+        '\nWorld: (' + Math.trunc(this.pointer.worldX) + ', ' + Math.trunc(this.pointer.worldY) + ')'
     );
 }
 
