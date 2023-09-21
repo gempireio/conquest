@@ -6,14 +6,17 @@ A web based turn based strategy game played on a hexagonal map
 # completed-features
 - [X] Hexognal grid board with neighboring hex tile functions
 - [X] Randomly generated land map with elevation values
-- [X] Zoom and pan controls
+- [X] Mouse zoom (scroll wheel and double-click)
+- [X] Arrow/WASD keys scrolling
 
 # to-do
 - [ ] Zoom focused on mouse pointer location
-- [ ] Grab/drag map panning
+- [ ] Grab/drag map scrolling
+- [ ] Keyboard zooming
 - [ ] Tile selection
 - [ ] Mobile controls
-- [ ] UI controls
+- [ ] UI controls (turn timer, globe button, taskbar)
+- [ ] Basic gameplay
 - [ ] Edge of map scrolling
 - [ ] Better map generation (distinct mountain ranges, wide plains, islands, etc.)
 - [ ] Wrap around map
