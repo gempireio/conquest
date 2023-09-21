@@ -97,7 +97,7 @@ export class Map extends HexGrid {
 
         // }
     
-        this.smoothElevations(this.maxHexId*3);
+        this.smoothElevations(this.maxHexId);
     
         for (let hexId = 1; hexId <= this.maxHexId; hexId++) {
             let neighborIds = this.neighborsOf(hexId);
@@ -126,7 +126,7 @@ export class Map extends HexGrid {
             }
         }
 
-        this.smoothElevations(this.maxHexId*5);
+        this.smoothElevations(this.maxHexId*10);
     }
 
     /**
