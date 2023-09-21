@@ -14,5 +14,6 @@ A web based turn based strategy game played on a hexagonal map
 - [ ] Tile selection
 - [ ] Mobile controls
 - [ ] UI controls
+- [ ] Edge of map scrolling
 - [ ] Better map generation (distinct mountain ranges, wide plains, islands, etc.)
 - [ ] Wrap around map
