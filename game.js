@@ -27,7 +27,7 @@ let game = new Phaser.Game(game_config);
 const GRID_LAYERS = URL_PARAMS.get('l') ? parseInt(URL_PARAMS.get('l')) : 60;
 const SEA_LEVEL = URL_PARAMS.get('sl') ? parseInt(URL_PARAMS.get('sl')) : 35;
 const MAX_ZOOM = 10;
-const MIN_ZOOM = 12 / GRID_LAYERS;
+const MIN_ZOOM = 15 / GRID_LAYERS;
 const SHOW_GRID = URL_PARAMS.get('grid') ? URL_PARAMS.get('grid') : false;
 const SHOW_DEBUG_TEXT = URL_PARAMS.get('debug') ? URL_PARAMS.get('debug') : false;
 const TURN_TIME = 30;
@@ -94,28 +94,28 @@ function preload() {
     this.input.on('wheel', (e) => {
         let zoomDelta;
         if (e.deltaY < 0) { // Zoom In
-            zoomDelta = 0.05 + Math.random() * 0.2;
+            zoomDelta = 0.1 + Math.random() * 0.15;
         } else { // Zoom Out     
-            zoomDelta = -0.05 - Math.random() * 0.2;
+            zoomDelta = -0.1 - Math.random() * 0.15;
         }
 
         // Prevent from zooming in/out too far
+        let oldZoom = zoom;
         zoom = Math.max( MIN_ZOOM, Math.min(MAX_ZOOM, zoom * (1 + zoomDelta) ) );
-        
-        // Zoom to mouse pointer
-        cam.pan( this.pointer.worldX, this.pointer.worldY, 300 );
-        cam.zoomTo( zoom, 600 );
+ 
+        // Zoom to mouse pointer            
+        cam.pan(this.pointer.worldX - (this.pointer.worldX - cam.midPoint.x) * ((oldZoom/zoom)), this.pointer.worldY - ( this.pointer.worldY - cam.midPoint.y) * ((oldZoom/zoom)), 150, Phaser.Math.Easing.Elastic.Out, true);
+        //cam.pan(this.pointer.worldX - (this.pointer.worldX - cam.midPoint.x) * ((oldZoom/zoom)**2), this.pointer.worldY - ( this.pointer.worldY - cam.midPoint.y) * ((oldZoom/zoom)**2), 200, Phaser.Math.Easing.Back.Out, true);
+        cam.zoomTo( zoom, 200, Phaser.Math.Easing.Back.Out, true );       
     });
 
     // Click event
     this.input.on('pointerdown', (e) => {
-        console.log(Phaser.Math.Easing.Back.Out);
         // Zoom in on double click
         if( this.time.now - this.lastClick < 400 ){   
             zoom = Math.min(( zoom * 3 + MAX_ZOOM / 3 ) / 2, MAX_ZOOM);
-            cam.pan( this.pointer.worldX, this.pointer.worldY, 400, Phaser.Math.Easing.Back.Out );  
-            cam.zoomTo( zoom, 500, Phaser.Math.Easing.Bounce.Out);  
-            cam.shake(500, Math.pow(zoom + 1 , -4.5));       
+            cam.pan( this.pointer.worldX, this.pointer.worldY, 500, Phaser.Math.Easing.Bounce.Out, true );  
+            cam.zoomTo( zoom, 1000, Phaser.Math.Easing.Bounce.Out, true);        
         }
         
         this.lastClick = this.time.now;
@@ -170,7 +170,7 @@ function create() {
     }
     
     this.tweens.add(tweenConfig);
-    cam.shake(1500, 0.005);
+    cam.shake(1500, 0.004);
 }
 
 function update(timestamp, elapsed) {

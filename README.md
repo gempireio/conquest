@@ -10,7 +10,6 @@ A web based turn based strategy game played on a hexagonal map
 - [X] Arrow/WASD keys scrolling
 
 # to-do
-- [ ] Zoom focused on mouse pointer location
 - [ ] Grab/drag map scrolling
 - [ ] Keyboard zooming
 - [ ] Tile selection
@@ -18,5 +17,6 @@ A web based turn based strategy game played on a hexagonal map
 - [ ] UI controls (turn timer, globe button, taskbar)
 - [ ] Basic gameplay
 - [ ] Edge of map scrolling
+- [ ] Better zooming (smoother fast zoom)
 - [ ] Better map generation (distinct mountain ranges, wide plains, islands, etc.)
 - [ ] Wrap around map
