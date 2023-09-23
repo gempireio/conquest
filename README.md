@@ -8,9 +8,9 @@ A web based turn based strategy game played on a hexagonal map
 - [X] Randomly generated land map with elevation values
 - [X] Mouse zoom (scroll wheel and double-click)
 - [X] Arrow/WASD keys scrolling
+- [X] Grab/drag map scrolling
 
 # to-do
-- [ ] Grab/drag map scrolling
 - [ ] Keyboard zooming
 - [ ] Tile selection
 - [ ] Mobile controls

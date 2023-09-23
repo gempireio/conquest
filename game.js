@@ -27,7 +27,7 @@ let game = new Phaser.Game(game_config);
 const GRID_LAYERS = URL_PARAMS.get('l') ? parseInt(URL_PARAMS.get('l')) : 60;
 const SEA_LEVEL = URL_PARAMS.get('sl') ? parseInt(URL_PARAMS.get('sl')) : 35;
 const MAX_ZOOM = 10;
-const MIN_ZOOM = 15 / GRID_LAYERS;
+const MIN_ZOOM = 10 / GRID_LAYERS;
 const SHOW_GRID = URL_PARAMS.get('grid') ? URL_PARAMS.get('grid') : false;
 const SHOW_DEBUG_TEXT = URL_PARAMS.get('debug') ? URL_PARAMS.get('debug') : false;
 const TURN_TIME = 30;
@@ -91,9 +91,9 @@ function preload() {
     });
 
     // Scroll Wheel event
-    this.input.on('wheel', (e) => {
+    this.input.on('wheel', (wheel) => {
         let zoomDelta;
-        if (e.deltaY < 0) { // Zoom In
+        if (wheel.deltaY < 0) { // Zoom In
             zoomDelta = 0.1 + Math.random() * 0.15;
         } else { // Zoom Out     
             zoomDelta = -0.1 - Math.random() * 0.15;
@@ -110,7 +110,7 @@ function preload() {
     });
 
     // Click event
-    this.input.on('pointerdown', (e) => {
+    this.input.on('pointerdown', (pointer) => {
         // Zoom in on double click
         if( this.time.now - this.lastClick < 400 ){   
             zoom = Math.min(( zoom * 3 + MAX_ZOOM / 3 ) / 2, MAX_ZOOM);
@@ -119,6 +119,19 @@ function preload() {
         }
         
         this.lastClick = this.time.now;
+        this.lastDownX = this.pointer.worldX;
+        this.lastDownY = this.pointer.worldY;
+    });
+
+    // Mouse move event
+    this.input.on('pointermove', (pointer) => {
+        // Drag map on mouse pointer down
+        if(pointer.isDown){
+            cam.scrollX += this.lastDownX - this.pointer.worldX;
+            cam.scrollY += this.lastDownY - this.pointer.worldY;
+        }  
+        this.lastDownX = this.pointer.worldX;
+        this.lastDownY = this.pointer.worldY;
     });
 
     // Looped Timer Events
@@ -174,20 +187,22 @@ function create() {
 }
 
 function update(timestamp, elapsed) {
+
+    // Pan on Arrow/WASD keys down
     if (this.keys.A.isDown || this.cursors.left.isDown) {
         cam.scrollX -= 20/zoom + 0.3;
-    }
-    else if (this.keys.D.isDown || this.cursors.right.isDown) {
+    } 
+    if (this.keys.D.isDown || this.cursors.right.isDown) {
         cam.scrollX += 20/zoom + 0.3;
     }
-
     if (this.keys.W.isDown || this.cursors.up.isDown) {
         cam.scrollY -= 20/zoom + 0.3;
-    }
-    else if (this.keys.S.isDown || this.cursors.down.isDown) {
+    } 
+    if (this.keys.S.isDown || this.cursors.down.isDown) {
         cam.scrollY += 20/zoom + 0.3;
     }
 
+    // Update Debug Output
     if (SHOW_DEBUG_TEXT) this.coordLabel.setText(
         'FPS: ' + Math.trunc(this.game.loop.actualFps) +
         '\nScreen: (' + Math.trunc(this.pointer.x) + ', ' + Math.trunc(this.pointer.y) + ')' +
