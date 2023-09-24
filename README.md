@@ -20,4 +20,5 @@ A web based turn based strategy game played on a hexagonal map
 - [ ] Edge of map scrolling
 - [ ] Better zooming (smoother fast zoom)
 - [ ] Better map generation (distinct mountain ranges, wide plains, islands, etc.)
+- [ ] Better grab/drag map scrolling
 - [ ] Wrap around map

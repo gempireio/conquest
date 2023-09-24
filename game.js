@@ -105,7 +105,6 @@ function preload() {
  
         // Zoom to mouse pointer            
         cam.pan(this.pointer.worldX - (this.pointer.worldX - cam.midPoint.x) * ((oldZoom/zoom)), this.pointer.worldY - ( this.pointer.worldY - cam.midPoint.y) * ((oldZoom/zoom)), 150, Phaser.Math.Easing.Elastic.Out, true);
-        //cam.pan(this.pointer.worldX - (this.pointer.worldX - cam.midPoint.x) * ((oldZoom/zoom)**2), this.pointer.worldY - ( this.pointer.worldY - cam.midPoint.y) * ((oldZoom/zoom)**2), 200, Phaser.Math.Easing.Back.Out, true);
         cam.zoomTo( zoom, 200, Phaser.Math.Easing.Back.Out, true );       
     });
 
@@ -121,17 +120,30 @@ function preload() {
         this.lastClick = this.time.now;
         this.lastDownX = this.pointer.worldX;
         this.lastDownY = this.pointer.worldY;
+
+        // TODO: Smoother mouse drag scrolling
+        // this.downX = this.pointer.worldX;
+        // this.downY = this.pointer.worldY;
+        // this.downScrollX = cam.scrollX;
+        // this.downScrollY = cam.scrollY;
+        // this.lastDragUpdate = this.time.now;
     });
 
     // Mouse move event
     this.input.on('pointermove', (pointer) => {
+        
         // Drag map on mouse pointer down
         if(pointer.isDown){
             cam.scrollX += this.lastDownX - this.pointer.worldX;
             cam.scrollY += this.lastDownY - this.pointer.worldY;
+
+            // TODO: Smoother mouse drag scrolling
+            // cam.scrollX = this.downScrollX + (this.downX - ((this.pointer.x / zoom ) + cam.worldView.x));
+            // cam.scrollY = this.downScrollY + (this.downY - ((this.pointer.y / zoom ) + cam.worldView.y));
+            // this.lastDragUpdate = this.time.now;
+            this.lastDownX = this.pointer.worldX;
+            this.lastDownY = this.pointer.worldY;
         }  
-        this.lastDownX = this.pointer.worldX;
-        this.lastDownY = this.pointer.worldY;
     });
 
     // Looped Timer Events
@@ -183,7 +195,7 @@ function create() {
     }
     
     this.tweens.add(tweenConfig);
-    cam.shake(1500, 0.004);
+    cam.shake(1700, 0.004);
 }
 
 function update(timestamp, elapsed) {
@@ -205,6 +217,7 @@ function update(timestamp, elapsed) {
     // Update Debug Output
     if (SHOW_DEBUG_TEXT) this.coordLabel.setText(
         'FPS: ' + Math.trunc(this.game.loop.actualFps) +
+        '\nZoom: ' + zoom +
         '\nScreen: (' + Math.trunc(this.pointer.x) + ', ' + Math.trunc(this.pointer.y) + ')' +
         '\nWorld: (' + Math.trunc(this.pointer.worldX) + ', ' + Math.trunc(this.pointer.worldY) + ')'
     );
