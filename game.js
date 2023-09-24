@@ -115,6 +115,7 @@ class Game extends Phaser.Scene {
             
             // Drag map on mouse pointer down
             if(pointer.isDown){
+                this.input.manager.canvas.style.cursor = 'url("images/gem_scroll_32.png"), move';
                 cam.scrollX += this.lastDownX - this.pointer.worldX;
                 cam.scrollY += this.lastDownY - this.pointer.worldY;
     
@@ -124,7 +125,9 @@ class Game extends Phaser.Scene {
                 // this.lastDragUpdate = this.time.now;
                 this.lastDownX = this.pointer.worldX;
                 this.lastDownY = this.pointer.worldY;
-            }  
+            } else {            
+                this.input.manager.canvas.style.cursor = 'auto';
+            }
         });
     
         // Looped Timer Events
@@ -239,7 +242,6 @@ class Game extends Phaser.Scene {
 }
 
 const game_config = {
-    type: Phaser.WEBGL,
     backgroundColor: '#051231',
     scene: [Game],
     scale: {
