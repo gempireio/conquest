@@ -80,7 +80,13 @@ class Game extends Phaser.Scene {
     
         // Scroll Wheel event
         this.input.on('wheel', (wheel) => {
-            this.zoomUpdate(wheel.deltaY);
+            let zoomDelta;
+            if (wheel.deltaY < 0) {
+                zoomDelta = 0.1 + Math.random() * 0.15;
+            } else {    
+                zoomDelta = -0.1 - Math.random() * 0.15;
+            }
+            this.zoomUpdate(zoomDelta);
         });
     
         // Click event
@@ -138,7 +144,7 @@ class Game extends Phaser.Scene {
     create() {
         console.log("create");
         this.cursors = this.input.keyboard.createCursorKeys();
-        this.keys = this.input.keyboard.addKeys('W,A,S,D');
+        this.keys = this.input.keyboard.addKeys('W,A,S,D,Q,E,Z,X,NUMPAD_ADD,NUMPAD_SUBTRACT');
         this.pointer = this.input.activePointer;
         
         if (SHOW_DEBUG_TEXT) {
@@ -171,6 +177,8 @@ class Game extends Phaser.Scene {
         
         this.tweens.add(tweenConfig);
         cam.shake(1700, 0.004);
+
+        this.lastZoomUpdate = this.time.now;
     }
     
     update(timestamp, elapsed) {
@@ -188,7 +196,20 @@ class Game extends Phaser.Scene {
         if (this.keys.S.isDown || this.cursors.down.isDown) {
             cam.scrollY += 20/zoom + 0.3;
         }
-    
+
+        // Zoom in
+        if (this.keys.Q.isDown || this.keys.Z.isDown || this.keys.NUMPAD_ADD.isDown) {
+            if ( this.time.now - this.lastZoomUpdate > 30 ) {
+                this.zoomUpdate(0.05);
+            }           
+        } 
+        // Zoom out
+        if (this.keys.E.isDown || this.keys.X.isDown || this.keys.NUMPAD_SUBTRACT.isDown) {
+            if ( this.time.now - this.lastZoomUpdate > 30 ) {
+                this.zoomUpdate(-0.05);
+            }
+        } 
+
         // Update Debug Output
         if (SHOW_DEBUG_TEXT) this.coordLabel.setText(
             'FPS: ' + Math.trunc(this.game.loop.actualFps) +
@@ -204,11 +225,6 @@ class Game extends Phaser.Scene {
 
     zoomUpdate(zoomDelta) {
         if (zoomDelta == 0) return;
-        if (zoomDelta < 0) { // Zoom In
-            zoomDelta = 0.1 + Math.random() * 0.15;
-        } else { // Zoom Out     
-            zoomDelta = -0.1 - Math.random() * 0.15;
-        }
 
         // Prevent from zooming in/out too far
         let oldZoom = zoom;
@@ -217,6 +233,8 @@ class Game extends Phaser.Scene {
         // Zoom to mouse pointer            
         cam.pan(this.pointer.worldX - (this.pointer.worldX - cam.midPoint.x) * ((oldZoom/zoom)), this.pointer.worldY - ( this.pointer.worldY - cam.midPoint.y) * ((oldZoom/zoom)), 150, Phaser.Math.Easing.Elastic.Out, true);
         cam.zoomTo( zoom, 200, Phaser.Math.Easing.Back.Out, true );    
+
+        this.lastZoomUpdate = this.time.now;
     }
 }
 

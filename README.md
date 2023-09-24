@@ -9,9 +9,9 @@ A web based turn based strategy game played on a hexagonal map
 - [X] Mouse zoom (scroll wheel and double-click)
 - [X] Arrow/WASD keys scrolling
 - [X] Grab/drag map scrolling
+- [X] Keyboard zooming
 
 # to-do
-- [ ] Keyboard zooming
 - [ ] Tile selection
 - [ ] Mobile controls
 - [ ] UI controls (turn timer, globe button, taskbar)
