@@ -80,20 +80,7 @@ class Game extends Phaser.Scene {
     
         // Scroll Wheel event
         this.input.on('wheel', (wheel) => {
-            let zoomDelta;
-            if (wheel.deltaY < 0) { // Zoom In
-                zoomDelta = 0.1 + Math.random() * 0.15;
-            } else { // Zoom Out     
-                zoomDelta = -0.1 - Math.random() * 0.15;
-            }
-    
-            // Prevent from zooming in/out too far
-            let oldZoom = zoom;
-            zoom = Math.max( MIN_ZOOM, Math.min(MAX_ZOOM, zoom * (1 + zoomDelta) ) );
-     
-            // Zoom to mouse pointer            
-            cam.pan(this.pointer.worldX - (this.pointer.worldX - cam.midPoint.x) * ((oldZoom/zoom)), this.pointer.worldY - ( this.pointer.worldY - cam.midPoint.y) * ((oldZoom/zoom)), 150, Phaser.Math.Easing.Elastic.Out, true);
-            cam.zoomTo( zoom, 200, Phaser.Math.Easing.Back.Out, true );    
+            this.zoomUpdate(wheel.deltaY);
         });
     
         // Click event
@@ -213,6 +200,23 @@ class Game extends Phaser.Scene {
     
     updateGraphics() {
         map.drawMap();
+    }
+
+    zoomUpdate(zoomDelta) {
+        if (zoomDelta == 0) return;
+        if (zoomDelta < 0) { // Zoom In
+            zoomDelta = 0.1 + Math.random() * 0.15;
+        } else { // Zoom Out     
+            zoomDelta = -0.1 - Math.random() * 0.15;
+        }
+
+        // Prevent from zooming in/out too far
+        let oldZoom = zoom;
+        zoom = Math.max( MIN_ZOOM, Math.min(MAX_ZOOM, zoom * (1 + zoomDelta) ) );
+ 
+        // Zoom to mouse pointer            
+        cam.pan(this.pointer.worldX - (this.pointer.worldX - cam.midPoint.x) * ((oldZoom/zoom)), this.pointer.worldY - ( this.pointer.worldY - cam.midPoint.y) * ((oldZoom/zoom)), 150, Phaser.Math.Easing.Elastic.Out, true);
+        cam.zoomTo( zoom, 200, Phaser.Math.Easing.Back.Out, true );    
     }
 }
 
