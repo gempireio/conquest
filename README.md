@@ -30,7 +30,7 @@ A smaller medium sized map with grid shown
 <https://gempire.io/tbs/?l=55&grid=1>
 
 A small map with debug 
-<https://gempire.io/tbs/?l=150&debug=1>
+<https://gempire.io/tbs/?l=25&debug=1>
 
 A very small map with low sea level, debug and grid shown 
 <https://gempire.io/tbs/?l=10&sl=10&debug=1&grid=1>
