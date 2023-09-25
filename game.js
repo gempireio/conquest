@@ -92,44 +92,27 @@ class Game extends Phaser.Scene {
         // Click event
         this.input.on('pointerdown', (pointer) => {
             // Zoom in on double click
-            if( this.time.now - this.lastClick < 400 ){   
+            if( this.time.now - pointer.lastClick < 400 ){   
                 zoom = Math.min(( zoom * 3 + MAX_ZOOM / 3 ) / 2, MAX_ZOOM);
-                cam.pan( this.mouse.worldX, this.mouse.worldY, 500, Phaser.Math.Easing.Bounce.Out, true );  
+                cam.pan( pointer.worldX, pointer.worldY, 500, Phaser.Math.Easing.Bounce.Out, true );  
                 cam.zoomTo( zoom, 1000, Phaser.Math.Easing.Bounce.Out, true);        
             }
             
-            this.lastClick = this.time.now;
-            this.lastDownX = this.mouse.worldX;
-            this.lastDownY = this.mouse.worldY;
-    
-            // TODO: Smoother mouse drag scrolling
-            // this.downX = this.mouse.worldX;
-            // this.downY = this.mouse.worldY;
-            // this.downScrollX = cam.scrollX;
-            // this.downScrollY = cam.scrollY;
-            // this.lastDragUpdate = this.time.now;
+            pointer.lastClick = this.time.now;
+            pointer.lastDownX = pointer.worldX;
+            pointer.lastDownY = pointer.worldY;
         });
     
         // Mouse move event
         this.input.on('pointermove', (pointer) => {
-            
-            // Drag map on mouse pointer down
-            if(pointer.isDown){
+            // Change cursor if mouse is down
+            if (pointer.isDown) {
                 this.input.manager.canvas.style.cursor = 'url("images/gem_scroll_32.png"), move';
-                cam.scrollX += this.lastDownX - this.mouse.worldX;
-                cam.scrollY += this.lastDownY - this.mouse.worldY;
-    
-                // TODO: Smoother mouse drag scrolling
-                // cam.scrollX = this.downScrollX + (this.downX - ((this.mouse.x / zoom ) + cam.worldView.x));
-                // cam.scrollY = this.downScrollY + (this.downY - ((this.mouse.y / zoom ) + cam.worldView.y));
-                // this.lastDragUpdate = this.time.now;
-                this.lastDownX = this.mouse.worldX;
-                this.lastDownY = this.mouse.worldY;
             } else {            
                 this.input.manager.canvas.style.cursor = 'auto';
             }
         });
-    
+
         // Looped Timer Events
         // 20 second Loop
         this.time.addEvent({ delay: 20000, loop: true, callback: () => {
@@ -142,6 +125,9 @@ class Game extends Phaser.Scene {
         map = new Map( GRID_LAYERS, SEA_LEVEL, game_config.backgroundColor, this, mapGraphics, SHOW_DEBUG_TEXT );
         if (SHOW_DEBUG_TEXT) nonUIComponents.push(...map.debugTexts);
         if (SHOW_GRID) map.showGrid = true;
+
+        let pinchUrl = 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexpinchplugin.min.js';
+        this.load.plugin('rexpinchplugin', pinchUrl, true);
     }
     
     create() {
@@ -173,6 +159,17 @@ class Game extends Phaser.Scene {
     
         console.log("draw graphics");
         this.updateGraphics();
+
+        // Mouse pinch event
+        let dragScale = this.plugins.get('rexpinchplugin').add(this);
+        dragScale.on('drag1', function (dragScale) {
+                let drag1Vector = dragScale.drag1Vector;
+                cam.scrollX -= drag1Vector.x / cam.zoom;
+                cam.scrollY -= drag1Vector.y / cam.zoom;
+            }).on('pinch', function (dragScale) {
+                let scaleFactor = dragScale.scaleFactor;
+                cam.zoom *= scaleFactor;
+            }, this);
     
         // Zoom into start location
         const tweenConfig = {
@@ -217,8 +214,6 @@ class Game extends Phaser.Scene {
             }
         } 
 
-
-
         // Update Debug Output
         if (SHOW_DEBUG_TEXT) {
             let degugText = 'FPS: ' + this.game.loop.actualFps + '\nZoom: ' + zoom;
@@ -235,9 +230,7 @@ class Game extends Phaser.Scene {
                 '\nTouch2WorldX: (' + Math.trunc(this.touch2.worldX) + ', ' + Math.trunc(this.touch2.worldY) + ')';
             }
             this.degugText.setText(degugText);
-        }
-        
-        
+        } 
     }
     
     updateGraphics() {
@@ -261,7 +254,7 @@ class Game extends Phaser.Scene {
 
 const game_config = {
     backgroundColor: '#051231',
-    input: { smoothFactor: 1 },
+    input: { smoothFactor: 0.3 },
     scene: [Game],
     scale: {
         mode: Phaser.Scale.RESIZE,
