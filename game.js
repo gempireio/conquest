@@ -94,17 +94,17 @@ class Game extends Phaser.Scene {
             // Zoom in on double click
             if( this.time.now - this.lastClick < 400 ){   
                 zoom = Math.min(( zoom * 3 + MAX_ZOOM / 3 ) / 2, MAX_ZOOM);
-                cam.pan( this.pointer.worldX, this.pointer.worldY, 500, Phaser.Math.Easing.Bounce.Out, true );  
+                cam.pan( this.mouse.worldX, this.mouse.worldY, 500, Phaser.Math.Easing.Bounce.Out, true );  
                 cam.zoomTo( zoom, 1000, Phaser.Math.Easing.Bounce.Out, true);        
             }
             
             this.lastClick = this.time.now;
-            this.lastDownX = this.pointer.worldX;
-            this.lastDownY = this.pointer.worldY;
+            this.lastDownX = this.mouse.worldX;
+            this.lastDownY = this.mouse.worldY;
     
             // TODO: Smoother mouse drag scrolling
-            // this.downX = this.pointer.worldX;
-            // this.downY = this.pointer.worldY;
+            // this.downX = this.mouse.worldX;
+            // this.downY = this.mouse.worldY;
             // this.downScrollX = cam.scrollX;
             // this.downScrollY = cam.scrollY;
             // this.lastDragUpdate = this.time.now;
@@ -116,15 +116,15 @@ class Game extends Phaser.Scene {
             // Drag map on mouse pointer down
             if(pointer.isDown){
                 this.input.manager.canvas.style.cursor = 'url("images/gem_scroll_32.png"), move';
-                cam.scrollX += this.lastDownX - this.pointer.worldX;
-                cam.scrollY += this.lastDownY - this.pointer.worldY;
+                cam.scrollX += this.lastDownX - this.mouse.worldX;
+                cam.scrollY += this.lastDownY - this.mouse.worldY;
     
                 // TODO: Smoother mouse drag scrolling
-                // cam.scrollX = this.downScrollX + (this.downX - ((this.pointer.x / zoom ) + cam.worldView.x));
-                // cam.scrollY = this.downScrollY + (this.downY - ((this.pointer.y / zoom ) + cam.worldView.y));
+                // cam.scrollX = this.downScrollX + (this.downX - ((this.mouse.x / zoom ) + cam.worldView.x));
+                // cam.scrollY = this.downScrollY + (this.downY - ((this.mouse.y / zoom ) + cam.worldView.y));
                 // this.lastDragUpdate = this.time.now;
-                this.lastDownX = this.pointer.worldX;
-                this.lastDownY = this.pointer.worldY;
+                this.lastDownX = this.mouse.worldX;
+                this.lastDownY = this.mouse.worldY;
             } else {            
                 this.input.manager.canvas.style.cursor = 'auto';
             }
@@ -148,8 +148,11 @@ class Game extends Phaser.Scene {
         console.log("create");
         this.cursors = this.input.keyboard.createCursorKeys();
         this.keys = this.input.keyboard.addKeys('W,A,S,D,Q,E,Z,X,NUMPAD_ADD,NUMPAD_SUBTRACT');
-        this.pointer = this.input.activePointer;
-        
+        this.mouse = this.input.mousePointer;
+        this.touch1 = this.input.pointer1;
+        this.input.addPointer(1);
+        this.touch2 = this.input.pointer2;
+
         if (SHOW_DEBUG_TEXT) {
             this.coordLabel = this.add.text(0, 0, '(x, y)', { font: '70px monospace'});
             UIComponents.push(this.coordLabel);
@@ -215,10 +218,14 @@ class Game extends Phaser.Scene {
 
         // Update Debug Output
         if (SHOW_DEBUG_TEXT) this.coordLabel.setText(
-            'FPS: ' + Math.trunc(this.game.loop.actualFps) +
+            'FPS: ' + this.game.loop.actualFps +
             '\nZoom: ' + zoom +
-            '\nScreen: (' + Math.trunc(this.pointer.x) + ', ' + Math.trunc(this.pointer.y) + ')' +
-            '\nWorld: (' + Math.trunc(this.pointer.worldX) + ', ' + Math.trunc(this.pointer.worldY) + ')'
+            '\nMouseScreen: (' + Math.trunc(this.mouse.x) + ', ' + Math.trunc(this.mouse.y) + ')' +
+            '\nMouseWorld: (' + Math.trunc(this.mouse.worldX) + ', ' + Math.trunc(this.mouse.worldY) + ')' +
+            '\nTouch1Screen: (' + Math.trunc(this.touch1.x) + ', ' + Math.trunc(this.touch1.y) + ')' +
+            '\nTouch1World: (' + Math.trunc(this.touch1.worldX) + ', ' + Math.trunc(this.touch1.worldY) + ')' +
+            '\nTouch2Screen: (' + Math.trunc(this.touch2.x) + ', ' + Math.trunc(this.touch2.y) + ')' +
+            '\nTouch2WorldX: (' + Math.trunc(this.touch2.worldX) + ', ' + Math.trunc(this.touch2.worldY) + ')'
         );
     }
     
@@ -234,7 +241,7 @@ class Game extends Phaser.Scene {
         zoom = Math.max( MIN_ZOOM, Math.min(MAX_ZOOM, zoom * (1 + zoomDelta) ) );
  
         // Zoom to mouse pointer            
-        cam.pan(this.pointer.worldX - (this.pointer.worldX - cam.midPoint.x) * ((oldZoom/zoom)), this.pointer.worldY - ( this.pointer.worldY - cam.midPoint.y) * ((oldZoom/zoom)), 150, Phaser.Math.Easing.Elastic.Out, true);
+        cam.pan(this.mouse.worldX - (this.mouse.worldX - cam.midPoint.x) * ((oldZoom/zoom)), this.mouse.worldY - ( this.mouse.worldY - cam.midPoint.y) * ((oldZoom/zoom)), 150, Phaser.Math.Easing.Elastic.Out, true);
         cam.zoomTo( zoom, 200, Phaser.Math.Easing.Back.Out, true );    
 
         this.lastZoomUpdate = this.time.now;
@@ -243,6 +250,7 @@ class Game extends Phaser.Scene {
 
 const game_config = {
     backgroundColor: '#051231',
+    input: { smoothFactor: 1 },
     scene: [Game],
     scale: {
         mode: Phaser.Scale.RESIZE,
