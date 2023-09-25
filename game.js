@@ -154,8 +154,9 @@ class Game extends Phaser.Scene {
         this.touch2 = this.input.pointer2;
 
         if (SHOW_DEBUG_TEXT) {
-            this.coordLabel = this.add.text(0, 0, '(x, y)', { font: '70px monospace'});
-            UIComponents.push(this.coordLabel);
+            let fontSize = 10 + screenWidth / 35;
+            this.degugText = this.add.text(0, 0, '(x, y)', { font: fontSize + 'px monospace'});
+            UIComponents.push(this.degugText);
         }
     
         console.log("add cameras");
@@ -216,17 +217,27 @@ class Game extends Phaser.Scene {
             }
         } 
 
+
+
         // Update Debug Output
-        if (SHOW_DEBUG_TEXT) this.coordLabel.setText(
-            'FPS: ' + this.game.loop.actualFps +
-            '\nZoom: ' + zoom +
-            '\nMouseScreen: (' + Math.trunc(this.mouse.x) + ', ' + Math.trunc(this.mouse.y) + ')' +
-            '\nMouseWorld: (' + Math.trunc(this.mouse.worldX) + ', ' + Math.trunc(this.mouse.worldY) + ')' +
-            '\nTouch1Screen: (' + Math.trunc(this.touch1.x) + ', ' + Math.trunc(this.touch1.y) + ')' +
-            '\nTouch1World: (' + Math.trunc(this.touch1.worldX) + ', ' + Math.trunc(this.touch1.worldY) + ')' +
-            '\nTouch2Screen: (' + Math.trunc(this.touch2.x) + ', ' + Math.trunc(this.touch2.y) + ')' +
-            '\nTouch2WorldX: (' + Math.trunc(this.touch2.worldX) + ', ' + Math.trunc(this.touch2.worldY) + ')'
-        );
+        if (SHOW_DEBUG_TEXT) {
+            let degugText = 'FPS: ' + this.game.loop.actualFps + '\nZoom: ' + zoom;
+            if (this.mouse.active) {
+                degugText += '\nMouseScreen: (' + Math.trunc(this.mouse.x) + ', ' + Math.trunc(this.mouse.y) + ')' +
+                '\nMouseWorld: (' + Math.trunc(this.mouse.worldX) + ', ' + Math.trunc(this.mouse.worldY) + ')'; 
+            }
+            if (this.touch1.active) {
+                degugText += '\nTouch1Screen: (' + Math.trunc(this.touch1.x) + ', ' + Math.trunc(this.touch1.y) + ')' +
+                '\nTouch1World: (' + Math.trunc(this.touch1.worldX) + ', ' + Math.trunc(this.touch1.worldY) + ')';
+            }
+            if (this.touch2.active) {
+                degugText +='\nTouch2Screen: (' + Math.trunc(this.touch2.x) + ', ' + Math.trunc(this.touch2.y) + ')' +
+                '\nTouch2WorldX: (' + Math.trunc(this.touch2.worldX) + ', ' + Math.trunc(this.touch2.worldY) + ')';
+            }
+            this.degugText.setText(degugText);
+        }
+        
+        
     }
     
     updateGraphics() {
