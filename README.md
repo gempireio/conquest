@@ -33,7 +33,7 @@ A small map with debug
 <https://gempire.io/tbs/?l=25&debug=1>
 
 A very small map with low sea level, debug and grid shown 
-<https://gempire.io/tbs/?l=10&sl=10&debug=1&grid=1>
+<https://gempire.io/tbs/?l=15&sl=20&debug=1&grid=1>
 
 
 
