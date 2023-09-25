@@ -15,17 +15,14 @@ export class Map extends HexGrid {
     // rocky
     // ocean
 
-    constructor( layers, seaLevel, oceanColor, scene, graphics, showDebugText ) {
+    constructor( layers, seaLevel, oceanColor, scene, showDebugText ) {
         super(layers, 100);
         this.seaLevel = seaLevel;
         this.oceanColor = oceanColor;
         this.scene = scene;
-        this.graphics = graphics;
         this.showDebugText = showDebugText;
 
         this.showGrid = false;
-
-        this.createSelectGraphic();
 
         this.elevations = new Uint8Array(this.maxHexId + 1);
         this.landCover = new Uint8Array(this.maxHexId + 1);
@@ -38,6 +35,7 @@ export class Map extends HexGrid {
         }
 
         this.generateElevations();
+        this.createSelectGraphic();
     }
 
     /**
@@ -80,6 +78,8 @@ export class Map extends HexGrid {
     }
 
     generateElevations() {
+        this.elevationGraphics = this.scene.add.graphics(); 
+
         // First pass: assign every hexagon by incrementing ID (spiral outward) varying land type slightly
         // Tend towards 0 (ocean) at edges and 255 (fresh water, mountains) at center
         let currentValue = this.randInt(200,255);
@@ -160,31 +160,33 @@ export class Map extends HexGrid {
 
     /**
      * Draws a hexagon border (pointy side up) at given coordinates.
+     * @param graphic the graphics object to draw to
      * @param x the center x coordinate to draw to
      * @param y the center y coordinate to draw to
      * @param color the color of the line stroke
      * @param strokeWidth the width of the line stroke
      * @param alpha the alpha of the line stroke
      */
-    drawHexagonBorder(x, y, color = 0xc1d1d9, strokeWidth = 0.7, alpha = 1) {
+    drawHexagonBorder(graphic, x, y, color = 0xc1d1d9, strokeWidth = 0.7, alpha = 1) {
         const hexagon = new Phaser.Geom.Polygon(this.hexagonPoints);
         Phaser.Geom.Polygon.Translate(hexagon, x, y);
-        this.graphics.lineStyle(strokeWidth, color, alpha);    
-        this.graphics.strokePoints(hexagon.points, true);
+        graphic.lineStyle(strokeWidth, color, alpha);    
+        graphic.strokePoints(hexagon.points, true);
     }
 
     /**
      * Draws a filled hexagon (pointy side up) at given coordinates.
+     * @param graphic the graphics object to draw to
      * @param x the center x coordinate to draw to
      * @param y the center y coordinate to draw to
      * @param color the fill color
      * @param alpha the color alpha
      */
-    drawHexagonFill(x, y, color = 0xc1d1d9, alpha = 1) {
+    drawHexagonFill(graphic, x, y, color = 0xc1d1d9, alpha = 1) {
         const hexagon = new Phaser.Geom.Polygon(this.hexagonPoints);
         Phaser.Geom.Polygon.Translate(hexagon, x, y);
-        this.graphics.fillStyle(color, alpha);
-        this.graphics.fillPoints(hexagon.points, true);
+        graphic.fillStyle(color, alpha);
+        graphic.fillPoints(hexagon.points, true);
     }
 
     /**
@@ -207,18 +209,18 @@ export class Map extends HexGrid {
             let oceanAlphaElevation = Math.pow(elevation/this.seaLevel, 3); // Based on Elevation
             let oceanAlpha = Math.max( 0, ( oceanAlphaHex * 0.1 ) + ( oceanAlphaCircle * 0.15 ) + ( oceanAlphaElevation * 0.75 ) );
             color = Phaser.Display.Color.GetColor32(0, 120, 120);
-            this.graphics.fillStyle(color, oceanAlpha);
+            this.elevationGraphics.fillStyle(color, oceanAlpha);
         } else { // Land
             color = Phaser.Display.Color.GetColor(Math.pow(1.018,elevation)+(elevation/3), 178-(elevation/1.45), Math.round(180*Math.pow(0.98,elevation)));
-            this.graphics.fillStyle(color);
+            this.elevationGraphics.fillStyle(color);
         }
-        this.graphics.fillPoints(hexagon.points, true);
+        this.elevationGraphics.fillPoints(hexagon.points, true);
     }
 
     drawMap() {
         for (let hexId = 0; hexId <= this.maxHexId; hexId++) {
             this.drawLandHexagon(hexId, this.elevations[hexId] ,this.hexCenters[hexId].x, this.hexCenters[hexId].y);   
-            if (this.showGrid) this.drawHexagonBorder(this.hexCenters[hexId].x, this.hexCenters[hexId].y);
+            if (this.showGrid) this.drawHexagonBorder(this.elevationGraphics, this.hexCenters[hexId].x, this.hexCenters[hexId].y);
             if (this.showDebugText) this.debugTexts[hexId].setText("ID:   " + hexId + "\nElev: " + this.elevations[hexId]);
         }
     }

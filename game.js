@@ -101,10 +101,8 @@ class Game extends Phaser.Scene {
             pointer.lastClick = this.time.now;
             pointer.lastDownX = pointer.worldX;
             pointer.lastDownY = pointer.worldY;
-            //console.log(map.hexCenters);
 
             let hexID = map.selectAt(pointer.worldX, pointer.worldY);
-            console.log(hexID);
         });
     
         // Mouse move event
@@ -123,10 +121,9 @@ class Game extends Phaser.Scene {
             console.log('FPS: ' + this.game.loop.actualFps);
         }});
     
-        mapGraphics = this.add.graphics();
-        nonUIComponents.push(mapGraphics);
+        //nonUIComponents.push(mapGraphics);
     
-        map = new Map( GRID_LAYERS, SEA_LEVEL, game_config.backgroundColor, this, mapGraphics, SHOW_DEBUG_TEXT );
+        map = new Map( GRID_LAYERS, SEA_LEVEL, game_config.backgroundColor, this, SHOW_DEBUG_TEXT );
         if (SHOW_DEBUG_TEXT) nonUIComponents.push(...map.debugTexts);
         if (SHOW_GRID) map.showGrid = true;
 
@@ -160,6 +157,8 @@ class Game extends Phaser.Scene {
         // UI Camera (Ignore Zoom)
         const UICam = this.cameras.add(10, 10, screenWidth, screenHeight);
         UICam.ignore(nonUIComponents);
+        UICam.ignore(map.elevationGraphics);
+        UICam.ignore(map.selectGraphic);
     
         console.log("draw graphics");
         this.updateGraphics();
