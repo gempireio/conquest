@@ -13,6 +13,30 @@ A web based turn based strategy game played on a hexagonal map
 - Scroll Right: D, RIGHT Arrow
 - Free Scroll: Hold down and drag
 
+### URL/Game Parameters
+- l: Hexagon Layers. This determines the size of the map.
+- sl: Sea Level (0-255)
+- debug: display debug text.
+- grid: show grid.
+
+#### Examples
+A large map
+<https://gempire.io/tbs/?l=160>
+
+A medium sized map with high sea level 
+<https://gempire.io/tbs/?l=85&sl=100>
+
+A smaller medium sized map with grid shown 
+<https://gempire.io/tbs/?l=55&grid=1>
+
+A small map with debug 
+<https://gempire.io/tbs/?l=150&debug=1>
+
+A very small map with low sea level, debug and grid shown 
+<https://gempire.io/tbs/?l=10&sl=10&debug=1&grid=1>
+
+
+
 ## Features
 ### Completed 
 - [X] Hexognal grid board with neighboring hex tile functions
