@@ -101,6 +101,10 @@ class Game extends Phaser.Scene {
             pointer.lastClick = this.time.now;
             pointer.lastDownX = pointer.worldX;
             pointer.lastDownY = pointer.worldY;
+            //console.log(map.hexCenters);
+
+            let hexID = map.selectAt(pointer.worldX, pointer.worldY);
+            console.log(hexID);
         });
     
         // Mouse move event

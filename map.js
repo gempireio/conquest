@@ -21,9 +21,11 @@ export class Map extends HexGrid {
         this.oceanColor = oceanColor;
         this.scene = scene;
         this.graphics = graphics;
-        
-        this.showGrid = false;
         this.showDebugText = showDebugText;
+
+        this.showGrid = false;
+
+        this.createSelectGraphic();
 
         this.elevations = new Uint8Array(this.maxHexId + 1);
         this.landCover = new Uint8Array(this.maxHexId + 1);
@@ -45,6 +47,19 @@ export class Map extends HexGrid {
         min = Math.ceil(min);
         max = Math.floor(max);
         return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    createSelectGraphic() {
+        const hexagon = new Phaser.Geom.Polygon(this.hexagonPoints);
+        const color = 0xc1d1ff;
+        //Phaser.Geom.Polygon.Translate(hexagon, 0, 0);
+        this.selectedHexId = -1;
+        this.selectGraphic = this.scene.add.graphics();   
+        this.selectGraphic.fillStyle(color, 0.1);
+        this.selectGraphic.fillPoints(hexagon.points, true);  
+        this.selectGraphic.lineStyle(3, color, 0.7);    
+        this.selectGraphic.strokePoints(hexagon.points, true);
+        this.selectGraphic.visible = false;
     }
 
     /**
@@ -130,25 +145,54 @@ export class Map extends HexGrid {
     }
 
     /**
-     * Draws a hexagon border (pointy side up) at given x, y coordinates.
+     * Sets the selectedHexId to the hexagon that contains the given coordiantes
+     *
+     * @param {number} x - The x-coordinate of the position.
+     * @param {number} y - The y-coordinate of the position.
+     * @return {undefined} - The HexId selected.
+     */
+    selectAt(x, y) {
+        this.selectGraphic.visible = true;
+        let hexID = this.selectedHexId = this.hexIdAtPosition({x: x, y: y});
+        this.selectGraphic.setPosition(this.hexCenters[hexID].x, this.hexCenters[hexID].y);
+        return hexID;
+    }
+
+    /**
+     * Draws a hexagon border (pointy side up) at given coordinates.
      * @param x the center x coordinate to draw to
      * @param y the center y coordinate to draw to
-     * @param s the scale factor (size) of the hexagon
-     * @param buffer the image buffer canvas to draw to
+     * @param color the color of the line stroke
+     * @param strokeWidth the width of the line stroke
+     * @param alpha the alpha of the line stroke
      */
-    drawHexagonBorder(x, y, color = 0xc1d1d9) {
+    drawHexagonBorder(x, y, color = 0xc1d1d9, strokeWidth = 0.7, alpha = 1) {
         const hexagon = new Phaser.Geom.Polygon(this.hexagonPoints);
         Phaser.Geom.Polygon.Translate(hexagon, x, y);
-        this.graphics.lineStyle(0.7, color);    
+        this.graphics.lineStyle(strokeWidth, color, alpha);    
         this.graphics.strokePoints(hexagon.points, true);
     }
 
     /**
-     * Draws a filled hexagon (pointy side up) at given x, y coordinates.
+     * Draws a filled hexagon (pointy side up) at given coordinates.
      * @param x the center x coordinate to draw to
      * @param y the center y coordinate to draw to
-     * @param s the scale factor (size) of the hexagon
-     * @param buffer the image buffer canvas to draw to
+     * @param color the fill color
+     * @param alpha the color alpha
+     */
+    drawHexagonFill(x, y, color = 0xc1d1d9, alpha = 1) {
+        const hexagon = new Phaser.Geom.Polygon(this.hexagonPoints);
+        Phaser.Geom.Polygon.Translate(hexagon, x, y);
+        this.graphics.fillStyle(color, alpha);
+        this.graphics.fillPoints(hexagon.points, true);
+    }
+
+    /**
+     * Draws a filled land hexagon (pointy side up) at given coordinates.
+     * @hexId the hexID of the hexagon to draw
+     * @elevation the elevation of the hexagon to draw
+     * @param x the center x coordinate to draw to
+     * @param y the center y coordinate to draw to
      */
     drawLandHexagon(hexId, elevation, x, y) {
         const hexagon = new Phaser.Geom.Polygon(this.hexagonPoints);

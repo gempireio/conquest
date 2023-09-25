@@ -186,7 +186,7 @@ export class HexGrid {
         let shortestDistance = Infinity;
         let closestHexId = 0;
         for (let i = 0; i < this.hexCenters.length; i++) {
-            let distanceToHex = hexCenters[i].dist(this.vector2(position.x, position.y));
+            let distanceToHex = this.vectorDistance( this.hexCenters[i], position );
             if (distanceToHex < shortestDistance) {
                 shortestDistance = distanceToHex;
                 closestHexId = i;

@@ -46,9 +46,9 @@ A very small map with low sea level, debug and grid shown
 - [X] Grab/drag map scrolling
 - [X] Keyboard zooming
 - [X] Mobile controls
+- [X] Hex tile selection
 
 ### To-Do
-- [ ] Tile selection
 - [ ] UI controls (turn timer, globe button, taskbar)
 - [ ] Basic gameplay
 - [ ] Startup Dialog Box
