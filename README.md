@@ -20,19 +20,19 @@ A web based turn based strategy game played on a hexagonal map
 - grid: show grid.
 
 #### Examples
-A large map
+A large map  
 <https://gempire.io/tbs/?l=160>
 
-A medium sized map with high sea level 
+A medium sized map with high sea level  
 <https://gempire.io/tbs/?l=85&sl=100>
 
-A smaller medium sized map with grid shown 
+A smaller medium sized map with grid shown  
 <https://gempire.io/tbs/?l=55&grid=1>
 
-A small map with debug 
+A small map with debug  
 <https://gempire.io/tbs/?l=25&debug=1>
 
-A very small map with low sea level, debug and grid shown 
+A very small map with low sea level, debug and grid shown  
 <https://gempire.io/tbs/?l=15&sl=20&debug=1&grid=1>
 
 
