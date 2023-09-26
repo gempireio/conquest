@@ -4,6 +4,8 @@
 // Gempire: Strategic Expanse
 
 import {Map} from './map.js';
+import {Player} from './player.js';
+
 const URL_PARAMS = new URLSearchParams(window.location.search);
 const GRID_LAYERS = URL_PARAMS.get('l') ? parseInt(URL_PARAMS.get('l')) : 60;
 const SEA_LEVEL = URL_PARAMS.get('sl') ? parseInt(URL_PARAMS.get('sl')) : 35;
@@ -27,6 +29,7 @@ class Game extends Phaser.Scene {
 
     constructor () { 
         super({ key: 'game', active: true });
+        this.players = [];
     }
 
     preload() { 
@@ -119,11 +122,10 @@ class Game extends Phaser.Scene {
             console.log('FPS: ' + this.game.loop.actualFps);
         }});
     
-        //nonUIComponents.push(mapGraphics);
-    
         map = new Map( GRID_LAYERS, SEA_LEVEL, game_config.backgroundColor, this, SHOW_DEBUG_TEXT );
         if (SHOW_DEBUG_TEXT) nonUIComponents.push(...map.debugTexts);
         if (SHOW_GRID) map.showGrid = true;
+        
 
         let pinchUrl = 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexpinchplugin.min.js';
         this.load.plugin('rexpinchplugin', pinchUrl, true);
@@ -160,6 +162,9 @@ class Game extends Phaser.Scene {
     
         console.log("draw graphics");
         this.updateGraphics();
+
+        console.log("Create Players and game objects");
+        this.createPlayers(5);
 
         // Key down event
         let keyC = this.input.keyboard.addKey('C');
@@ -258,6 +263,12 @@ class Game extends Phaser.Scene {
         cam.zoomTo( newZoom, 200, Phaser.Math.Easing.Back.Out, true );    
 
         this.lastZoomUpdate = this.time.now;
+    }
+
+    createPlayers( playerCount ) {
+        for ( let i = 0; i <= playerCount; i++){
+            this.players.push( new Player(i, 'Player' + i, this.map) );
+        }
     }
 }
 
