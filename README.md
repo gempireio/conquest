@@ -7,6 +7,7 @@ A web based turn based strategy game played on a hexagonal map
 - Zoom in: Q, Z, +, mouse wheel up, pinch out
 - Zoom out: E, X, -, mouse wheel down, pinch in
 - Zoom in and center: Double click/tap
+- Center selected: C
 - Scroll Up: W, UP Arrow
 - Scroll Down: S, DOWN Arrow
 - Scroll Left: A, LEFT Arrow

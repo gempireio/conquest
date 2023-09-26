@@ -161,6 +161,14 @@ class Game extends Phaser.Scene {
         console.log("draw graphics");
         this.updateGraphics();
 
+        // Key down event
+        let keyC = this.input.keyboard.addKey('C');
+        keyC.on('down', (key) => {
+            if (map.selectedHexId < 0) return;
+            let hexVec = map.hexCenters[map.selectedHexId];
+            cam.pan(hexVec.x, hexVec.y, 1000, Phaser.Math.Easing.Back.Out, true)
+        });
+
         // Mouse pinch event
         let dragScale = this.plugins.get('rexpinchplugin').add(this);
         dragScale.on('drag1', function (dragScale) {
