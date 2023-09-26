@@ -153,7 +153,13 @@ export class Map extends HexGrid {
      */
     selectAt(x, y) {
         this.selectGraphic.visible = true;
-        let hexID = this.selectedHexId = this.hexIdAtPosition({x: x, y: y});
+        let hexID = this.hexIdAtPosition({x: x, y: y});
+        if ( hexID == this.selectedHexId ) {
+            this.selectGraphic.visible = false;
+            this.selectedHexId = -1;
+            return -1;
+        }
+        this.selectedHexId = hexID;
         this.selectGraphic.setPosition(this.hexCenters[hexID].x, this.hexCenters[hexID].y);
         return hexID;
     }
