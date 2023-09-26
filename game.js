@@ -5,17 +5,15 @@
 
 import {Map} from './map.js';
 const URL_PARAMS = new URLSearchParams(window.location.search);
-
 const GRID_LAYERS = URL_PARAMS.get('l') ? parseInt(URL_PARAMS.get('l')) : 60;
 const SEA_LEVEL = URL_PARAMS.get('sl') ? parseInt(URL_PARAMS.get('sl')) : 35;
-const MAX_ZOOM = 10;
+const MAX_ZOOM = 8;
 const MIN_ZOOM = 15 / GRID_LAYERS;
 const SHOW_GRID = URL_PARAMS.get('grid') ? URL_PARAMS.get('grid') : false;
 const SHOW_DEBUG_TEXT = URL_PARAMS.get('debug') ? URL_PARAMS.get('debug') : false;
 const TURN_TIME = 30;
 
 let map;
-let zoom = 2.5;
 let lasTimerReset = 0;
 
 let mapGraphics;
@@ -93,7 +91,7 @@ class Game extends Phaser.Scene {
         this.input.on('pointerdown', (pointer) => {
             // Zoom in on double click
             if( this.time.now - pointer.lastClick < 400 ){   
-                zoom = Math.min(( zoom * 3 + MAX_ZOOM / 3 ) / 2, MAX_ZOOM);
+                let zoom = Math.min(( cam.zoom * 3 + MAX_ZOOM / 3 ) / 2, MAX_ZOOM);
                 cam.pan( pointer.worldX, pointer.worldY, 500, Phaser.Math.Easing.Bounce.Out, true );  
                 cam.zoomTo( zoom, 1000, Phaser.Math.Easing.Bounce.Out, true);        
             }
@@ -177,13 +175,13 @@ class Game extends Phaser.Scene {
         // Zoom into start location
         const tweenConfig = {
             targets: cam,
-            zoom: zoom,
-            duration: 3500,
+            zoom: ( MIN_ZOOM + MAX_ZOOM ) / 3,
+            duration: 3000,
             ease: 'Bounce.Out'
         }
         
         this.tweens.add(tweenConfig);
-        cam.shake(1700, 0.004);
+        cam.shake(1500, 0.004);
 
         this.lastZoomUpdate = this.time.now;
     }
@@ -192,34 +190,34 @@ class Game extends Phaser.Scene {
     
         // Pan on Arrow/WASD keys down
         if (this.keys.A.isDown || this.cursors.left.isDown) {
-            cam.scrollX -= 20/zoom + 0.3;
+            cam.scrollX -= 20/cam.zoom + 0.3;
         } 
         if (this.keys.D.isDown || this.cursors.right.isDown) {
-            cam.scrollX += 20/zoom + 0.3;
+            cam.scrollX += 20/cam.zoom + 0.3;
         }
         if (this.keys.W.isDown || this.cursors.up.isDown) {
-            cam.scrollY -= 20/zoom + 0.3;
+            cam.scrollY -= 20/cam.zoom + 0.3;
         } 
         if (this.keys.S.isDown || this.cursors.down.isDown) {
-            cam.scrollY += 20/zoom + 0.3;
+            cam.scrollY += 20/cam.zoom + 0.3;
         }
 
         // Zoom in
         if (this.keys.Q.isDown || this.keys.Z.isDown || this.keys.NUMPAD_ADD.isDown) {
-            if ( this.time.now - this.lastZoomUpdate > 30 ) {
+            if ( this.time.now - this.lastZoomUpdate > 35 ) {
                 this.zoomUpdate(0.05);
             }           
         } 
         // Zoom out
         if (this.keys.E.isDown || this.keys.X.isDown || this.keys.NUMPAD_SUBTRACT.isDown) {
-            if ( this.time.now - this.lastZoomUpdate > 30 ) {
+            if ( this.time.now - this.lastZoomUpdate > 35 ) {
                 this.zoomUpdate(-0.05);
             }
         } 
 
         // Update Debug Output
         if (SHOW_DEBUG_TEXT) {
-            let degugText = 'FPS: ' + this.game.loop.actualFps + '\nZoom: ' + zoom;
+            let degugText = 'FPS: ' + this.game.loop.actualFps + '\nZoom: ' + cam.zoom;
             if (this.mouse.active) {
                 degugText += '\nMouseScreen: (' + Math.trunc(this.mouse.x) + ', ' + Math.trunc(this.mouse.y) + ')' +
                 '\nMouseWorld: (' + Math.trunc(this.mouse.worldX) + ', ' + Math.trunc(this.mouse.worldY) + ')'; 
@@ -244,12 +242,12 @@ class Game extends Phaser.Scene {
         if (zoomDelta == 0) return;
 
         // Prevent from zooming in/out too far
-        let oldZoom = zoom;
-        zoom = Math.max( MIN_ZOOM, Math.min(MAX_ZOOM, zoom * (1 + zoomDelta) ) );
+        let oldZoom = cam.zoom;
+        let newZoom = Math.max( MIN_ZOOM, Math.min(MAX_ZOOM, cam.zoom * (1 + zoomDelta) ) );
  
         // Zoom to mouse pointer            
-        cam.pan(this.mouse.worldX - (this.mouse.worldX - cam.midPoint.x) * ((oldZoom/zoom)), this.mouse.worldY - ( this.mouse.worldY - cam.midPoint.y) * ((oldZoom/zoom)), 150, Phaser.Math.Easing.Elastic.Out, true);
-        cam.zoomTo( zoom, 200, Phaser.Math.Easing.Back.Out, true );    
+        cam.pan(this.mouse.worldX - (this.mouse.worldX - cam.midPoint.x) * ((oldZoom/newZoom)), this.mouse.worldY - ( this.mouse.worldY - cam.midPoint.y) * ((oldZoom/newZoom)), 150, Phaser.Math.Easing.Elastic.Out, true);
+        cam.zoomTo( newZoom, 200, Phaser.Math.Easing.Back.Out, true );    
 
         this.lastZoomUpdate = this.time.now;
     }
