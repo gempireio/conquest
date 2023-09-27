@@ -4,10 +4,12 @@
 export class Player {
     static players = new Set();
 
-    constructor( playerID, name, map ) {
+    constructor( playerID, name, color, startPosition, map ) {
         Player.players.add(name);
         this.playerID = playerID;
         this.name = name;
+        this.color = color;
+        this.startPosition = startPosition;
         this.map = map;  
         this.civs = new Uint16Array(map.maxHexId + 1).fill(0);
         this.soldiers = new Uint16Array(map.maxHexId + 1).fill(0);

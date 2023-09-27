@@ -126,9 +126,13 @@ class Game extends Phaser.Scene {
         if (SHOW_DEBUG_TEXT) nonUIComponents.push(...map.debugTexts);
         if (SHOW_GRID) map.showGrid = true;
         
-
-        let pinchUrl = 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexpinchplugin.min.js';
-        this.load.plugin('rexpinchplugin', pinchUrl, true);
+        // Load Plugins
+        this.load.plugin('rexpinchplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexpinchplugin.min.js', true);
+        this.load.scenePlugin({
+            key: 'rexuiplugin',
+            url: 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js',
+            sceneKey: 'rexUI'
+        });  
     }
     
     create() {
@@ -267,7 +271,7 @@ class Game extends Phaser.Scene {
 
     createPlayers( playerCount ) {
         for ( let i = 0; i <= playerCount; i++){
-            this.players.push( new Player(i, 'Player' + i, this.map) );
+            this.players.push( new Player(i, 'Player' + i, Phaser.Display.Color.RandomRGB(30,200), map.randHexID(),  map) );
         }
     }
 }

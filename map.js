@@ -26,6 +26,15 @@ export class Map extends HexGrid {
 
         this.elevations = new Uint8Array(this.maxHexId + 1);
         this.landCover = new Uint8Array(this.maxHexId + 1);
+
+        // Specifies which player controls a given tile and to what extent
+        // playerID: first 6 bits, status: last 2 bits (occupied, influenced, owned, developed)
+        // occupied: has units stationed there, but not owned or influenced
+        // influenced: owned land extends influence there
+        // owned: owns tile, but not developed
+        // developed: owned and developed tile
+        this.tileOwners = new Uint8Array(this.maxHexId + 1); 
+        this.influenceMap = new Uint8Array((this.maxHexId + 1) * 4); 
         
         if ( showDebugText ){
             this.debugTexts = [];
@@ -40,6 +49,7 @@ export class Map extends HexGrid {
 
     /**
      * Returns a random integer between min (inclusive) and max (inclusive).
+     * @return {number} the random integer generated
      */
     randInt(min, max) {
         min = Math.ceil(min);
@@ -47,10 +57,33 @@ export class Map extends HexGrid {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
+    /**
+     * Generate a random hexID.
+     * @return {number} A random hexadecimal ID.
+     */
+    randHexID() {
+        return this.randInt(0, this.maxHexId);
+    }
+
+    /**
+     * Splits a uint8 value into two parts based on a given split bit.
+     * @param {number} uint8 - The uint8 value to be split.
+     * @param {number} split - The bit position at which to split the uint8 value.
+     * @return {Array} An array containing the first and last parts of the split uint8 value.
+     */
+    splitUint8(uint8, split) {
+        // Calculate the number of last bits
+        let lastBits = 8 - split;
+        // Shift right by lastBits to get the firstBits
+        let first = uint8 >> lastBits;
+        // Use bitwise AND with a mask to get the last bits
+        let last = uint8 & ((1 << lastBits) - 1);
+        return [first, last];
+    }
+
     createSelectGraphic() {
         const hexagon = new Phaser.Geom.Polygon(this.hexagonPoints);
         const color = 0xc1d1ff;
-        //Phaser.Geom.Polygon.Translate(hexagon, 0, 0);
         this.selectedHexId = -1;
         this.selectGraphic = this.scene.add.graphics();   
         this.selectGraphic.fillStyle(color, 0.1);
