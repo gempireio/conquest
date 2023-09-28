@@ -6,6 +6,8 @@
 import {Map} from './map.js';
 import {Player} from './player.js';
 
+const tileDlg = document.getElementById("tile-dlg");
+
 const URL_PARAMS = new URLSearchParams(window.location.search);
 const GRID_LAYERS = URL_PARAMS.get('l') ? parseInt(URL_PARAMS.get('l')) : 60;
 const SEA_LEVEL = URL_PARAMS.get('sl') ? parseInt(URL_PARAMS.get('sl')) : 35;
@@ -104,6 +106,8 @@ class Game extends Phaser.Scene {
             pointer.lastDownY = pointer.worldY;
 
             let hexID = map.selectAt(pointer.worldX, pointer.worldY);
+            setTileDlgLabels( "District", hexID, map.elevations[hexID], 1, 2 )
+            fadeIn(tileDlg);
         });
     
         // Mouse move event

@@ -14,11 +14,18 @@ export class Player {
         this.civs = new Uint16Array(map.maxHexId + 1).fill(0);
         this.soldiers = new Uint16Array(map.maxHexId + 1).fill(0);
         this.buildings = new Uint8Array(map.maxHexId + 1).fill(0);
+
+        // Resources
         this.food = 0;
         this.gems = 0;
         this.metal = 0;
         this.stone = 0; 
         this.wood = 0;
+
+        // Player Metrics
+        this.morale = 0;
+        this.health = 0;
+
         this.occupiedTiles = new Set();
         this.developedTiles = new Set();
     }
