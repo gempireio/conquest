@@ -1,8 +1,9 @@
 import {HexGrid} from './hex_grid.js';
 const tileDlg = document.getElementById("tile-dlg");
 
-const PRE = ["Alt", "Am", "Bor", "Cal", "Den", "El", "Ex", "Fin", "Gat", "Hin", "Ig", "Jil", "Kit", "Lin", "Min", "Nor", "Or", "Pit", "Rich", "Zer", "Zin", "Al"];
-const MID = ["", "land", "ville", "an", "for", "ork", "ist", "eed", "lore", "feld", "ma", "bor"];
+// District Names
+const PRE = ["Alt", "Am", "Bor", "Cal", "Cam", "Den", "El", "Ex", "Fin", "Gat", "Hin", "Ig", "Jil", "Kit", "Lin", "Min", "Nor", "Or", "Ox", "Pit", "Rich", "Zer", "Zin", "Al"];
+const MID = ["", "ham", "land", "ville", "an", "for", "ork", "ist", "eed", "lore", "feld", "ma", "bor", "ter"];
 const SUFF = ["", "a", "y", "id", "or", "il", "ex","est"];
 
 export class Map extends HexGrid {
@@ -32,6 +33,18 @@ export class Map extends HexGrid {
         this.elevations = new Uint8Array(this.maxHexId + 1);
         this.landCover = new Uint8Array(this.maxHexId + 1);
 
+        // Each Bit represents whether a given building is built on a tile
+        // 0: Farm
+        // 1: Mine
+        // 2: Barracks
+        // 3: Lumbermill
+        // 4: Factory
+        // 5: Palace
+        this.buildings = new Uint8Array(this.maxHexId + 1);
+
+        // Heatmaps
+        this.influenceMap = new Uint8Array((this.maxHexId + 1) * 4); 
+
         // Specifies which player controls a given tile and to what extent
         // playerID: first 6 bits, status: last 2 bits (occupied, influenced, owned, developed)
         // occupied: has units stationed there, but not owned or influenced
@@ -39,7 +52,10 @@ export class Map extends HexGrid {
         // owned: owns tile, but not developed
         // developed: owned and developed tile
         this.tileOwners = new Uint8Array(this.maxHexId + 1); 
-        this.influenceMap = new Uint8Array((this.maxHexId + 1) * 4); 
+        
+        this.tileDisplay = new Uint16Array(this.maxHexId + 1); 
+
+
         
         if ( showDebugText ){
             this.debugTexts = [];
