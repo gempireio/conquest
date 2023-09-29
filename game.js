@@ -10,10 +10,11 @@ const URL_PARAMS = new URLSearchParams(window.location.search);
 const GRID_LAYERS = URL_PARAMS.get('l') ? parseInt(URL_PARAMS.get('l')) : 60;
 const SEA_LEVEL = URL_PARAMS.get('sl') ? parseInt(URL_PARAMS.get('sl')) : 35;
 const MAX_ZOOM = 5;
-const MIN_ZOOM = 15 / GRID_LAYERS;
+const MIN_ZOOM = 6 / GRID_LAYERS;
 const SHOW_GRID = URL_PARAMS.get('grid') ? URL_PARAMS.get('grid') : false;
 const SHOW_DEBUG_TEXT = URL_PARAMS.get('debug') ? URL_PARAMS.get('debug') : false;
 const TURN_TIME = 30;
+console.log(MIN_ZOOM);
 
 let map;
 let lasTimerReset = 0;
@@ -36,49 +37,7 @@ class Game extends Phaser.Scene {
         console.log("preload");   
         screenWidth = this.sys.game.canvas.width;
         screenHeight = this.sys.game.canvas.height;
-    
-        // Create progress bar
-        let progressBar = this.add.graphics();
-        let progressBox = this.add.graphics();
-        progressBox.fillStyle(0x212527, 0.8);
-        progressBox.fillRect(screenWidth/3, screenHeight/1.7 - 100, screenWidth/3, 150);
-    
-        // Loading text
-        let loadingText = this.make.text({
-            x: screenWidth / 2,
-            y: screenHeight/1.7 - 150,
-            text: 'Loading...',
-            style: {
-                font: '45px monospace',
-                fill: '#ffffff'
-            }
-        });
-        loadingText.setOrigin(0.5, 0.5);     
-        let percentText = this.make.text({
-            x: screenWidth / 2,
-            y: screenHeight / 1.7 - 25,
-            text: '0%',
-            style: {
-                font: '40px monospace',
-                fill: '#ffffff'
-            }
-        });
-        percentText.setOrigin(0.5, 0.5);
-    
-        this.load.on('progress', function(progressPercent) {
-            percentText.setText(parseInt(progressPercent * 100) + '%');
-            progressBar.clear();
-            progressBar.fillStyle(0x112233, 1);
-            progressBar.fillRect(screenWidth/3+5, screenHeight/1.7 - 95, (screenWidth/3 - 10) * progressPercent, 140);
-        });
-    
-        this.load.on('complete', function () {
-            progressBar.destroy();
-            progressBox.destroy();
-            loadingText.destroy();
-            percentText.destroy(); 
-        });
-    
+
         // Scroll Wheel event
         this.input.on('wheel', (wheel) => {
             let zoomDelta;
@@ -127,7 +86,7 @@ class Game extends Phaser.Scene {
             console.log('FPS: ' + this.game.loop.actualFps);
         }});
     
-        map = new Map( GRID_LAYERS, SEA_LEVEL, game_config.backgroundColor, this, SHOW_DEBUG_TEXT );
+        map = new Map( GRID_LAYERS, SEA_LEVEL, game_config.oceanColor, this, SHOW_DEBUG_TEXT );
         if (SHOW_DEBUG_TEXT) nonUIComponents.push(...map.debugTexts);
         if (SHOW_GRID) map.showGrid = true;
         
@@ -201,6 +160,8 @@ class Game extends Phaser.Scene {
         cam.shake(1500, 0.004);
 
         this.lastZoomUpdate = this.time.now;
+        cam.fadeIn(4000);
+        fadeOutLoadingScreen();
     }
     
     update(timestamp, elapsed) {
@@ -257,7 +218,7 @@ class Game extends Phaser.Scene {
 
     zoomUpdate(zoomDelta) {
         if (zoomDelta == 0) return;
-
+        console.log(cam.zoom);
         // Prevent from zooming in/out too far
         let oldZoom = cam.zoom;
         let newZoom = Math.max( MIN_ZOOM, Math.min(MAX_ZOOM, cam.zoom * (1 + zoomDelta) ) );
@@ -277,7 +238,9 @@ class Game extends Phaser.Scene {
 }
 
 const game_config = {
-    backgroundColor: '#051231',
+    backgroundColor: 'rgba(100,0,0,0)',
+    transparent: true, 
+    oceanColor: '#051231',
     input: { smoothFactor: 0.3 },
     scene: [Game],
     scale: {

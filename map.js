@@ -1,8 +1,9 @@
 import {HexGrid} from './hex_grid.js';
 const tileDlg = document.getElementById("tile-dlg");
 
-const PRE = ["Alt", "Am", "Bor", "Cal", "Den", "El", "Fin", "Gat", "Hin", "Ig", "Jip", "Knap", "Lin", "Min", "Nor", "Or", "Pit", "Queen", "Rich"];
-const SUFF = ["land", "ville", "an", "ford", "ork", "ist", "eed", "lore"];
+const PRE = ["Alt", "Am", "Bor", "Cal", "Den", "El", "Ex", "Fin", "Gat", "Hin", "Ig", "Jil", "Kit", "Lin", "Min", "Nor", "Or", "Pit", "Rich", "Zer", "Zin", "Al"];
+const MID = ["", "land", "ville", "an", "for", "ork", "ist", "eed", "lore", "feld", "ma", "bor"];
+const SUFF = ["", "a", "y", "id", "or", "il", "ex","est"];
 
 export class Map extends HexGrid {
 
@@ -99,12 +100,10 @@ export class Map extends HexGrid {
     }
 
     generateNames() {
-        
         let length = this.maxHexId + 1;
-        console.log(PRE[Math.floor(Math.random()*PRE.length)] );
         this.tileNames = new Array(length);
         for (let hexID = 0; hexID < length; hexID++){
-            this.tileNames[hexID] = PRE[Math.floor(Math.random()*PRE.length)] + SUFF[Math.floor(Math.random()*SUFF.length)];
+            this.tileNames[hexID] = PRE[Math.floor(Math.random()*PRE.length)] + MID[Math.floor(Math.random()*MID.length)] + SUFF[Math.floor(Math.random()*SUFF.length)];
         }       
     }
 

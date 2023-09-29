@@ -1,15 +1,19 @@
-#tileDlg {
-  position: absolute;
-  z-index: 9;
-  background-color: #f1f1f1;
-  border: 1px solid #d3d3d3;
-  text-align: center;
+body {
+  background-image: none;
+  background-color: #0b0c19;
 }
 
-#dlgHeader {
-  padding: 10px;
-  cursor: move;
-  z-index: 10;
-  background-color: #2196F3;
-  color: #fff;
+#loading {
+  color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-height: 100vh;
+  z-index: 110;
+  opacity: 0.8;
+}
+
+#game {
+  z-index: -1;
 }
