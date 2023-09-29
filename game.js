@@ -14,7 +14,6 @@ const MIN_ZOOM = 6 / GRID_LAYERS;
 const SHOW_GRID = URL_PARAMS.get('grid') ? URL_PARAMS.get('grid') : false;
 const SHOW_DEBUG_TEXT = URL_PARAMS.get('debug') ? URL_PARAMS.get('debug') : false;
 const TURN_TIME = 30;
-console.log(MIN_ZOOM);
 
 let map;
 let lasTimerReset = 0;
@@ -147,20 +146,19 @@ class Game extends Phaser.Scene {
                 let scaleFactor = dragScale.scaleFactor;
                 cam.zoom *= scaleFactor;
             }, this);
-    
-        // Zoom into start location
+            
+        // Zoom and Fade In Intro
+        cam.fadeIn(3500);
         const tweenConfig = {
             targets: cam,
             zoom: ( MIN_ZOOM + MAX_ZOOM ) / 3,
             duration: 3000,
             ease: 'Bounce.Out'
-        }
-        
+        } 
         this.tweens.add(tweenConfig);
         cam.shake(1500, 0.004);
 
-        this.lastZoomUpdate = this.time.now;
-        cam.fadeIn(4000);
+        this.lastZoomUpdate = this.time.now;    
         fadeOutLoadingScreen();
     }
     
@@ -218,7 +216,7 @@ class Game extends Phaser.Scene {
 
     zoomUpdate(zoomDelta) {
         if (zoomDelta == 0) return;
-        console.log(cam.zoom);
+        
         // Prevent from zooming in/out too far
         let oldZoom = cam.zoom;
         let newZoom = Math.max( MIN_ZOOM, Math.min(MAX_ZOOM, cam.zoom * (1 + zoomDelta) ) );
