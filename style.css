@@ -1,6 +1,6 @@
 body {
   background-image: none;
-  background-color: #0b0c19;
+  background-color: #0c1825;
 }
 
 #loading {
@@ -11,9 +11,11 @@ body {
   text-align: center;
   min-height: 100vh;
   z-index: 110;
-  opacity: 0.8;
+  opacity: 0.95;
+  height:200px;
 }
 
 #game {
+  opacity: 0;
   z-index: -1;
 }

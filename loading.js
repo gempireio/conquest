@@ -1,16 +1,17 @@
 loadingScreen = document.getElementById("loading");
+gameScreen = document.getElementById("game");
 
 function fadeOutLoadingScreen() {
-    var opacity = 1;
-    var timer = setInterval(function () {
-        if (opacity > 0.05) {    
-            opacity *= 0.9;
+    let opacity = 1;
+    let timer = setInterval(function () {
+        if (opacity > 0.01) {    
+            opacity *= 0.95;
         } else {
+            gameScreen.style.opacity = 1;
             loadingScreen.remove();
             clearInterval(timer);   
         }
-        loadingScreen.style.opacity = opacity;
-       
-    }, 100);
-    
+        loadingScreen.style.opacity = opacity;  
+        gameScreen.style.opacity = 1 - opacity;  
+    }, 50);   
 }

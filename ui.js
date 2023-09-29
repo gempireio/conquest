@@ -6,11 +6,10 @@ document.getElementsByTagName("head")[0].appendChild(metaTag);
 const lastWindow = document.getElementsByClassName("window-group")[0].lastElementChild.id.substring(6);
 const active = document.getElementsByClassName("window");
 
-for (let i = 1; i <= lastWindow; i++) {
-    createWindow(i);
-}
 
-function createWindow(id) {
+createWindows();
+
+function createWindows() {
     const tileDlg = document.getElementById("tile-dlg");
 
     document.getElementById("tile-dlg-close").onclick = function () {

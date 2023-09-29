@@ -148,7 +148,7 @@ class Game extends Phaser.Scene {
             }, this);
             
         // Zoom and Fade In Intro
-        cam.fadeIn(3500);
+        //cam.fadeIn(3500);
         const tweenConfig = {
             targets: cam,
             zoom: ( MIN_ZOOM + MAX_ZOOM ) / 3,
@@ -216,7 +216,7 @@ class Game extends Phaser.Scene {
 
     zoomUpdate(zoomDelta) {
         if (zoomDelta == 0) return;
-        
+
         // Prevent from zooming in/out too far
         let oldZoom = cam.zoom;
         let newZoom = Math.max( MIN_ZOOM, Math.min(MAX_ZOOM, cam.zoom * (1 + zoomDelta) ) );
@@ -236,7 +236,6 @@ class Game extends Phaser.Scene {
 }
 
 const game_config = {
-    backgroundColor: 'rgba(100,0,0,0)',
     transparent: true, 
     oceanColor: '#051231',
     input: { smoothFactor: 0.3 },
