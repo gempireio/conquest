@@ -6,8 +6,6 @@
 import {Map} from './map.js';
 import {Player} from './player.js';
 
-const tileDlg = document.getElementById("tile-dlg");
-
 const URL_PARAMS = new URLSearchParams(window.location.search);
 const GRID_LAYERS = URL_PARAMS.get('l') ? parseInt(URL_PARAMS.get('l')) : 60;
 const SEA_LEVEL = URL_PARAMS.get('sl') ? parseInt(URL_PARAMS.get('sl')) : 35;
@@ -98,16 +96,19 @@ class Game extends Phaser.Scene {
             if( this.time.now - pointer.lastClick < 400 ){   
                 let zoom = Math.min(( cam.zoom * 3 + MAX_ZOOM / 3 ) / 2, MAX_ZOOM);
                 cam.pan( pointer.worldX, pointer.worldY, 500, Phaser.Math.Easing.Bounce.Out, true );  
-                cam.zoomTo( zoom, 1000, Phaser.Math.Easing.Bounce.Out, true);        
+                cam.zoomTo( zoom, 1000, Phaser.Math.Easing.Bounce.Out, true);   
+                let hexID = map.selectAt(pointer.worldX, pointer.worldY);
+                pointer.lastClick = this.time.now;
+                pointer.lastDownX = pointer.worldX;
+                pointer.lastDownY = pointer.worldY;
+                return;
             }
-            
+
             pointer.lastClick = this.time.now;
             pointer.lastDownX = pointer.worldX;
             pointer.lastDownY = pointer.worldY;
-
-            let hexID = map.selectAt(pointer.worldX, pointer.worldY);
-            setTileDlgLabels( "District", hexID, map.elevations[hexID], 1, 2 )
-            fadeIn(tileDlg);
+            
+            let hexID = map.selectAt(pointer.worldX, pointer.worldY, true);
         });
     
         // Mouse move event

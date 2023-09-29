@@ -1,4 +1,8 @@
 import {HexGrid} from './hex_grid.js';
+const tileDlg = document.getElementById("tile-dlg");
+
+const PRE = ["Alt", "Am", "Bor", "Cal", "Den", "El", "Fin", "Gat", "Hin", "Ig", "Jip", "Knap", "Lin", "Min", "Nor", "Or", "Pit", "Queen", "Rich"];
+const SUFF = ["land", "ville", "an", "ford", "ork", "ist", "eed", "lore"];
 
 export class Map extends HexGrid {
 
@@ -42,9 +46,10 @@ export class Map extends HexGrid {
                 this.debugTexts[hexId] = this.scene.add.text(this.hexCenters[hexId].x-46, this.hexCenters[hexId].y-34, "1", { font: '14px monospace', fill: '#b1e1f6' });
             }
         }
-
+    
         this.generateElevations();
         this.createSelectGraphic();
+        this.generateNames();
     }
 
     /**
@@ -91,6 +96,16 @@ export class Map extends HexGrid {
         this.selectGraphic.lineStyle(3, color, 0.7);    
         this.selectGraphic.strokePoints(hexagon.points, true);
         this.selectGraphic.visible = false;
+    }
+
+    generateNames() {
+        
+        let length = this.maxHexId + 1;
+        console.log(PRE[Math.floor(Math.random()*PRE.length)] );
+        this.tileNames = new Array(length);
+        for (let hexID = 0; hexID < length; hexID++){
+            this.tileNames[hexID] = PRE[Math.floor(Math.random()*PRE.length)] + SUFF[Math.floor(Math.random()*SUFF.length)];
+        }       
     }
 
     /**
@@ -182,19 +197,27 @@ export class Map extends HexGrid {
      *
      * @param {number} x - The x-coordinate of the position.
      * @param {number} y - The y-coordinate of the position.
+     * @param {boolean} toggle - Whether to toggle off the selection if already selected
      * @return {undefined} - The HexId selected.
      */
-    selectAt(x, y) {
+    selectAt(x, y, toggle = false) {
         this.selectGraphic.visible = true;
         let hexID = this.hexIdAtPosition({x: x, y: y});
-        if ( hexID == this.selectedHexId ) {
-            this.selectGraphic.visible = false;
-            this.selectedHexId = -1;
+        if ( toggle && hexID == this.selectedHexId ) {
+            this.deselect();
             return -1;
         }
         this.selectedHexId = hexID;
         this.selectGraphic.setPosition(this.hexCenters[hexID].x, this.hexCenters[hexID].y);
+        setTileDlgLabels( this.tileNames[hexID], hexID, this.elevations[hexID], 1, 2 )
+        fadeIn(tileDlg);
         return hexID;
+    }
+
+    deselect() {
+        this.selectGraphic.visible = false;
+        this.selectedHexId = -1;   
+        fadeOut(tileDlg);
     }
 
     /**

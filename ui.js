@@ -128,7 +128,7 @@ function activeWindow(elmnt) {
 
 function setTileDlgLabels( name, hexID, elevation, civs, soldiers ) {
     document.getElementById("tile-name").innerHTML = name + " (" + hexID + ")";
-    document.getElementById("elevation").innerHTML = "Elevation: " + elevation;
-    document.getElementById("civs").innerHTML = "Civs: " + civs;
-    document.getElementById("soldiers").innerHTML = "Soldiers: " + soldiers;
+    document.getElementById("elevation").innerHTML = elevation;
+    document.getElementById("civs").innerHTML = civs;
+    document.getElementById("soldiers").innerHTML = soldiers;
 }
