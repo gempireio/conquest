@@ -131,8 +131,8 @@ class Game extends Phaser.Scene {
         // Key down event
         let keyC = this.input.keyboard.addKey('C');
         keyC.on('down', (key) => {
-            if (map.selectedHexId < 0) return;
-            let hexVec = map.hexCenters[map.selectedHexId];
+            if (map.selectedhexID < 0) return;
+            let hexVec = map.hexCenters[map.selectedhexID];
             cam.pan(hexVec.x, hexVec.y, 1000, Phaser.Math.Easing.Back.Out, true)
         });
 
@@ -148,7 +148,7 @@ class Game extends Phaser.Scene {
             }, this);
             
         // Zoom and Fade In Intro
-        //cam.fadeIn(3500);
+        cam.fadeIn(3000);
         const tweenConfig = {
             targets: cam,
             zoom: ( MIN_ZOOM + MAX_ZOOM ) / 3,
@@ -230,7 +230,7 @@ class Game extends Phaser.Scene {
 
     createPlayers( playerCount ) {
         for ( let i = 0; i <= playerCount; i++){
-            this.players.push( new Player(i, 'Player' + i, Phaser.Display.Color.RandomRGB(30,200), map.randHexID(),  map) );
+            this.players.push( new Player(i, 'Player' + i, Phaser.Display.Color.RandomRGB(30,200), map.randhexID(),  map) );
         }
     }
 }
