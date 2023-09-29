@@ -52,6 +52,8 @@ A very small map with low sea level, debug and grid shown
 ### To-Do
 - [ ] UI controls (turn timer, globe button, taskbar)
 - [ ] Basic gameplay
+- [ ] Movable windows
+- [ ] Editable District names
 - [ ] Startup Dialog Box
 - [ ] Edge of map scrolling
 - [ ] Better zooming (smoother fast zoom)
