@@ -16,7 +16,7 @@
 
 .window-title {
 	font-weight: 550;
-	width: 85%;
+	width: 80%;
 	display: inline-block; 
 	text-overflow: ellipsis;
 	white-space: nowrap;
