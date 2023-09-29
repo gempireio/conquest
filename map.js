@@ -103,7 +103,11 @@ export class Map extends HexGrid {
         let length = this.maxHexId + 1;
         this.tileNames = new Array(length);
         for (let hexID = 0; hexID < length; hexID++){
-            this.tileNames[hexID] = PRE[Math.floor(Math.random()*PRE.length)] + MID[Math.floor(Math.random()*MID.length)] + SUFF[Math.floor(Math.random()*SUFF.length)];
+            if (this.elevations[hexID] > this.seaLevel) {
+                this.tileNames[hexID] = PRE[Math.floor(Math.random()*PRE.length)] + MID[Math.floor(Math.random()*MID.length)] + SUFF[Math.floor(Math.random()*SUFF.length)];
+            } else {
+                this.tileNames[hexID] = "Ocean";
+            }
         }       
     }
 
