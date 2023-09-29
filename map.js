@@ -83,7 +83,7 @@ export class Map extends HexGrid {
      * Generate a random hexID.
      * @return {number} A random hexadecimal ID.
      */
-    randhexID() {
+    randHexID() {
         return this.randInt(0, this.mexHexID);
     }
 

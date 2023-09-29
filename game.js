@@ -230,7 +230,7 @@ class Game extends Phaser.Scene {
 
     createPlayers( playerCount ) {
         for ( let i = 0; i <= playerCount; i++){
-            this.players.push( new Player(i, 'Player' + i, Phaser.Display.Color.RandomRGB(30,200), map.randhexID(),  map) );
+            this.players.push( new Player(i, 'Player' + i, Phaser.Display.Color.RandomRGB(30,200), map.randHexID(),  map) );
         }
     }
 }
