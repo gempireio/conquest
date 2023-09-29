@@ -57,7 +57,7 @@
 }
 
 .title-bar {
-	background-color: rgb(29, 73, 193);
+	background-color: rgb(14, 46, 134);
 	font-size: clamp( 12px + 2vw, 2.2vw, 30px );
 	padding:3px;
 }
