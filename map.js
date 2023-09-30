@@ -59,7 +59,7 @@ export class Map extends HexGrid {
     
         this.generateElevations();
         this.createSelectGraphic();
-        this.generateNames();
+        this.generateTileNames();
         this.updateTileDisplay('civs');
     }
 
@@ -109,16 +109,24 @@ export class Map extends HexGrid {
         this.selectGraphic.visible = false;
     }
 
-    generateNames() {
+    generateTileNames() {
         let length = this.maxHexID + 1;
         this.tileNames = new Array(length);
         for (let hexID = 0; hexID < length; hexID++){
-            if (this.elevations[hexID] > this.seaLevel) {
-                this.tileNames[hexID] = PRE[Math.floor(Math.random()*PRE.length)] + MID[Math.floor(Math.random()*MID.length)] + SUFF[Math.floor(Math.random()*SUFF.length)];
-            } else {
+            if ( this.elevations[hexID] <= this.seaLevel ) {
                 this.tileNames[hexID] = "Ocean";
+            } else if (this.elevations[hexID] < 100) {
+                this.tileNames[hexID] = "Plain";
+            } else if (this.elevations[hexID] < 150) {
+                this.tileNames[hexID] = "Hill";
+            } else {
+                this.tileNames[hexID] = "Mountain";
             }
         }       
+    }
+
+    generateTileName(hexID) {
+        this.tileNames[hexID] = PRE[Math.floor(Math.random()*PRE.length)] + MID[Math.floor(Math.random()*MID.length)] + SUFF[Math.floor(Math.random()*SUFF.length)];   
     }
 
     /**

@@ -3,7 +3,6 @@ const PRE = ["Ger", "Brit", "Am", "Cal", "Den", "Est", "Fin", "Gin", "Hin", "Ig"
 const MID = ["", "ham",  "an", "for", "ork", "ish", "ead", "ma", "bor", "ter"];
 const SUFF = ["", "a", "y", "id", "or", "il", "ex"];
 
-
 /**
  * Stores all the data relevant to a player
  */
@@ -19,6 +18,7 @@ export class Player {
         this.map = map;  
         this.startTile = startTile;
         this.startPosition = map.hexCenters[startTile];
+        map.generateTileName(startTile);
 
         this.civs = new Uint16Array(map.maxHexID + 1);
         this.soldiers = new Uint16Array(map.maxHexID + 1);
