@@ -8,7 +8,7 @@ const SUFF = ["", "a", "y", "id", "or", "il", "ex"];
  * Stores all the data relevant to a player
  */
 export class Player {
-    static players = new Set();
+    static playerNames = new Set();
     static startTiles = new Set();
 
     constructor( playerID, name, color, startTile, STARTING_UNITS, map ) {
@@ -41,7 +41,7 @@ export class Player {
         // Set/generate Player Name     
         if (!name) name = this.generatePlayerName();
         this.name = name;
-        Player.players.add(name);
+        Player.playerNames.add(name);
 
         this.occupiedTiles = new Set();
         this.developedTiles = new Set();

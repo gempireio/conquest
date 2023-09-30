@@ -110,7 +110,7 @@ class Game extends Phaser.Scene {
         cam.setRoundPixels(true);
 
         console.log("Create Players and game objects");
-        this.createPlayers(5);
+        this.createPlayers(2 + Math.round(GRID_LAYERS/10));
 
         console.log("draw graphics");
         this.updateGraphics();
@@ -211,7 +211,7 @@ class Game extends Phaser.Scene {
 
             this.players.push( new Player(i, '', Phaser.Display.Color.RandomRGB(30,200), startTile, STARTING_UNITS,  map) );
         }
-        console.log(Player.players);
+        console.log(Player.playerNames);
     }
 }
 
