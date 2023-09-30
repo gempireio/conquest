@@ -148,7 +148,7 @@ class Game extends Phaser.Scene {
             }, this);
             
         // Zoom and Fade In Intro
-        cam.fadeIn(3000);
+        //cam.fadeIn(3000);
         const tweenConfig = {
             targets: cam,
             zoom: ( MIN_ZOOM + MAX_ZOOM ) / 3,
