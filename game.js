@@ -1,20 +1,17 @@
-// Potential names
-// Gempire: Expanse Sim
-// Gempire: Strategy Board
-// Gempire: Strategic Expanse
-
 import {Map} from './map.js';
 import {Player} from './player.js';
+import {Debug} from './debug.js';
 
 const URL_PARAMS = new URLSearchParams(window.location.search);
 const GRID_LAYERS = URL_PARAMS.get('l') ? parseInt(URL_PARAMS.get('l')) : 60;
 const SEA_LEVEL = URL_PARAMS.get('sl') ? parseInt(URL_PARAMS.get('sl')) : 35;
-const MAX_ZOOM = 5;
+const MAX_ZOOM = 4;
 const MIN_ZOOM = 6 / GRID_LAYERS;
 const SHOW_GRID = URL_PARAMS.get('grid') ? URL_PARAMS.get('grid') : false;
 const SHOW_DEBUG_TEXT = URL_PARAMS.get('debug') ? URL_PARAMS.get('debug') : false;
 const TURN_TIME = 30;
 
+let debugObj;
 let map;
 let lasTimerReset = 0;
 
@@ -22,8 +19,6 @@ let mapGraphics;
 let cam;
 let screenWidth;
 let screenHeight;
-let UIComponents = [];
-let nonUIComponents = [];
 
 class Game extends Phaser.Scene {
 
@@ -33,6 +28,11 @@ class Game extends Phaser.Scene {
     }
 
     preload() { 
+
+        if (SHOW_DEBUG_TEXT) {
+            debugObj = new Debug();
+        }
+
         console.log("preload");   
         screenWidth = this.sys.game.canvas.width;
         screenHeight = this.sys.game.canvas.height;
@@ -85,8 +85,7 @@ class Game extends Phaser.Scene {
             console.log('FPS: ' + this.game.loop.actualFps);
         }});
     
-        map = new Map( GRID_LAYERS, SEA_LEVEL, game_config.oceanColor, this, SHOW_DEBUG_TEXT );
-        if (SHOW_DEBUG_TEXT) nonUIComponents.push(...map.debugTexts);
+        map = new Map( GRID_LAYERS, SEA_LEVEL, game_config.oceanColor, this );
         if (SHOW_GRID) map.showGrid = true;
         
         // Load Plugins
@@ -101,12 +100,6 @@ class Game extends Phaser.Scene {
         this.touch1 = this.input.pointer1;
         this.input.addPointer(1);
         this.touch2 = this.input.pointer2;
-
-        if (SHOW_DEBUG_TEXT) {
-            let fontSize = 10 + screenWidth / 35;
-            this.degugText = this.add.text(0, 0, '(x, y)', { font: fontSize + 'px monospace'});
-            UIComponents.push(this.degugText);
-        }
     
         console.log("add cameras");
         // Main Camera
@@ -114,13 +107,6 @@ class Game extends Phaser.Scene {
         cam.setBounds(map.minX * 1.025, map.minY * 1.025, map.width * 1.05, map.height * 1.05, true);
         cam.setZoom(MIN_ZOOM);
         cam.setRoundPixels(true);
-        cam.ignore(UIComponents);
-        
-        // UI Camera (Ignore Zoom)
-        const UICam = this.cameras.add(10, 10, screenWidth, screenHeight);
-        UICam.ignore(nonUIComponents);
-        UICam.ignore(map.elevationGraphics);
-        UICam.ignore(map.selectGraphic);
     
         console.log("draw graphics");
         this.updateGraphics();
@@ -159,7 +145,7 @@ class Game extends Phaser.Scene {
         cam.shake(1500, 0.004);
 
         this.lastZoomUpdate = this.time.now;    
-        fadeOutLoadingScreen();
+        fadeOutLoadingScreen();    
     }
     
     update(timestamp, elapsed) {
@@ -192,22 +178,7 @@ class Game extends Phaser.Scene {
         } 
 
         // Update Debug Output
-        if (SHOW_DEBUG_TEXT) {
-            let degugText = 'FPS: ' + this.game.loop.actualFps + '\nZoom: ' + cam.zoom;
-            if (this.mouse.active) {
-                degugText += '\nMouseScreen: (' + Math.trunc(this.mouse.x) + ', ' + Math.trunc(this.mouse.y) + ')' +
-                '\nMouseWorld: (' + Math.trunc(this.mouse.worldX) + ', ' + Math.trunc(this.mouse.worldY) + ')'; 
-            }
-            if (this.touch1.active) {
-                degugText += '\nTouch1Screen: (' + Math.trunc(this.touch1.x) + ', ' + Math.trunc(this.touch1.y) + ')' +
-                '\nTouch1World: (' + Math.trunc(this.touch1.worldX) + ', ' + Math.trunc(this.touch1.worldY) + ')';
-            }
-            if (this.touch2.active) {
-                degugText +='\nTouch2Screen: (' + Math.trunc(this.touch2.x) + ', ' + Math.trunc(this.touch2.y) + ')' +
-                '\nTouch2WorldX: (' + Math.trunc(this.touch2.worldX) + ', ' + Math.trunc(this.touch2.worldY) + ')';
-            }
-            this.degugText.setText(degugText);
-        } 
+        if (SHOW_DEBUG_TEXT) debugObj.updateDebugText(this);
     }
     
     updateGraphics() {

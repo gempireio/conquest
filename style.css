@@ -17,13 +17,10 @@ body {
   align-items: center;
   text-align: center;
   font-size: clamp( 15px + 1vw, 2.5vw, 25px );
+  letter-spacing: 6px;
   /* display: inline-block; */
   /* height:200px; */
 }
-
-/* #loading > div {
-
-} */
 
 #game {
   min-height: 100%; 

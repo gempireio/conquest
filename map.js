@@ -21,12 +21,11 @@ export class Map extends HexGrid {
     // rocky
     // ocean
 
-    constructor( layers, seaLevel, oceanColor, scene, showDebugText ) {
+    constructor( layers, seaLevel, oceanColor, scene ) {
         super(layers, 100);
         this.seaLevel = seaLevel;
         this.oceanColor = oceanColor;
         this.scene = scene;
-        this.showDebugText = showDebugText;
 
         this.showGrid = false;
 
@@ -55,13 +54,7 @@ export class Map extends HexGrid {
         
         // Data shown to user per tile. Varies based on selected map overlay.
         this.tileDisplay = new Uint16Array(this.maxHexID + 1).fill(0); 
-
-        if ( showDebugText ){
-            this.debugTexts = [];
-            for (let hexID = 0; hexID <= this.maxHexID; hexID++){
-                this.debugTexts[hexID] = this.scene.add.text(this.hexCenters[hexID].x-46, this.hexCenters[hexID].y-34, "1", { font: '14px monospace', fill: '#b1e1f6' });
-            }
-        }
+        this.tileDisplayText = Array(this.maxHexID + 1);
     
         this.generateElevations();
         this.createSelectGraphic();
@@ -300,8 +293,8 @@ export class Map extends HexGrid {
 
     updateTileDisplay() {
         for (let hexID = 0; hexID <= this.maxHexID; hexID++) {
-            if ( this.elevationGraphics[hexID] > this.seaLevel) {
-                this.tileDisplay[hexID] = this.elevationGraphics[hexID];
+            if ( this.elevations[hexID] > this.seaLevel) {
+                this.tileDisplay[hexID] = this.elevations[hexID];
             } else {
                 this.tileDisplay[hexID] = 0;
             }
@@ -313,10 +306,9 @@ export class Map extends HexGrid {
         for (let hexID = 0; hexID <= this.maxHexID; hexID++) {
             this.drawLandHexagon(hexID, this.elevations[hexID] ,this.hexCenters[hexID].x, this.hexCenters[hexID].y);   
             if (this.showGrid) this.drawHexagonBorder(this.elevationGraphics, this.hexCenters[hexID].x, this.hexCenters[hexID].y);
-            if (this.showDebugText) this.debugTexts[hexID].setText("ID:   " + hexID + "\nElev: " + this.elevations[hexID]);
-
             if ( this.tileDisplay[hexID] ) {
-                this.scene.add.text(this.hexCenters[hexID].x-46, this.hexCenters[hexID].y-34, this.tileDisplay[hexID], { font: '14px monospace', fill: '#b1e1f6' });
+                let text = this.tileDisplay[hexID].toString();
+                this.scene.add.text(this.hexCenters[hexID].x - (text.length * 10), this.hexCenters[hexID].y - 20, text, { font: '35px monospace', fill: '#b1e1f6' });
             }
         }
     }

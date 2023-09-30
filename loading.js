@@ -1,5 +1,5 @@
-loadingScreen = document.getElementById("loading");
-gameScreen = document.getElementById("game");
+const loadingScreen = document.getElementById("loading");
+const gameScreen = document.getElementById("game");
 
 function fadeOutLoadingScreen() {
     let opacity = 1;
