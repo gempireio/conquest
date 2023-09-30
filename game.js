@@ -42,9 +42,9 @@ class Game extends Phaser.Scene {
         this.input.on('wheel', (wheel) => {
             let zoomDelta;
             if (wheel.deltaY < 0) {
-                zoomDelta = 0.1 + Math.random() * 0.15;
+                zoomDelta = 0.1 + Math.random() * 0.1;
             } else {    
-                zoomDelta = -0.1 - Math.random() * 0.15;
+                zoomDelta = -0.1 - Math.random() * 0.1;
             }
             this.zoomUpdate(zoomDelta);
         });
@@ -195,8 +195,8 @@ class Game extends Phaser.Scene {
         let newZoom = Math.max( MIN_ZOOM, Math.min(MAX_ZOOM, cam.zoom * (1 + zoomDelta) ) );
  
         // Zoom to mouse pointer            
-        cam.pan(this.mouse.worldX - (this.mouse.worldX - cam.midPoint.x) * ((oldZoom/newZoom)), this.mouse.worldY - ( this.mouse.worldY - cam.midPoint.y) * ((oldZoom/newZoom)), 150, Phaser.Math.Easing.Elastic.Out, true);
-        cam.zoomTo( newZoom, 200, Phaser.Math.Easing.Back.Out, true );    
+        cam.pan(this.mouse.worldX - (this.mouse.worldX - cam.midPoint.x) * ((oldZoom/newZoom)), this.mouse.worldY - ( this.mouse.worldY - cam.midPoint.y) * ((oldZoom/newZoom)), 100, Phaser.Math.Easing.Elastic.Out, true);
+        cam.zoomTo( newZoom, 150, Phaser.Math.Easing.Back.Out, true );    
 
         this.lastZoomUpdate = this.time.now;
     }
@@ -218,7 +218,7 @@ class Game extends Phaser.Scene {
 const game_config = {
     transparent: true, 
     oceanColor: '#051231',
-    input: { smoothFactor: 0.3 },
+    input: { smoothFactor: 0.5 },
     scene: [Game],
     scale: {
         mode: Phaser.Scale.RESIZE,
