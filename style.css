@@ -16,7 +16,7 @@ body {
   justify-content: center;
   align-items: center;
   text-align: center;
-  font-size: 15px;
+  font-size: clamp( 15px + 1vw, 2.5vw, 25px );
   /* display: inline-block; */
   /* height:200px; */
 }
