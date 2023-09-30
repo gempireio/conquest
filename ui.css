@@ -3,10 +3,9 @@
 	width: clamp( 150px + 16vw, 18vw, 300px );
 	margin: clamp( 5px, 2vw, 50px );
 	z-index: 9;
-	background-color: #d2ecff;
+	background-color: rgba(151, 186, 255, 0.75);
 	border-radius: 8px 8px 0 0;
 	box-shadow: 8px 8px 6px -6px black;
-	opacity: 0.9;
 	display: none;
 }
 
@@ -54,6 +53,7 @@
 	display: flex;
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 	line-height: 1.1;
+	opacity: 0.9;
 }
 
 .title-bar {
