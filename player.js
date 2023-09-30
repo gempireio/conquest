@@ -11,9 +11,9 @@ export class Player {
         this.color = color;
         this.startPosition = startPosition;
         this.map = map;  
-        this.civs = new Uint16Array(map.mexHexID + 1).fill(0);
-        this.soldiers = new Uint16Array(map.mexHexID + 1).fill(0);
-        this.buildings = new Uint8Array(map.mexHexID + 1).fill(0);
+        this.civs = new Uint16Array(map.maxHexID + 1).fill(0);
+        this.soldiers = new Uint16Array(map.maxHexID + 1).fill(0);
+        this.buildings = new Uint8Array(map.maxHexID + 1).fill(0);
 
         // Resources
         this.food = 0;
