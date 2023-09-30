@@ -9,6 +9,7 @@ const MAX_ZOOM = 4;
 const MIN_ZOOM = 6 / GRID_LAYERS;
 const SHOW_GRID = URL_PARAMS.get('grid') ? URL_PARAMS.get('grid') : false;
 const SHOW_DEBUG_TEXT = URL_PARAMS.get('debug') ? URL_PARAMS.get('debug') : false;
+const STARTING_UNITS = 10;
 const TURN_TIME = 30;
 
 let debugObj;
@@ -107,12 +108,12 @@ class Game extends Phaser.Scene {
         cam.setBounds(map.minX * 1.025, map.minY * 1.025, map.width * 1.05, map.height * 1.05, true);
         cam.setZoom(MIN_ZOOM);
         cam.setRoundPixels(true);
-    
-        console.log("draw graphics");
-        this.updateGraphics();
 
         console.log("Create Players and game objects");
         this.createPlayers(5);
+
+        console.log("draw graphics");
+        this.updateGraphics();
 
         // Key down event
         let keyC = this.input.keyboard.addKey('C');
@@ -142,6 +143,7 @@ class Game extends Phaser.Scene {
             ease: 'Bounce.Out'
         } 
         this.tweens.add(tweenConfig);
+        cam.pan( this.players[0].startPosition.x, this.players[0].startPosition.y, 1500, Phaser.Math.Easing.Back.Out, true );  
         cam.shake(1500, 0.004);
 
         this.lastZoomUpdate = this.time.now;    
@@ -201,7 +203,13 @@ class Game extends Phaser.Scene {
 
     createPlayers( playerCount ) {
         for ( let i = 0; i <= playerCount; i++){
-            this.players.push( new Player(i, 'Player' + i, Phaser.Display.Color.RandomRGB(30,200), map.randHexID(),  map) );
+            let startTile;
+            // Set start position of player on Land
+            do {
+                startTile = map.randHexID();
+            } while ( map.elevations[startTile] <= map.seaLevel);
+
+            this.players.push( new Player(i, 'Player' + i, Phaser.Display.Color.RandomRGB(30,200), startTile, STARTING_UNITS,  map) );
         }
     }
 }

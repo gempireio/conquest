@@ -39,7 +39,9 @@ export class Map extends HexGrid {
         // 3: Lumbermill
         // 4: Factory
         // 5: Palace
-        this.buildings = new Uint8Array(this.maxHexID + 1);
+        this.buildings = new Uint8Array(this.maxHexID + 1).fill(0);
+        this.civs = new Uint16Array(this.maxHexID + 1).fill(0);
+        this.soldiers = new Uint16Array(this.maxHexID + 1).fill(0);
 
         // Heatmaps
         this.influenceMap = new Uint8Array((this.maxHexID + 1) * 4); 
@@ -54,12 +56,11 @@ export class Map extends HexGrid {
         
         // Data shown to user per tile. Varies based on selected map overlay.
         this.tileDisplay = new Uint16Array(this.maxHexID + 1).fill(0); 
-        this.tileDisplayText = Array(this.maxHexID + 1);
     
         this.generateElevations();
         this.createSelectGraphic();
         this.generateNames();
-        this.updateTileDisplay();
+        this.updateTileDisplay('civs');
     }
 
     /**
@@ -221,7 +222,7 @@ export class Map extends HexGrid {
         }
         this.selectedhexID = hexID;
         this.selectGraphic.setPosition(this.hexCenters[hexID].x, this.hexCenters[hexID].y);
-        setTileDlgLabels( this.tileNames[hexID], hexID, this.elevations[hexID], 1, 2 )
+        setTileDlgLabels( this.tileNames[hexID], hexID, this.elevations[hexID], this.civs[hexID], 2 )
         fadeIn(tileDlg);
         return hexID;
     }
@@ -291,13 +292,28 @@ export class Map extends HexGrid {
         this.elevationGraphics.fillPoints(hexagon.points, true);
     }
 
-    updateTileDisplay() {
-        for (let hexID = 0; hexID <= this.maxHexID; hexID++) {
-            if ( this.elevations[hexID] > this.seaLevel) {
-                this.tileDisplay[hexID] = this.elevations[hexID];
-            } else {
-                this.tileDisplay[hexID] = 0;
-            }
+    updateTileDisplay( updateData = 'elevation') {
+        switch(updateData) {
+            case 'civs':
+                this.tileDisplay = new Uint16Array(this.civs.buffer);
+                break;
+            case 'soldiers':
+            // code block
+                break;
+            case 'units':
+                // code block
+                break;
+            case 'elevation':
+                for (let hexID = 0; hexID <= this.maxHexID; hexID++) {
+                    if ( this.elevations[hexID] > this.seaLevel) {
+                        this.tileDisplay[hexID] = this.elevations[hexID];
+                    } else {
+                        this.tileDisplay[hexID] = 0;
+                    }
+                }
+                break;
+            default:
+                // code block
         }
         this.drawMap();
     }

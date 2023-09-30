@@ -3,18 +3,24 @@
  */
 export class Player {
     static players = new Set();
+    static startTiles = new Set();
 
-    constructor( playerID, name, color, startPosition, map ) {
+    constructor( playerID, name, color, startTile, STARTING_UNITS, map ) {
         Player.players.add(name);
         this.playerID = playerID;
         this.name = name;
-        this.color = color;
-        this.startPosition = startPosition;
+        this.color = color; 
         this.map = map;  
-        this.civs = new Uint16Array(map.maxHexID + 1).fill(0);
-        this.soldiers = new Uint16Array(map.maxHexID + 1).fill(0);
-        this.buildings = new Uint8Array(map.maxHexID + 1).fill(0);
+        this.startTile = startTile;
+        this.startPosition = map.hexCenters[startTile];
 
+        this.civs = new Uint16Array(map.maxHexID + 1);
+        this.soldiers = new Uint16Array(map.maxHexID + 1);
+        this.buildings = new Uint8Array(map.maxHexID + 1);
+
+        this.civs[this.startTile] = STARTING_UNITS;
+        map.civs[this.startTile] = STARTING_UNITS;
+        
         // Resources
         this.food = 0;
         this.gems = 0;
