@@ -202,15 +202,16 @@ class Game extends Phaser.Scene {
     }
 
     createPlayers( playerCount ) {
-        for ( let i = 0; i <= playerCount; i++){
+        for ( let i = 0; i < playerCount; i++){
             let startTile;
             // Set start position of player on Land
             do {
-                startTile = map.randHexID();
+                startTile = Math.round(map.randHexID() / 3);
             } while ( map.elevations[startTile] <= map.seaLevel);
 
-            this.players.push( new Player(i, 'Player' + i, Phaser.Display.Color.RandomRGB(30,200), startTile, STARTING_UNITS,  map) );
+            this.players.push( new Player(i, '', Phaser.Display.Color.RandomRGB(30,200), startTile, STARTING_UNITS,  map) );
         }
+        console.log(Player.players);
     }
 }
 

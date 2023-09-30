@@ -1,3 +1,9 @@
+// Empire Names
+const PRE = ["Ger", "Brit", "Am", "Cal", "Den", "Est", "Fin", "Gin", "Hin", "Ig", "Jar", "Kan", "Lon", "Mer", "Nan", "Orph", "Pol", "Qar", "Rash", "Saf", "", "Zor"];
+const MID = ["", "ham",  "an", "for", "ork", "ish", "ead", "ma", "bor", "ter"];
+const SUFF = ["", "a", "y", "id", "or", "il", "ex"];
+
+
 /**
  * Stores all the data relevant to a player
  */
@@ -6,7 +12,7 @@ export class Player {
     static startTiles = new Set();
 
     constructor( playerID, name, color, startTile, STARTING_UNITS, map ) {
-        Player.players.add(name);
+        
         this.playerID = playerID;
         this.name = name;
         this.color = color; 
@@ -32,7 +38,16 @@ export class Player {
         this.morale = 0;
         this.health = 0;
 
+        // Set/generate Player Name     
+        if (!name) name = this.generatePlayerName();
+        this.name = name;
+        Player.players.add(name);
+
         this.occupiedTiles = new Set();
         this.developedTiles = new Set();
+    }
+
+    generatePlayerName() {
+        return PRE[Math.floor(Math.random()*PRE.length)] + MID[Math.floor(Math.random()*MID.length)] + SUFF[Math.floor(Math.random()*SUFF.length)];
     }
 }
