@@ -57,9 +57,13 @@
 }
 
 .title-bar {
-	background-color: rgb(14, 46, 134);
+	/* background-color: rgb(14, 46, 134); */
 	font-size: clamp( 16px + 2.2vw, 2.5vw, 30px );
 	padding:3px;
+}
+
+#tile-dlg-title {
+	background-color: rgb(14, 46, 134);
 }
 
 *,

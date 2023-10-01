@@ -25,7 +25,7 @@ class Game extends Phaser.Scene {
 
     constructor () { 
         super({ key: 'game', active: true });
-        this.players = [];
+        this.players = [0];
     }
 
     preload() { 
@@ -143,7 +143,7 @@ class Game extends Phaser.Scene {
             ease: 'Bounce.Out'
         } 
         this.tweens.add(tweenConfig);
-        cam.pan( this.players[0].startPosition.x, this.players[0].startPosition.y, 1500, Phaser.Math.Easing.Back.Out, true );  
+        cam.pan( this.players[1].startPosition.x, this.players[1].startPosition.y, 1500, Phaser.Math.Easing.Back.Out, true );  
         cam.shake(1500, 0.004);
 
         this.lastZoomUpdate = this.time.now;    
@@ -202,7 +202,7 @@ class Game extends Phaser.Scene {
     }
 
     createPlayers( playerCount ) {
-        for ( let i = 0; i < playerCount; i++){
+        for ( let i = 1; i <= playerCount; i++){
             let startTile;
             // Set start position of player on Land
             do {
@@ -211,7 +211,8 @@ class Game extends Phaser.Scene {
 
             this.players.push( new Player(i, '', Phaser.Display.Color.RandomRGB(30,200), startTile, STARTING_UNITS,  map) );
         }
-        console.log(Player.playerNames);
+        map.players = this.players;
+        map.updateInfluenceMap();
     }
 }
 

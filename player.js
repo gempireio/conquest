@@ -4,6 +4,14 @@ const MID = ["", "ham",  "an", "for", "ork", "ish", "ead", "ma", "bor", "ter"];
 const SUFF = ["", "a", "y", "id", "or", "il", "ex"];
 
 /**
+ * Player Levels
+ * Clan: < 500 Population
+ * Tribe: > 500 Population
+ * Kingdom: > 10000 Population
+ * Empire: > 2 Kingdoms
+ */
+
+/**
  * Stores all the data relevant to a player
  */
 export class Player {
@@ -11,7 +19,6 @@ export class Player {
     static startTiles = new Set();
 
     constructor( playerID, name, color, startTile, STARTING_UNITS, map ) {
-        
         this.playerID = playerID;
         this.name = name;
         this.color = color; 
@@ -26,6 +33,8 @@ export class Player {
 
         this.civs[this.startTile] = STARTING_UNITS;
         map.civs[this.startTile] = STARTING_UNITS;
+        map.owner[this.startTile] = playerID;
+        map.influence[this.startTile] = 100;
         
         // Resources
         this.food = 0;

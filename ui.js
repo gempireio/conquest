@@ -125,9 +125,18 @@ function activeWindow(elmnt) {
     }
 }
 
-function setTileDlgLabels( name, hexID, elevation, civs, soldiers ) {
-    document.getElementById("tile-name").innerHTML = name + " (" + hexID + ")";
-    document.getElementById("elevation").innerHTML = elevation;
-    document.getElementById("civs").innerHTML = civs;
-    document.getElementById("soldiers").innerHTML = soldiers;
+function updateTileDlg( map, hexID ) {
+    document.getElementById("tile-name").innerHTML = map.tileNames[hexID];
+    document.getElementById("elevation").innerHTML = map.elevations[hexID];
+    document.getElementById("civs").innerHTML = map.civs[hexID];
+    document.getElementById("soldiers").innerHTML = map.soldiers[hexID];
+    setTileDlgTitleColor(map.getTileColor(hexID, "influence"));
+}
+
+function setTileDlgTitleColor(color) {
+    if(color.r + color.g + color.b > 0) {
+        document.getElementById("tile-dlg-title").style.background = "rgb(" + color.r + "," + color.g + "," + color.b + ")";
+    } else {
+        document.getElementById("tile-dlg-title").style.background = "rgb(14,46,134)"
+    }    
 }

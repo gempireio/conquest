@@ -32,31 +32,19 @@ export class Map extends HexGrid {
         this.elevations = new Uint8Array(this.maxHexID + 1);
         this.landCover = new Uint8Array(this.maxHexID + 1);
 
-        // Each Bit represents whether a given building is built on a tile
-        // 0: Farm
-        // 1: Mine
-        // 2: Barracks
-        // 3: Lumbermill
-        // 4: Factory
-        // 5: Palace
-        this.buildings = new Uint8Array(this.maxHexID + 1).fill(0);
-        this.civs = new Uint16Array(this.maxHexID + 1).fill(0);
-        this.soldiers = new Uint16Array(this.maxHexID + 1).fill(0);
+        // Tile level data
+        this.owner = new Uint8Array(this.maxHexID + 1); 
+        this.influence = new Uint8Array(this.maxHexID + 1); 
+        this.civs = new Uint16Array(this.maxHexID + 1);
+        this.soldiers = new Uint16Array(this.maxHexID + 1);
+        this.buildings = new Uint8Array(this.maxHexID + 1);
 
-        // Heatmaps
-        this.influenceMap = new Uint8Array((this.maxHexID + 1) * 4); 
-
-        // Specifies which player controls a given tile and to what extent
-        // playerID: first 6 bits, status: last 2 bits (occupied, influenced, owned, developed)
-        // occupied: has units stationed there, but not owned or influenced
-        // influenced: owned land extends influence there
-        // owned: owns tile, but not developed
-        // developed: owned and developed tile
-        this.tileOwners = new Uint8Array(this.maxHexID + 1); 
-        
         // Data shown to user per tile. Varies based on selected map overlay.
-        this.tileDisplay = new Uint16Array(this.maxHexID + 1).fill(0); 
-    
+        this.tileDisplay = new Uint16Array(this.maxHexID + 1); 
+
+        // Map Overlay Colors
+        this.influenceRGB = new Uint8Array((this.maxHexID + 1) * 4); 
+
         this.generateElevations();
         this.createSelectGraphic();
         this.generateTileNames();
@@ -95,6 +83,41 @@ export class Map extends HexGrid {
         // Use bitwise AND with a mask to get the last bits
         let last = uint8 & ((1 << lastBits) - 1);
         return [first, last];
+    }
+
+    getTileOwnerAndStatus(hexID) {
+        return this.splitUint8(this.tileOwners[hexID], 6);
+    }
+
+    getTileColor( hexID, type ) {
+        let r,g,b,a = 0;
+        switch(type) {
+            case "influence":
+                r = this.influenceRGB[hexID * 4];
+                g = this.influenceRGB[hexID * 4 + 1];
+                b = this.influenceRGB[hexID * 4 + 2];
+                a = this.influenceRGB[hexID * 4 + 3];
+                break;
+            case y:
+                // code block
+                break;
+            default:
+            // code block
+        }
+        return {r: r , g: g, b: b, a: a};
+    }
+
+    updateInfluenceMap() {
+        this.influenceRGB.fill(0);
+        for (let hexID = 0; hexID <= this.maxHexID; hexID++){
+            if (this.owner[hexID]) {
+                let baseColor = this.players[this.owner[hexID]].color;
+                this.influenceRGB[hexID * 4] = baseColor.red;
+                this.influenceRGB[hexID * 4 + 1] = baseColor.green;
+                this.influenceRGB[hexID * 4 + 2] = baseColor.blue;
+                this.influenceRGB[hexID * 4 + 3] = this.influence[hexID];
+            }
+        }
     }
 
     createSelectGraphic() {
@@ -230,7 +253,7 @@ export class Map extends HexGrid {
         }
         this.selectedhexID = hexID;
         this.selectGraphic.setPosition(this.hexCenters[hexID].x, this.hexCenters[hexID].y);
-        setTileDlgLabels( this.tileNames[hexID], hexID, this.elevations[hexID], this.civs[hexID], 2 )
+        updateTileDlg( this, hexID )
         fadeIn(tileDlg);
         return hexID;
     }
