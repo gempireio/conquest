@@ -18,9 +18,10 @@ export class Player {
     static playerNames = new Set();
     static startTiles = new Set();
 
-    constructor( playerID, name, color, startTile, STARTING_UNITS, map ) {
+    constructor( playerID, name, color, startTile, civs, map ) {
         this.playerID = playerID;
         this.name = name;
+        this.playerLevel = "Clan";
         this.color = color; 
         this.map = map;  
         this.startTile = startTile;
@@ -31,11 +32,13 @@ export class Player {
         this.soldiers = new Uint16Array(map.maxHexID + 1);
         this.buildings = new Uint8Array(map.maxHexID + 1);
 
-        this.civs[this.startTile] = STARTING_UNITS;
-        map.civs[this.startTile] = STARTING_UNITS;
+        this.civs[this.startTile] = civs;
+        map.civs[this.startTile] = civs;
         map.owner[this.startTile] = playerID;
-        map.influence[this.startTile] = 100;
+        this.influence = new Uint8Array(map.maxHexID + 1); 
         
+        this.setInfluence( this.startTile, this.calculateTileInfluence( civs, 0) );
+
         // Resources
         this.food = 0;
         this.gems = 0;
@@ -52,10 +55,28 @@ export class Player {
         this.name = name;
         Player.playerNames.add(name);
 
+        map.mapOverlays['influence'].addLayer(playerID, color, this.influence);
+
         this.occupiedTiles = new Set();
         this.developedTiles = new Set();
     }
 
+    calculateTileInfluence( units, buildings ){
+        let influence = 30 * buildings + units + 200;
+        // if (owned) influence += 100;
+        if ( influence > 255 ) influence = 255;
+        return influence
+    }
+
+    setInfluence( middleTileID, middleValue ){
+        this.influence[middleTileID] = middleValue;
+        let neighbors = this.map.neighborsOf( middleTileID );
+
+        neighbors.forEach((tileID) => {
+            this.influence[tileID] = middleValue / 2;
+        });
+    }
+    
     generatePlayerName() {
         return PRE[Math.floor(Math.random()*PRE.length)] + MID[Math.floor(Math.random()*MID.length)] + SUFF[Math.floor(Math.random()*SUFF.length)];
     }

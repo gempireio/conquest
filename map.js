@@ -1,4 +1,5 @@
 import {HexGrid} from './hex_grid.js';
+import {MapOverlay} from './map_overlay.js';
 const tileDlg = document.getElementById("tile-dlg");
 
 // District Names
@@ -38,12 +39,14 @@ export class Map extends HexGrid {
         this.civs = new Uint16Array(this.maxHexID + 1);
         this.soldiers = new Uint16Array(this.maxHexID + 1);
         this.buildings = new Uint8Array(this.maxHexID + 1);
+        this.influenceRGB = new Uint8Array((this.maxHexID + 1) * 4); 
 
         // Data shown to user per tile. Varies based on selected map overlay.
         this.tileDisplay = new Uint16Array(this.maxHexID + 1); 
 
-        // Map Overlay Colors
-        this.influenceRGB = new Uint8Array((this.maxHexID + 1) * 4); 
+        this.mapOverlays = {
+            influence: new MapOverlay( this, "influence", 10, 0.7 )
+        }
 
         this.generateElevations();
         this.createSelectGraphic();
@@ -169,6 +172,22 @@ export class Map extends HexGrid {
         }        
     }
 
+    createMapOverlays() {
+        this.mapOverlays = [];
+        this.mapOverlays.push(new MapOverlay( scene, name, lowColor, highColor, opacity, data ));
+        // Create graphics objects
+        this.influenceMap = this.scene.add.graphics(); 
+        this.foodMap = this.scene.add.graphics(); 
+        this.civsMap = this.scene.add.graphics(); 
+        this.soldiersMap = this.scene.add.graphics();
+        
+        // Map Overlay Colors
+        this.influenceRGB = new Uint8Array((this.maxHexID + 1) * 4); 
+
+
+        drawHexagonFill(this.influenceMap, x, y, color = 0xc1d1d9, alpha = 1);
+    }
+
     generateElevations() {
         this.elevationGraphics = this.scene.add.graphics(); 
 
@@ -255,6 +274,7 @@ export class Map extends HexGrid {
         this.selectGraphic.setPosition(this.hexCenters[hexID].x, this.hexCenters[hexID].y);
         updateTileDlg( this, hexID )
         fadeIn(tileDlg);
+        console.log(hexID);
         return hexID;
     }
 
@@ -346,16 +366,17 @@ export class Map extends HexGrid {
             default:
                 // code block
         }
-        this.drawMap();
+        this.draw();
     }
 
-    drawMap() {
+    draw() {
         for (let hexID = 0; hexID <= this.maxHexID; hexID++) {
             this.drawLandHexagon(hexID, this.elevations[hexID] ,this.hexCenters[hexID].x, this.hexCenters[hexID].y);   
             if (this.showGrid) this.drawHexagonBorder(this.elevationGraphics, this.hexCenters[hexID].x, this.hexCenters[hexID].y);
             if ( this.tileDisplay[hexID] ) {
                 let text = this.tileDisplay[hexID].toString();
-                this.scene.add.text(this.hexCenters[hexID].x - (text.length * 10), this.hexCenters[hexID].y - 20, text, { font: '35px monospace', fill: '#b1e1f6' });
+                let textGraphic = this.scene.add.text(this.hexCenters[hexID].x - (text.length * 10), this.hexCenters[hexID].y - 20, text, { font: '35px monospace', fill: '#b1e1f6' });
+                // textGraphic.setDepth(10);
             }
         }
     }

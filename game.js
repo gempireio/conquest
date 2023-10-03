@@ -9,7 +9,7 @@ const MAX_ZOOM = 4;
 const MIN_ZOOM = 6 / GRID_LAYERS;
 const SHOW_GRID = URL_PARAMS.get('grid') ? URL_PARAMS.get('grid') : false;
 const SHOW_DEBUG_TEXT = URL_PARAMS.get('debug') ? URL_PARAMS.get('debug') : false;
-const STARTING_UNITS = 10;
+const STARTING_UNITS = 15;
 const TURN_TIME = 30;
 
 let debugObj;
@@ -184,7 +184,11 @@ class Game extends Phaser.Scene {
     }
     
     updateGraphics() {
-        map.drawMap();
+        map.draw();
+        let mapOverlays = Object.values(map.mapOverlays);
+        mapOverlays.forEach((mapOverlay) => {
+            mapOverlay.draw();
+        });
     }
 
     zoomUpdate(zoomDelta) {
@@ -209,7 +213,7 @@ class Game extends Phaser.Scene {
                 startTile = Math.round(map.randHexID() / 3);
             } while ( map.elevations[startTile] <= map.seaLevel);
 
-            this.players.push( new Player(i, '', Phaser.Display.Color.RandomRGB(30,200), startTile, STARTING_UNITS,  map) );
+            this.players.push( new Player(i, '', Phaser.Display.Color.RandomRGB(30,200), startTile, map.randInt(STARTING_UNITS - 2, STARTING_UNITS + 2),  map) );
         }
         map.players = this.players;
         map.updateInfluenceMap();
