@@ -114,7 +114,7 @@ export class Map extends HexGrid {
         this.influenceRGB.fill(0);
         for (let hexID = 0; hexID <= this.maxHexID; hexID++){
             if (this.owner[hexID]) {
-                let baseColor = this.players[this.owner[hexID]].color;
+                let baseColor = Player.players[this.owner[hexID]].color;
                 this.influenceRGB[hexID * 4] = baseColor.red;
                 this.influenceRGB[hexID * 4 + 1] = baseColor.green;
                 this.influenceRGB[hexID * 4 + 2] = baseColor.blue;

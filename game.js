@@ -66,8 +66,8 @@ class Game extends Phaser.Scene {
             pointer.lastClick = this.time.now;
             pointer.lastDownX = pointer.worldX;
             pointer.lastDownY = pointer.worldY;
-            
-            let hexID = map.selectAt(pointer.worldX, pointer.worldY, true);
+
+            let hexID = map.selectAt(pointer.worldX, pointer.worldY, true);          
         });
     
         // Mouse move event
@@ -110,7 +110,7 @@ class Game extends Phaser.Scene {
         cam.setRoundPixels(true);
 
         console.log("Create Players and game objects");
-        this.createPlayers(2 + Math.round(GRID_LAYERS/10));
+        this.createPlayers(2 + Math.round(GRID_LAYERS/10), 1 + Math.round(GRID_LAYERS/30));
 
         console.log("draw graphics");
         this.updateGraphics();
@@ -143,9 +143,9 @@ class Game extends Phaser.Scene {
             ease: 'Bounce.Out'
         } 
         this.tweens.add(tweenConfig);
-        cam.pan( this.players[1].startPosition.x, this.players[1].startPosition.y, 1500, Phaser.Math.Easing.Back.Out, true );  
+        let startTile = this.humanPlayer.highestUnitTile();
+        cam.pan( startTile.x, startTile.y, 1500, Phaser.Math.Easing.Back.Out, true );  
         cam.shake(1500, 0.004);
-
         this.lastZoomUpdate = this.time.now;    
         fadeOutLoadingScreen();    
     }
@@ -205,18 +205,22 @@ class Game extends Phaser.Scene {
         this.lastZoomUpdate = this.time.now;
     }
 
-    createPlayers( playerCount ) {
-        for ( let i = 1; i <= playerCount; i++){
-            let startTile;
-            // Set start position of player on Land
-            do {
-                startTile = Math.round(map.randHexID() / 3);
-            } while ( map.elevations[startTile] <= map.seaLevel);
+    selectTile(pointer) {
+        if(pointer.isDown) {
+            map.deselect();      
+        } else {
+            let hexID = map.selectAt(pointer.worldX, pointer.worldY, true);
+        }      
+    }
 
-            this.players.push( new Player(i, '', Phaser.Display.Color.RandomRGB(30,200), startTile, map.randInt(STARTING_UNITS - 2, STARTING_UNITS + 2),  map) );
+    createPlayers( playerCount, startTiles ) {
+        for ( let i = 0; i < playerCount; i++){
+            new Player(map, STARTING_UNITS, startTiles);
         }
         map.players = this.players;
         map.updateInfluenceMap();
+        this.humanPlayer = Player.chooseHumanPlayer();
+        console.log(this.humanPlayer);
     }
 }
 

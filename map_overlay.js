@@ -34,7 +34,7 @@ export class MapOverlay {
         this.graphic.fillPoints(hexagon.points, true);
     }
 
-    addLayer(id, color, values) {
+    setLayer(id, color, values) {
         this.colors[id] = color;
         this.values[id] = values;
     }
@@ -54,7 +54,6 @@ export class MapOverlay {
             return;
         }
         this.graphic.clear();
-        // this.graphic = map.scene.add.graphics(); 
         for (let i = 0; i < this.colors.length; i++) {
             if(this.values[i]) {
                 for (let hexID = 0; hexID <= this.map.maxHexID; hexID++) {
