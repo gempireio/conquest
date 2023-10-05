@@ -53,7 +53,8 @@ export class Player {
         this.chooseStartTiles(startingUnits, startTiles);
         this.setPlayerName();
         this.playerLevel = "Clan";
-        this.color = Phaser.Display.Color.RandomRGB(30,200);        
+        this.color = Phaser.Display.Color.RandomRGB(30,200);     
+        map.mapOverlays['influence'].setLayer(this.playerID, this.color, this.influence);
     }
 
     calculateTileInfluence( units, buildings ){
@@ -66,9 +67,10 @@ export class Player {
     setInfluence( middleTileID, middleValue ){
         this.influence[middleTileID] = middleValue;
         let neighbors = this.map.neighborsOf( middleTileID );
-
         neighbors.forEach((tileID) => {
-            this.influence[tileID] = middleValue / 2;
+            if( this.influence[tileID] < middleValue / 2) {
+                this.influence[tileID] = middleValue / 2;
+            }         
         });
     }
 
@@ -76,16 +78,19 @@ export class Player {
         this.civs[this.startTile] =
         this.captureTile(this.startTile);
 
+        // Pick tile not already taken
         for (let i = 0; i < startTiles; i++){
             let startTile;
             do {
-                startTile = Math.round(this.map.randHexID() / 3);
+                startTile = Math.round(this.map.randHexID() / 3);           
             } while (this.map.elevations[startTile] <= this.map.seaLevel || Player.allOwnedTiles.has(startTile));
             Player.allOwnedTiles.add(startTile);
             this.ownedTiles.add(startTile);
             this.map.generateTileName(startTile);
             this.captureTile(startTiles);
         }
+
+        // Add civs to tile
         for (const tileID of this.ownedTiles) {
             this.civs[tileID] = Math.ceil(Math.random() * units/startTiles*2) + 1;
         }
@@ -112,7 +117,7 @@ export class Player {
 
     captureTile(tileID) {
         this.map.owner[tileID] = this.playerID;    
-        this.setInfluence( this.startTile, this.calculateTileInfluence( this.civs[tileID], 0) ); 
+        this.setInfluence( tileID, this.calculateTileInfluence( this.civs[tileID], 0) ); 
         this.map.mapOverlays['influence'].setLayer(this.playerID, this.color, this.influence);
     }
 

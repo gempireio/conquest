@@ -48,7 +48,7 @@ export class MapOverlay {
         this.graphic.setAlpha(alpha);
     }
 
-    draw() {
+    draw() {      
         if (!this.active) {
             this.graphic.visible = false;
             return;

@@ -3,7 +3,7 @@ import {Player} from './player.js';
 import {Debug} from './debug.js';
 
 const URL_PARAMS = new URLSearchParams(window.location.search);
-const GRID_LAYERS = URL_PARAMS.get('l') ? parseInt(URL_PARAMS.get('l')) : 60;
+const GRID_LAYERS = Math.max( 5, URL_PARAMS.get('l') ? parseInt(URL_PARAMS.get('l')) : 60 );
 const SEA_LEVEL = URL_PARAMS.get('sl') ? parseInt(URL_PARAMS.get('sl')) : 35;
 const MAX_ZOOM = 4;
 const MIN_ZOOM = 6 / GRID_LAYERS;
@@ -25,7 +25,6 @@ class Game extends Phaser.Scene {
 
     constructor () { 
         super({ key: 'game', active: true });
-        this.players = [0];
     }
 
     preload() { 
@@ -110,7 +109,7 @@ class Game extends Phaser.Scene {
         cam.setRoundPixels(true);
 
         console.log("Create Players and game objects");
-        this.createPlayers(2 + Math.round(GRID_LAYERS/10), 1 + Math.round(GRID_LAYERS/30));
+        this.createPlayers(Math.max(2, Math.round(GRID_LAYERS/15)), Math.max(1, Math.round(GRID_LAYERS/20)));
 
         console.log("draw graphics");
         this.updateGraphics();
@@ -205,22 +204,13 @@ class Game extends Phaser.Scene {
         this.lastZoomUpdate = this.time.now;
     }
 
-    selectTile(pointer) {
-        if(pointer.isDown) {
-            map.deselect();      
-        } else {
-            let hexID = map.selectAt(pointer.worldX, pointer.worldY, true);
-        }      
-    }
-
     createPlayers( playerCount, startTiles ) {
         for ( let i = 0; i < playerCount; i++){
             new Player(map, STARTING_UNITS, startTiles);
         }
-        map.players = this.players;
-        map.updateInfluenceMap();
         this.humanPlayer = Player.chooseHumanPlayer();
-        console.log(this.humanPlayer);
+        map.players = Player.players;
+        // map.updateInfluenceMap();
     }
 }
 

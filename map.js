@@ -1,5 +1,6 @@
 import {HexGrid} from './hex_grid.js';
 import {MapOverlay} from './map_overlay.js';
+import {Player} from './player.js';
 const tileDlg = document.getElementById("tile-dlg");
 
 // District Names
@@ -45,7 +46,7 @@ export class Map extends HexGrid {
         this.tileDisplay = new Uint16Array(this.maxHexID + 1); 
 
         this.mapOverlays = {
-            influence: new MapOverlay( this, "influence", 10, 0.7 )
+            influence: new MapOverlay( this, "influence", 100, 0.6 )
         }
 
         this.generateElevations();
@@ -112,13 +113,13 @@ export class Map extends HexGrid {
 
     updateInfluenceMap() {
         this.influenceRGB.fill(0);
-        for (let hexID = 0; hexID <= this.maxHexID; hexID++){
-            if (this.owner[hexID]) {
-                let baseColor = Player.players[this.owner[hexID]].color;
-                this.influenceRGB[hexID * 4] = baseColor.red;
-                this.influenceRGB[hexID * 4 + 1] = baseColor.green;
-                this.influenceRGB[hexID * 4 + 2] = baseColor.blue;
-                this.influenceRGB[hexID * 4 + 3] = this.influence[hexID];
+        for (let tileID = 0; tileID <= this.maxHexID; tileID++){
+            if (this.owner[tileID]) {
+                let baseColor = Player.players[this.owner[tileID]].color;
+                this.influenceRGB[tileID * 4] = baseColor.red;
+                this.influenceRGB[tileID * 4 + 1] = baseColor.green;
+                this.influenceRGB[tileID * 4 + 2] = baseColor.blue;
+                this.influenceRGB[tileID * 4 + 3] = this.influence[tileID];
             }
         }
     }
