@@ -66,10 +66,10 @@ export class Map extends HexGrid {
     }
 
     /**
-     * Generate a random hexID.
+     * Generate a random tileID.
      * @return {number} A random hexadecimal ID.
      */
-    randHexID() {
+    randtileID() {
         return this.randInt(0, this.maxHexID);
     }
 
@@ -89,26 +89,20 @@ export class Map extends HexGrid {
         return [first, last];
     }
 
-    getTileOwnerAndStatus(hexID) {
-        return this.splitUint8(this.tileOwners[hexID], 6);
+    getTileOwnerAndStatus(tileID) {
+        return this.splitUint8(this.tileOwners[tileID], 6);
     }
 
-    getTileColor( hexID, type ) {
-        let r,g,b,a = 0;
-        switch(type) {
-            case "influence":
-                r = this.influenceRGB[hexID * 4];
-                g = this.influenceRGB[hexID * 4 + 1];
-                b = this.influenceRGB[hexID * 4 + 2];
-                a = this.influenceRGB[hexID * 4 + 3];
-                break;
-            case y:
-                // code block
-                break;
-            default:
-            // code block
+    getTileColor( tileID, type ) {
+        return Player.players[this.owner[tileID]].color
+    }
+
+    getOwnerColor( tileID ) {
+        let player = Player.players[this.owner[tileID]];
+        if (player) {
+            return player.color
         }
-        return {r: r , g: g, b: b, a: a};
+        return {r: 0, g: 0, b: 0, a: 0};
     }
 
     updateInfluenceMap() {
@@ -127,7 +121,7 @@ export class Map extends HexGrid {
     createSelectGraphic() {
         const hexagon = new Phaser.Geom.Polygon(this.hexagonPoints);
         const color = 0xc1d1ff;
-        this.selectedhexID = -1;
+        this.selectedtileID = -1;
         this.selectGraphic = this.scene.add.graphics();   
         this.selectGraphic.fillStyle(color, 0.1);
         this.selectGraphic.fillPoints(hexagon.points, true);  
@@ -139,21 +133,21 @@ export class Map extends HexGrid {
     generateTileNames() {
         let length = this.maxHexID + 1;
         this.tileNames = new Array(length);
-        for (let hexID = 0; hexID < length; hexID++){
-            if ( this.elevations[hexID] <= this.seaLevel ) {
-                this.tileNames[hexID] = "Ocean";
-            } else if (this.elevations[hexID] < 100) {
-                this.tileNames[hexID] = "Plain";
-            } else if (this.elevations[hexID] < 150) {
-                this.tileNames[hexID] = "Hill";
+        for (let tileID = 0; tileID < length; tileID++){
+            if ( this.elevations[tileID] <= this.seaLevel ) {
+                this.tileNames[tileID] = "Ocean";
+            } else if (this.elevations[tileID] < 100) {
+                this.tileNames[tileID] = "Plain";
+            } else if (this.elevations[tileID] < 150) {
+                this.tileNames[tileID] = "Hill";
             } else {
-                this.tileNames[hexID] = "Mountain";
+                this.tileNames[tileID] = "Mountain";
             }
         }       
     }
 
-    generateTileName(hexID) {
-        this.tileNames[hexID] = PRE[Math.floor(Math.random()*PRE.length)] + MID[Math.floor(Math.random()*MID.length)] + SUFF[Math.floor(Math.random()*SUFF.length)];   
+    generateTileName(tileID) {
+        this.tileNames[tileID] = PRE[Math.floor(Math.random()*PRE.length)] + MID[Math.floor(Math.random()*MID.length)] + SUFF[Math.floor(Math.random()*SUFF.length)];   
     }
 
     /**
@@ -161,15 +155,15 @@ export class Map extends HexGrid {
      */
     smoothElevations(iterations) {
         for (let i = 0; i <= iterations; i++) {
-            let hexID = this.randInt(0, this.maxHexID);
-            let total = this.elevations[hexID];
+            let tileID = this.randInt(0, this.maxHexID);
+            let total = this.elevations[tileID];
             let count = 1;
-            let neighborIds = this.neighborsOf(hexID);
+            let neighborIds = this.neighborsOf(tileID);
             for (let j = 0; j < neighborIds.length; j++){
                 total += this.elevations[neighborIds[j]];
                 count++;
             }
-            this.elevations[hexID] = Math.round(total/count);
+            this.elevations[tileID] = Math.round(total/count);
         }        
     }
 
@@ -196,13 +190,13 @@ export class Map extends HexGrid {
         // Tend towards 0 (ocean) at edges and 255 (fresh water, mountains) at center
         let currentValue = this.randInt(200,255);
         this.elevations[0] = this.elevations[1] = currentValue;
-        for (let hexID = 2; hexID <= this.maxHexID; hexID++) {
-            let currentLayer = this.layerOf(hexID);  
-            let neighborIds = this.neighborsOf(hexID);
+        for (let tileID = 2; tileID <= this.maxHexID; tileID++) {
+            let currentLayer = this.layerOf(tileID);  
+            let neighborIds = this.neighborsOf(tileID);
             currentValue = (currentValue + this.elevations[Math.min(...neighborIds)] + this.elevations[Math.min(...neighborIds) + 1]) / 3 + this.randInt(-47,40);
             currentValue = Math.round((0.99 * currentValue) + (0.01 * 255 * (1 - (currentLayer / (this.layers))))); // Tend towards 0 at edges.
             // for (let neighborId = 0; neighborId < neighborIds.length; neighborId++){
-            //     // if ( neighborId < hexID ) {
+            //     // if ( neighborId < tileID ) {
             //     //     this.elevations[neighborId] = ( 0.01 * this.elevations[neighborId] ) + ( 0.99 * currentValue );
             //     //     currentValue = ( 0.1 * this.elevations[neighborId] ) + ( 0.9 * currentValue );
             //     // }
@@ -210,27 +204,27 @@ export class Map extends HexGrid {
             
             // Force between 0 and 255
             currentValue = Math.min(Math.max(Math.round(currentValue), 0), 255);
-            this.elevations[hexID] = currentValue;
+            this.elevations[tileID] = currentValue;
     
             // Make outer edges lowest elevation.
-            if (this.layerOf(hexID) >= Math.round(this.layers * 0.9)) {
-                this.elevations[hexID] = Math.min(currentValue, this.seaLevel / 2);
+            if (this.layerOf(tileID) >= Math.round(this.layers * 0.9)) {
+                this.elevations[tileID] = Math.min(currentValue, this.seaLevel / 2);
             }
         }
     
         // // Plains Clusters
         // for (let i = 0; i < this.maxHexID/900; i++) {
-        //     let hexID = this.randInt(0,this.maxHexID/2);
+        //     let tileID = this.randInt(0,this.maxHexID/2);
 
         // }
     
         this.smoothElevations(this.maxHexID);
     
-        for (let hexID = 1; hexID <= this.maxHexID; hexID++) {
-            let neighborIds = this.neighborsOf(hexID);
+        for (let tileID = 1; tileID <= this.maxHexID; tileID++) {
+            let neighborIds = this.neighborsOf(tileID);
             
             // Eliminate solo ocean tiles
-            if (this.elevations[hexID] <= this.seaLevel) { 
+            if (this.elevations[tileID] <= this.seaLevel) { 
                 let lowestNeighborElevation = 255;
                 
                 for (let j = 0; j < neighborIds.length; j++){
@@ -239,15 +233,15 @@ export class Map extends HexGrid {
                     }
                 }
                 if (lowestNeighborElevation > this.seaLevel){
-                    this.elevations[hexID] = lowestNeighborElevation;
+                    this.elevations[tileID] = lowestNeighborElevation;
                 }
             }
 
             // Make inner ocean tiles connect to outside ocean
-            if (this.elevations[hexID] <= this.seaLevel) { 
+            if (this.elevations[tileID] <= this.seaLevel) { 
                 for (let i = 0; i < neighborIds.length; i++){
-                    if ( neighborIds[i] > hexID ) {
-                        this.elevations[neighborIds[i]] = ( 0.45 * this.elevations[neighborIds[i]] ) + ( 0.45 * this.elevations[hexID] );
+                    if ( neighborIds[i] > tileID ) {
+                        this.elevations[neighborIds[i]] = ( 0.45 * this.elevations[neighborIds[i]] ) + ( 0.45 * this.elevations[tileID] );
                     }
                 }            
             }
@@ -257,31 +251,36 @@ export class Map extends HexGrid {
     }
 
     /**
-     * Sets the selectedhexID to the hexagon that contains the given coordiantes
+     * Sets the selectedtileID to the hexagon that contains the given coordiantes
      *
      * @param {number} x - The x-coordinate of the position.
      * @param {number} y - The y-coordinate of the position.
      * @param {boolean} toggle - Whether to toggle off the selection if already selected
-     * @return {undefined} - The hexID selected.
+     * @return {undefined} - The tileID selected.
      */
     selectAt(x, y, toggle = false) {
         this.selectGraphic.visible = true;
-        let hexID = this.hexIDAtPosition({x: x, y: y});
-        if ( toggle && hexID == this.selectedhexID ) {
+        let tileID = this.hexIDAtPosition({x: x, y: y});
+        let neighbors = this.neighborsOf(tileID);
+        // console.log(tileID, neighbors);
+        if ( neighbors.includes(tileID) ) {
+            console.log("neighbor");
+        }
+        if ( toggle && tileID == this.selectedtileID ) {
             this.deselect();
             return -1;
         }
-        this.selectedhexID = hexID;
-        this.selectGraphic.setPosition(this.hexCenters[hexID].x, this.hexCenters[hexID].y);
-        updateTileDlg( this, hexID )
+        this.selectedtileID = tileID;
+        this.selectGraphic.setPosition(this.hexCenters[tileID].x, this.hexCenters[tileID].y);
+        updateTileDlg( this, Player.players[this.owner[tileID]], tileID )
         fadeIn(tileDlg);
-        console.log(hexID);
-        return hexID;
+        console.log(tileID);
+        return tileID;
     }
 
     deselect() {
         this.selectGraphic.visible = false;
-        this.selectedhexID = -1;   
+        this.selectedtileID = -1;   
         fadeOut(tileDlg);
     }
 
@@ -318,12 +317,12 @@ export class Map extends HexGrid {
 
     /**
      * Draws a filled land hexagon (pointy side up) at given coordinates.
-     * @hexID the hexID of the hexagon to draw
+     * @tileID the tileID of the hexagon to draw
      * @elevation the elevation of the hexagon to draw
      * @param x the center x coordinate to draw to
      * @param y the center y coordinate to draw to
      */
-    drawLandHexagon(hexID, elevation, x, y) {
+    drawLandHexagon(tileID, elevation, x, y) {
         const hexagon = new Phaser.Geom.Polygon(this.hexagonPoints);
         Phaser.Geom.Polygon.Translate(hexagon, x, y);
 
@@ -331,7 +330,7 @@ export class Map extends HexGrid {
         let color;
         if (elevation <= this.seaLevel) { // Ocean
             //color = Phaser.Display.Color.HexStringToColor(this.oceanColor).color;
-            let oceanAlphaHex = 0.9 - (this.layerOf(hexID) / this.layerOf(this.maxHexID) * 1.3 ) // Based on layers
+            let oceanAlphaHex = 0.9 - (this.layerOf(tileID) / this.layerOf(this.maxHexID) * 1.3 ) // Based on layers
             let oceanAlphaCircle = 0.9 - (Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)) / Math.sqrt(Math.pow(this.maxX, 2) + Math.pow(this.maxY, 2)) * 1.5); // Based on distance from center/edges x, y coordinates
             let oceanAlphaElevation = Math.pow(elevation/this.seaLevel, 3); // Based on Elevation
             let oceanAlpha = Math.max( 0, ( oceanAlphaHex * 0.1 ) + ( oceanAlphaCircle * 0.15 ) + ( oceanAlphaElevation * 0.75 ) );
@@ -344,7 +343,7 @@ export class Map extends HexGrid {
         this.elevationGraphics.fillPoints(hexagon.points, true);
     }
 
-    updateTileDisplay( updateData = 'elevation') {
+    updateTileDisplay(updateData = 'elevation') {
         switch(updateData) {
             case 'civs':
                 this.tileDisplay = new Uint16Array(this.civs.buffer);
@@ -356,11 +355,11 @@ export class Map extends HexGrid {
                 // code block
                 break;
             case 'elevation':
-                for (let hexID = 0; hexID <= this.maxHexID; hexID++) {
-                    if ( this.elevations[hexID] > this.seaLevel) {
-                        this.tileDisplay[hexID] = this.elevations[hexID];
+                for (let tileID = 0; tileID <= this.maxHexID; tileID++) {
+                    if ( this.elevations[tileID] > this.seaLevel) {
+                        this.tileDisplay[tileID] = this.elevations[tileID];
                     } else {
-                        this.tileDisplay[hexID] = 0;
+                        this.tileDisplay[tileID] = 0;
                     }
                 }
                 break;
@@ -371,13 +370,14 @@ export class Map extends HexGrid {
     }
 
     draw() {
-        for (let hexID = 0; hexID <= this.maxHexID; hexID++) {
-            this.drawLandHexagon(hexID, this.elevations[hexID] ,this.hexCenters[hexID].x, this.hexCenters[hexID].y);   
-            if (this.showGrid) this.drawHexagonBorder(this.elevationGraphics, this.hexCenters[hexID].x, this.hexCenters[hexID].y);
-            if ( this.tileDisplay[hexID] ) {
-                let text = this.tileDisplay[hexID].toString();
-                let textGraphic = this.scene.add.text(this.hexCenters[hexID].x - (text.length * 10), this.hexCenters[hexID].y - 20, text, { font: '35px monospace', fill: '#b1e1f6' });
-                // textGraphic.setDepth(10);
+        for (let tileID = 0; tileID <= this.maxHexID; tileID++) {
+            this.drawLandHexagon(tileID, this.elevations[tileID] ,this.hexCenters[tileID].x, this.hexCenters[tileID].y);   
+            if (this.showGrid) this.drawHexagonBorder(this.elevationGraphics, this.hexCenters[tileID].x, this.hexCenters[tileID].y);
+            if ( this.tileDisplay[tileID] ) {
+                let text = this.tileDisplay[tileID].toString();
+                let textGraphic = this.scene.add.text(this.hexCenters[tileID].x - (text.length * 10), this.hexCenters[tileID].y - 20, text, { font: '35px monospace', fill: '#b1e1f6' });
+                console.log(textGraphic);
+                // textGraphic.setDepth(100);
             }
         }
     }

@@ -55,7 +55,7 @@ class Game extends Phaser.Scene {
                 let zoom = Math.min(( cam.zoom * 3 + MAX_ZOOM / 3 ) / 2, MAX_ZOOM);
                 cam.pan( pointer.worldX, pointer.worldY, 500, Phaser.Math.Easing.Bounce.Out, true );  
                 cam.zoomTo( zoom, 1000, Phaser.Math.Easing.Bounce.Out, true);   
-                let hexID = map.selectAt(pointer.worldX, pointer.worldY);
+                let tileID = map.selectAt(pointer.worldX, pointer.worldY);
                 pointer.lastClick = this.time.now;
                 pointer.lastDownX = pointer.worldX;
                 pointer.lastDownY = pointer.worldY;
@@ -66,7 +66,7 @@ class Game extends Phaser.Scene {
             pointer.lastDownX = pointer.worldX;
             pointer.lastDownY = pointer.worldY;
 
-            let hexID = map.selectAt(pointer.worldX, pointer.worldY, true);          
+            let tileID = map.selectAt(pointer.worldX, pointer.worldY, true);          
         });
     
         // Mouse move event
@@ -107,8 +107,6 @@ class Game extends Phaser.Scene {
         cam.setBounds(map.minX * 1.025, map.minY * 1.025, map.width * 1.05, map.height * 1.05, true);
         cam.setZoom(MIN_ZOOM);
         cam.setRoundPixels(true);
-
-        console.log("Create Players and game objects");
         this.createPlayers(Math.max(2, Math.round(GRID_LAYERS/15)), Math.max(1, Math.round(GRID_LAYERS/20)));
 
         console.log("draw graphics");
@@ -117,8 +115,8 @@ class Game extends Phaser.Scene {
         // Key down event
         let keyC = this.input.keyboard.addKey('C');
         keyC.on('down', (key) => {
-            if (map.selectedhexID < 0) return;
-            let hexVec = map.hexCenters[map.selectedhexID];
+            if (map.selectedtileID < 0) return;
+            let hexVec = map.hexCenters[map.selectedtileID];
             cam.pan(hexVec.x, hexVec.y, 1000, Phaser.Math.Easing.Back.Out, true)
         });
 
@@ -205,11 +203,11 @@ class Game extends Phaser.Scene {
     }
 
     createPlayers( playerCount, startTiles ) {
+        console.log("creating " + playerCount + " players with " + startTiles + " start tiles each");
         for ( let i = 0; i < playerCount; i++){
             new Player(map, STARTING_UNITS, startTiles);
         }
         this.humanPlayer = Player.chooseHumanPlayer();
-        map.players = Player.players;
         // map.updateInfluenceMap();
     }
 }

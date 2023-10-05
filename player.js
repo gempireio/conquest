@@ -10,21 +10,6 @@ const SUFF = ["", "a", "y", "id", "or", "il", "ex"];
  * Kingdom: > 10000 Population
  * Empire: > 2 Kingdoms
  * 
- * Resources:
- * 0: Gems
- * 1: Food
- * 2: Metal
- * 3: Stone
- * 4: Wood
- * 
- * Metrics:
- * 0: Morale
- * 1: Health
- * 2: totalCivs
- * 3: totalSoldiers
- * 4: totalBuildings
- * 5: totalUnits
- * 
  * Buildings:
  * 0: Barracks
  * 1: Farm
@@ -41,8 +26,8 @@ const SUFF = ["", "a", "y", "id", "or", "il", "ex"];
 export class Player {
     static playerNames = new Set();
     static allOwnedTiles = new Set();
-    static players = [];
     static humanPlayerID = 0;
+    static players = [0];
 
     constructor(map, startingUnits, startTiles) {
         Player.players.push(this);
@@ -50,6 +35,8 @@ export class Player {
         this.map = map; 
         this.ownedTiles = new Set();
         this.createDataArrays();
+        this.initializeResources(startingUnits*3);
+        this.initializeMetrics()
         this.chooseStartTiles(startingUnits, startTiles);
         this.setPlayerName();
         this.playerLevel = "Clan";
@@ -68,40 +55,50 @@ export class Player {
         this.influence[middleTileID] = middleValue;
         let neighbors = this.map.neighborsOf( middleTileID );
         neighbors.forEach((tileID) => {
-            if( this.influence[tileID] < middleValue / 2) {
-                this.influence[tileID] = middleValue / 2;
+            if( this.influence[tileID] < middleValue / 5) {
+                this.influence[tileID] = middleValue / 5;
             }         
         });
     }
 
-    chooseStartTiles(startTiles, units) {
-        this.civs[this.startTile] =
-        this.captureTile(this.startTile);
-
+    chooseStartTiles(units, startTiles) {
         // Pick tile not already taken
         for (let i = 0; i < startTiles; i++){
-            let startTile;
+            let newTileID;
             do {
-                startTile = Math.round(this.map.randHexID() / 3);           
-            } while (this.map.elevations[startTile] <= this.map.seaLevel || Player.allOwnedTiles.has(startTile));
-            Player.allOwnedTiles.add(startTile);
-            this.ownedTiles.add(startTile);
-            this.map.generateTileName(startTile);
-            this.captureTile(startTiles);
+                newTileID = Math.round(this.map.randtileID() / 3);      
+            } while (this.map.elevations[newTileID] <= this.map.seaLevel || Player.allOwnedTiles.has(newTileID));
+            Player.allOwnedTiles.add(newTileID);
+            this.ownedTiles.add(newTileID);
+            this.map.generateTileName(newTileID);
+            this.captureTile(newTileID);
         }
-
+    
         // Add civs to tile
         for (const tileID of this.ownedTiles) {
-            this.civs[tileID] = Math.ceil(Math.random() * units/startTiles*2) + 1;
+            let civs = Math.round(Math.random() * units/startTiles*2) + 1;
+            this.addCivs(tileID, civs);
         }
     }
+
+    addCivs(tileID, civs) {
+        this.civs[tileID] += civs;
+        this.map.civs[tileID] = this.civs[tileID]; 
+    }
+
+    removeCivs(tileID, civs) {
+        this.civs[tileID] -= civs;
+        this.map.civs[tileID] = this.civs[tileID];   
+    }
     
-    setPlayerName() {
-        let name = "";
-        // Set Player Name. Prevent Duplicates.
-        do {
-            if (!name || Player.playerNames.has(name)) name = PRE[Math.floor(Math.random()*PRE.length)] + MID[Math.floor(Math.random()*MID.length)] + SUFF[Math.floor(Math.random()*SUFF.length)];
-        } while ( Player.playerNames.has(name) || name.length < 3 );
+    /**
+     * Set the player name. Prevent Duplicates
+     * @param {string} name - The name to set for the player. Defaults to an empty string so that a new random name is generated.
+     */
+    setPlayerName(name = "") {
+        while ( Player.playerNames.has(name) || name.length < 3 ) {
+            name = PRE[Math.floor(Math.random()*PRE.length)] + MID[Math.floor(Math.random()*MID.length)] + SUFF[Math.floor(Math.random()*SUFF.length)];
+        }
         Player.playerNames.add(name);
         this.name = name;
     }
@@ -110,9 +107,34 @@ export class Player {
         this.civs = new Uint16Array(this.map.maxHexID + 1);
         this.soldiers = new Uint16Array(this.map.maxHexID + 1);
         this.buildings = new Uint8Array(this.map.maxHexID + 1);
-        this.influence = new Uint8Array(this.map.maxHexID + 1); 
+        this.influence = new Uint8Array(this.map.maxHexID + 1);   
+    }
+
+    /**
+    * Resources:
+    * 0: Gems
+    * 1: Food
+    * 2: Metal
+    * 3: Stone
+    * 4: Wood
+     */
+    initializeResources( maxAmount ) {
         this.resoucres = new Uint16Array(5);
-        this.metrics = new Uint16Array(5);
+        for (let i in this.resoucres) {
+            this.resoucres[i] = Math.ceil(Math.random() * maxAmount);
+        }
+    }
+
+    /**
+    * Metrics:
+    * 0: Morale
+    * 1: Health
+    */
+    initializeMetrics() {
+        this.metrics = new Uint16Array(2);
+        for (let i in this.metrics) {
+            this.metrics[i] = 204; // 80%
+        }
     }
 
     captureTile(tileID) {
@@ -144,7 +166,7 @@ export class Player {
     }
 
     static chooseHumanPlayer() {
-        Player.humanPlayerID = Math.floor(Math.random() * (Player.players.length));
+        Player.humanPlayerID = Math.ceil(Math.random() * (Player.players.length - 1));
         return Player.players[Player.humanPlayerID];
     }
 }

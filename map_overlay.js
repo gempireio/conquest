@@ -56,11 +56,11 @@ export class MapOverlay {
         this.graphic.clear();
         for (let i = 0; i < this.colors.length; i++) {
             if(this.values[i]) {
-                for (let hexID = 0; hexID <= this.map.maxHexID; hexID++) {
-                    if (this.values[i][hexID]) {
+                for (let tileID = 0; tileID <= this.map.maxHexID; tileID++) {
+                    if (this.values[i][tileID]) {
                         let color = this.colors[i];
-                        let alpha = Math.sqrt( this.values[i][hexID] / 255 );
-                        this.drawHexagonFill(this.map.hexCenters[hexID].x, this.map.hexCenters[hexID].y, color.color, alpha); 
+                        let alpha = Math.sqrt( this.values[i][tileID] / 255 );
+                        this.drawHexagonFill(this.map.hexCenters[tileID].x, this.map.hexCenters[tileID].y, color.color, alpha); 
                     }           
                 }       
             }

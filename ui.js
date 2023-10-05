@@ -125,12 +125,21 @@ function activeWindow(elmnt) {
     }
 }
 
-function updateTileDlg( map, hexID ) {
-    document.getElementById("tile-name").innerHTML = map.tileNames[hexID];
-    document.getElementById("elevation").innerHTML = map.elevations[hexID];
-    document.getElementById("civs").innerHTML = map.civs[hexID];
-    document.getElementById("soldiers").innerHTML = map.soldiers[hexID];
-    setTileDlgTitleColor(map.getTileColor(hexID, "influence"));
+function updateTileDlg( map, player, tileID ) {
+    if (player) {
+        document.getElementById("tile-name").innerHTML = map.tileNames[tileID];
+        document.getElementById("elevation").innerHTML = map.elevations[tileID];
+        document.getElementById("civs").innerHTML = player.civs[tileID];
+        document.getElementById("soldiers").innerHTML = player.soldiers[tileID];
+        setTileDlgTitleColor(map.getOwnerColor(tileID));
+    } else {
+        document.getElementById("tile-name").innerHTML = map.tileNames[tileID];
+        document.getElementById("elevation").innerHTML = map.elevations[tileID];
+        document.getElementById("civs").innerHTML = 0;
+        document.getElementById("soldiers").innerHTML = 0;
+        setTileDlgTitleColor(map.getOwnerColor(tileID));
+    }
+
 }
 
 function setTileDlgTitleColor(color) {
