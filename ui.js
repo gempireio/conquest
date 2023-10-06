@@ -127,19 +127,15 @@ function activeWindow(elmnt) {
 
 function updateTileDlg( map, player, tileID ) {
     if (player) {
-        document.getElementById("tile-name").innerHTML = map.tileNames[tileID];
-        document.getElementById("elevation").innerHTML = map.elevations[tileID];
         document.getElementById("civs").innerHTML = player.civs[tileID];
         document.getElementById("soldiers").innerHTML = player.soldiers[tileID];
-        setTileDlgTitleColor(map.getOwnerColor(tileID));
     } else {
-        document.getElementById("tile-name").innerHTML = map.tileNames[tileID];
-        document.getElementById("elevation").innerHTML = map.elevations[tileID];
         document.getElementById("civs").innerHTML = 0;
         document.getElementById("soldiers").innerHTML = 0;
-        setTileDlgTitleColor(map.getOwnerColor(tileID));
     }
-
+    document.getElementById("tile-name").innerHTML = map.tileNames[tileID];
+    document.getElementById("elevation").innerHTML = map.elevations[tileID];
+    setTileDlgTitleColor(map.getOwnerColor(tileID));
 }
 
 function setTileDlgTitleColor(color) {
