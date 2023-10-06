@@ -49,11 +49,17 @@ export class MapOverlay {
     }
 
     draw() {      
+        console.log(this);
+        // Hide graphic and return if this mapOverlay is not active
         if (!this.active) {
+            console.log("not active");
             this.graphic.visible = false;
             return;
         }
+
         this.graphic.clear();
+
+        // Iterate through all layers of this mapOverlay and draw each hexagon
         for (let i = 0; i < this.colors.length; i++) {
             if(this.values[i]) {
                 for (let tileID = 0; tileID <= this.map.maxHexID; tileID++) {

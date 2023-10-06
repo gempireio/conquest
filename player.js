@@ -30,19 +30,19 @@ export class Player {
     static players = [0];
 
     constructor(map, startingUnits, startTiles) {
-        Player.players.push(this);
         Player.maxTileID = map.maxHexID;
+        Player.players.push(this);
+        Player.map = map;
         this.playerID = Player.players.length - 1;
-        this.map = map; 
+        this.playerLevel = "Clan"; 
+        this.color = Phaser.Display.Color.RandomRGB(30,200);   
         this.ownedTiles = new Set();
         this.createDataArrays();
         this.initializeResources(startingUnits*3);
         this.initializeMetrics();
         this.chooseStartTiles(startingUnits, startTiles);
         this.setPlayerName();
-        this.playerLevel = "Clan";
-        this.color = Phaser.Display.Color.RandomRGB(30,200);     
-        map.mapOverlays['influence'].setLayer(this.playerID, this.color, this.influence);
+        
     }
 
     calculateTileInfluence( units, buildings ){
@@ -54,7 +54,7 @@ export class Player {
 
     setInfluence( middleTileID, middleValue ){
         this.influence[middleTileID] = middleValue;
-        let neighbors = this.map.neighborsOf( middleTileID );
+        let neighbors = Player.map.neighborsOf( middleTileID );
         neighbors.forEach((tileID) => {
             if( this.influence[tileID] < middleValue / 5) {
                 this.influence[tileID] = middleValue / 5;
@@ -67,11 +67,9 @@ export class Player {
         for (let i = 0; i < startTiles; i++){
             let newTileID;
             do {
-                newTileID = Math.round(this.map.randtileID() / 3);      
-            } while (this.map.elevations[newTileID] <= this.map.seaLevel || Player.allOwnedTiles.has(newTileID));
-            Player.allOwnedTiles.add(newTileID);
-            this.ownedTiles.add(newTileID);
-            this.map.generateTileName(newTileID);
+                newTileID = Math.round(Player.map.randtileID() / 3);      
+            } while (Player.map.elevations[newTileID] <= Player.map.seaLevel || Player.allOwnedTiles.has(newTileID));
+            Player.map.generateTileName(newTileID);
             this.captureTile(newTileID);
         }
     
@@ -93,17 +91,16 @@ export class Player {
     }
 
     moveAllUnits(from, to) {
-        // TODO: Check for conflicts/collisions, and buildings (for ownership)
+        // TODO: Check for conflicts/collisions
         this.civs[to] += this.civs[from];
         this.soldiers[to] += this.soldiers[from];
         this.civs[from] = 0;
         this.soldiers[from] = 0;
         this.ownedTiles.add(to);
         this.ownedTiles.delete(from);
-        this.map.updateTileDisplay('civs');
-        this.map.updateOverLays();
         this.updateOwnershipStatus(from);
         this.updateOwnershipStatus(to);
+        Player.map.updateOverLays();
     }
 
     updateOwnershipStatus(tileID) {
@@ -161,15 +158,19 @@ export class Player {
     }
 
     captureTile(tileID) {
+        Player.allOwnedTiles.add(tileID);
         this.ownedTiles.add(tileID); 
-        this.setInfluence( tileID, this.calculateTileInfluence( this.civs[tileID], 0) ); 
-        this.map.mapOverlays['influence'].setLayer(this.playerID, this.color, this.influence);
+        this.setInfluence( tileID, this.calculateTileInfluence( this.civs[tileID], 0) );   
+        Player.map.mapOverlays['allInfluence'].setLayer(this.playerID, this.color, this.influence);
+        if (Player.getOwnerID(tileID) === Player.humanPlayerID) {
+            Player.map.mapOverlays['playerInfluence'].setLayer(0, this.color, this.influence);
+        }  
     }
 
     randomOwnedTile() {
         let owndedTilesArray = Array.from(this.ownedTiles);    
         let tileID = owndedTilesArray[Math.floor(Math.random() * items.length)];
-        let tilePosition = this.map.hexCenters[tileID];
+        let tilePosition = Player.map.hexCenters[tileID];
         return {tileID: tileID, x: tilePosition.x, y: tilePosition.y}
     }
 
@@ -184,7 +185,7 @@ export class Player {
             }
             this.civs[tileID] = Math.ceil(Math.random() * units/this.ownedTiles.size*2) + 1;
         }
-        let tilePosition = this.map.hexCenters[highestUnitsTileID];
+        let tilePosition = Player.map.hexCenters[highestUnitsTileID];
         return {tileID: highestUnitsTileID, x: tilePosition.x, y: tilePosition.y}
     }
 
@@ -239,5 +240,6 @@ export class Player {
     static chooseHumanPlayer() {
         Player.humanPlayerID = Math.ceil(Math.random() * (Player.players.length - 1));
         Player.humanPlayer = Player.players[Player.humanPlayerID];
+        Player.map.mapOverlays['playerInfluence'].setLayer(0, Player.humanPlayer.color, Player.humanPlayer.influence);
     }
 }

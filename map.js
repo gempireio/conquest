@@ -34,11 +34,9 @@ export class Map extends HexGrid {
         this.elevations = new Uint8Array(this.maxHexID + 1);
         this.landCover = new Uint8Array(this.maxHexID + 1);
 
-        // Data shown to user per tile. Varies based on selected map overlay.
-        this.tileDisplay = new Uint16Array(this.maxHexID + 1); 
-
         this.mapOverlays = {
-            influence: new MapOverlay( this, "influence", 100, 0.6 )
+            allInfluence: new MapOverlay( this, "allInfluence", 10, 0.4 ),
+            playerInfluence: new MapOverlay( this, "playerInfluence", 20, 0.7 )
         }
 
         this.generateElevations();
@@ -103,7 +101,7 @@ export class Map extends HexGrid {
 
     createTextGraphic() {
         this.textGraphic = this.scene.add.graphics(); 
-        //this.textGraphic.setDepth(10);
+        this.textGraphic.setDepth(120);
         this.tileText = Array(this.maxHexID + 1);
     }
 
@@ -252,7 +250,6 @@ export class Map extends HexGrid {
             let neighbors = this.neighborsOf(tileID);
             if ( neighbors.includes(this.selectedtileID) ) {       
                 oldTilePlayer.moveAllUnits(this.selectedtileID, tileID);
-                this.updateOverLays();
             }
         }
 
@@ -327,32 +324,6 @@ export class Map extends HexGrid {
             this.baseMapGraphic.fillStyle(color);
         }
         this.baseMapGraphic.fillPoints(hexagon.points, true);
-    }
-
-    updateTileDisplay(updateData = 'elevation') {
-        switch(updateData) {
-            case 'civs':
-                this.tileDisplay = new Uint16Array(Player.allCivs().buffer);
-                break;
-            case 'soldiers':
-            // code block
-                break;
-            case 'units':
-                // code block
-                break;
-            case 'elevation':
-                for (let tileID = 0; tileID <= this.maxHexID; tileID++) {
-                    if ( this.elevations[tileID] > this.seaLevel) {
-                        this.tileDisplay[tileID] = this.elevations[tileID];
-                    } else {
-                        this.tileDisplay[tileID] = 0;
-                    }
-                }
-                break;
-            default:
-                // code block
-        }
-        this.updateGraphics();
     }
 
     draw() {
