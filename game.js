@@ -104,13 +104,10 @@ class Game extends Phaser.Scene {
         console.log("add cameras");
         // Main Camera
         cam = this.cameras.main;
-        cam.setBounds(map.minX * 1.025, map.minY * 1.025, map.width * 1.05, map.height * 1.05, true);
+        cam.setBounds(map.minX * 1.035, map.minY * 1.035, map.width * 1.07, map.height * 1.07, true);
         cam.setZoom(MIN_ZOOM);
         cam.setRoundPixels(true);
         this.createPlayers(Math.max(2, Math.round(GRID_LAYERS/15)), Math.max(1, Math.round(GRID_LAYERS/20)));
-
-        console.log("draw graphics");
-        this.updateGraphics();
 
         // Key down event
         let keyC = this.input.keyboard.addKey('C');
@@ -130,7 +127,7 @@ class Game extends Phaser.Scene {
                 let scaleFactor = dragScale.scaleFactor;
                 cam.zoom *= scaleFactor;
             }, this);
-            
+
         // Zoom and Fade In Intro
         //cam.fadeIn(3000);
         const tweenConfig = {
@@ -140,11 +137,14 @@ class Game extends Phaser.Scene {
             ease: 'Bounce.Out'
         } 
         this.tweens.add(tweenConfig);
-        let startTile = this.humanPlayer.highestUnitTile();
+        let startTile = Player.humanPlayer.highestUnitTile();
         cam.pan( startTile.x, startTile.y, 1500, Phaser.Math.Easing.Back.Out, true );  
         cam.shake(1500, 0.004);
         this.lastZoomUpdate = this.time.now;    
-        fadeOutLoadingScreen();    
+        fadeOutLoadingScreen();  
+            
+        console.log("draw graphics");
+        map.updateGraphics();
     }
     
     update(timestamp, elapsed) {
@@ -180,13 +180,7 @@ class Game extends Phaser.Scene {
         if (SHOW_DEBUG_TEXT) debugObj.updateDebugText(this);
     }
     
-    updateGraphics() {
-        map.draw();
-        let mapOverlays = Object.values(map.mapOverlays);
-        mapOverlays.forEach((mapOverlay) => {
-            mapOverlay.draw();
-        });
-    }
+
 
     zoomUpdate(zoomDelta) {
         if (zoomDelta == 0) return;
@@ -207,8 +201,7 @@ class Game extends Phaser.Scene {
         for ( let i = 0; i < playerCount; i++){
             new Player(map, STARTING_UNITS, startTiles);
         }
-        this.humanPlayer = Player.chooseHumanPlayer();
-        // map.updateInfluenceMap();
+        Player.chooseHumanPlayer();
     }
 }
 

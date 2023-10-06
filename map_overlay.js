@@ -77,6 +77,4 @@ export class MapOverlay {
         this.active = false;
         this.graphic.visible = false;
     }
-
-
 }

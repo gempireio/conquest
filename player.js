@@ -31,12 +31,13 @@ export class Player {
 
     constructor(map, startingUnits, startTiles) {
         Player.players.push(this);
+        Player.maxTileID = map.maxHexID;
         this.playerID = Player.players.length - 1;
         this.map = map; 
         this.ownedTiles = new Set();
         this.createDataArrays();
         this.initializeResources(startingUnits*3);
-        this.initializeMetrics()
+        this.initializeMetrics();
         this.chooseStartTiles(startingUnits, startTiles);
         this.setPlayerName();
         this.playerLevel = "Clan";
@@ -83,14 +84,36 @@ export class Player {
 
     addCivs(tileID, civs) {
         this.civs[tileID] += civs;
-        this.map.civs[tileID] = this.civs[tileID]; 
+        this.updateOwnershipStatus(tileID);
     }
 
     removeCivs(tileID, civs) {
         this.civs[tileID] -= civs;
-        this.map.civs[tileID] = this.civs[tileID];   
+        this.updateOwnershipStatus(tileID);
     }
-    
+
+    moveAllUnits(from, to) {
+        // TODO: Check for conflicts/collisions, and buildings (for ownership)
+        this.civs[to] += this.civs[from];
+        this.soldiers[to] += this.soldiers[from];
+        this.civs[from] = 0;
+        this.soldiers[from] = 0;
+        this.ownedTiles.add(to);
+        this.ownedTiles.delete(from);
+        this.map.updateTileDisplay('civs');
+        this.map.updateOverLays();
+        this.updateOwnershipStatus(from);
+        this.updateOwnershipStatus(to);
+    }
+
+    updateOwnershipStatus(tileID) {
+        if(this.civs[tileID] + this.soldiers[tileID] + this.buildings[tileID]) {
+            this.ownedTiles.add(tileID);
+        } else {
+            this.ownedTiles.delete(tileID);
+        }
+    }
+
     /**
      * Set the player name. Prevent Duplicates
      * @param {string} name - The name to set for the player. Defaults to an empty string so that a new random name is generated.
@@ -104,10 +127,10 @@ export class Player {
     }
 
     createDataArrays() {
-        this.civs = new Uint16Array(this.map.maxHexID + 1);
-        this.soldiers = new Uint16Array(this.map.maxHexID + 1);
-        this.buildings = new Uint8Array(this.map.maxHexID + 1);
-        this.influence = new Uint8Array(this.map.maxHexID + 1);   
+        this.civs = new Uint16Array(Player.maxTileID + 1);
+        this.soldiers = new Uint16Array(Player.maxTileID + 1);
+        this.buildings = new Uint8Array(Player.maxTileID + 1);
+        this.influence = new Uint8Array(Player.maxTileID + 1);   
     }
 
     /**
@@ -138,7 +161,7 @@ export class Player {
     }
 
     captureTile(tileID) {
-        this.map.owner[tileID] = this.playerID;    
+        this.ownedTiles.add(tileID); 
         this.setInfluence( tileID, this.calculateTileInfluence( this.civs[tileID], 0) ); 
         this.map.mapOverlays['influence'].setLayer(this.playerID, this.color, this.influence);
     }
@@ -165,8 +188,56 @@ export class Player {
         return {tileID: highestUnitsTileID, x: tilePosition.x, y: tilePosition.y}
     }
 
+    static allCivs() {
+        let allCivs = new Uint16Array(Player.maxTileID + 1);
+        for (let playerID = 1; playerID < Player.players.length; playerID++) {
+            for (let tileID = 0; tileID <= Player.maxTileID; tileID++) {
+                allCivs[tileID] += Player.players[playerID].civs[tileID];
+            }
+        }     
+        return allCivs;
+    }
+
+    static allSoldiers() {
+        let allSoldiers = new Uint16Array(Player.maxTileID + 1);
+        for (let playerID = 1; playerID < Player.players.length; playerID++) {
+            for (let tileID = 0; tileID <= Player.maxTileID; tileID++) {
+                allSoldiers[tileID] += Player.players[playerID].soldiers[tileID];
+            }
+        }     
+        return allSoldiers;
+    }
+
+    static allUnits() {
+        let allUnits = new Uint16Array(Player.maxTileID + 1);
+        for (let playerID = 1; playerID < Player.players.length; playerID++) {
+            for (let tileID = 0; tileID <= Player.maxTileID; tileID++) {
+                allUnits[tileID] += Player.players[playerID].civs[tileID] + Player.players[playerID].soldiers[tileID];
+            }
+        }     
+        return allUnits;
+    }
+
+    static getOwnerID(tileID) {
+        for (let playerID = 1; playerID < Player.players.length; playerID++) {
+            if (Player.players[playerID].ownedTiles.has(tileID)) {
+                return playerID;
+            }
+        }
+        return 0;
+    }
+
+    static getOwner(tileID) {
+        for (let playerID = 1; playerID < Player.players.length; playerID++) {
+            if (Player.players[playerID].ownedTiles.has(tileID)) {
+                return Player.players[playerID];
+            }
+        }
+        return 0;
+    }
+
     static chooseHumanPlayer() {
         Player.humanPlayerID = Math.ceil(Math.random() * (Player.players.length - 1));
-        return Player.players[Player.humanPlayerID];
+        Player.humanPlayer = Player.players[Player.humanPlayerID];
     }
 }

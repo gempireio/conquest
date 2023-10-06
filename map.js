@@ -34,14 +34,6 @@ export class Map extends HexGrid {
         this.elevations = new Uint8Array(this.maxHexID + 1);
         this.landCover = new Uint8Array(this.maxHexID + 1);
 
-        // Tile level data
-        this.owner = new Uint8Array(this.maxHexID + 1); 
-        this.influence = new Uint8Array(this.maxHexID + 1); 
-        this.civs = new Uint16Array(this.maxHexID + 1);
-        this.soldiers = new Uint16Array(this.maxHexID + 1);
-        this.buildings = new Uint8Array(this.maxHexID + 1);
-        this.influenceRGB = new Uint8Array((this.maxHexID + 1) * 4); 
-
         // Data shown to user per tile. Varies based on selected map overlay.
         this.tileDisplay = new Uint16Array(this.maxHexID + 1); 
 
@@ -52,7 +44,7 @@ export class Map extends HexGrid {
         this.generateElevations();
         this.createSelectGraphic();
         this.generateTileNames();
-        this.updateTileDisplay('civs');
+        this.createTextGraphic();
     }
 
     /**
@@ -89,33 +81,12 @@ export class Map extends HexGrid {
         return [first, last];
     }
 
-    getTileOwnerAndStatus(tileID) {
-        return this.splitUint8(this.tileOwners[tileID], 6);
-    }
-
-    getTileColor( tileID, type ) {
-        return Player.players[this.owner[tileID]].color
-    }
-
     getOwnerColor( tileID ) {
-        let player = Player.players[this.owner[tileID]];
+        let player = Player.getOwner(tileID);
         if (player) {
-            return player.color
+            return player.color;
         }
         return {r: 0, g: 0, b: 0, a: 0};
-    }
-
-    updateInfluenceMap() {
-        this.influenceRGB.fill(0);
-        for (let tileID = 0; tileID <= this.maxHexID; tileID++){
-            if (this.owner[tileID]) {
-                let baseColor = Player.players[this.owner[tileID]].color;
-                this.influenceRGB[tileID * 4] = baseColor.red;
-                this.influenceRGB[tileID * 4 + 1] = baseColor.green;
-                this.influenceRGB[tileID * 4 + 2] = baseColor.blue;
-                this.influenceRGB[tileID * 4 + 3] = this.influence[tileID];
-            }
-        }
     }
 
     createSelectGraphic() {
@@ -128,6 +99,30 @@ export class Map extends HexGrid {
         this.selectGraphic.lineStyle(3, color, 0.7);    
         this.selectGraphic.strokePoints(hexagon.points, true);
         this.selectGraphic.visible = false;
+    }
+
+    createTextGraphic() {
+        this.textGraphic = this.scene.add.graphics(); 
+        //this.textGraphic.setDepth(10);
+        this.tileText = Array(this.maxHexID + 1);
+    }
+
+    updateTextGraphic() {
+        let civs = Player.allCivs();
+        let soldiers = Player.allSoldiers();
+        for (let tileID = 0; tileID <= this.maxHexID; tileID++) {
+            if (civs[tileID] + soldiers[tileID]) {
+                let text = "C: " + civs[tileID] + "\nS: " + soldiers[tileID];
+                if(this.tileText[tileID]) {
+                    this.tileText[tileID].setText(text);
+                } else {
+                    this.tileText[tileID] = this.scene.add.text(this.hexCenters[tileID].x - 26, this.hexCenters[tileID].y - 22, text, { font: '18px monospace', fill: '#b1e1f6' });
+                }        
+            } else { 
+                // Destroy text graphic object if no civs or soldiers
+                if(this.tileText[tileID]) this.tileText[tileID].destroy();
+            }
+        } 
     }
 
     generateTileNames() {
@@ -167,24 +162,8 @@ export class Map extends HexGrid {
         }        
     }
 
-    createMapOverlays() {
-        this.mapOverlays = [];
-        this.mapOverlays.push(new MapOverlay( scene, name, lowColor, highColor, opacity, data ));
-        // Create graphics objects
-        this.influenceMap = this.scene.add.graphics(); 
-        this.foodMap = this.scene.add.graphics(); 
-        this.civsMap = this.scene.add.graphics(); 
-        this.soldiersMap = this.scene.add.graphics();
-        
-        // Map Overlay Colors
-        this.influenceRGB = new Uint8Array((this.maxHexID + 1) * 4); 
-
-
-        drawHexagonFill(this.influenceMap, x, y, color = 0xc1d1d9, alpha = 1);
-    }
-
     generateElevations() {
-        this.elevationGraphics = this.scene.add.graphics(); 
+        this.baseMapGraphic = this.scene.add.graphics(); 
 
         // First pass: assign every hexagon by incrementing ID (spiral outward) varying land type slightly
         // Tend towards 0 (ocean) at edges and 255 (fresh water, mountains) at center
@@ -252,27 +231,34 @@ export class Map extends HexGrid {
 
     /**
      * Sets the selectedtileID to the hexagon that contains the given coordiantes
-     *
      * @param {number} x - The x-coordinate of the position.
      * @param {number} y - The y-coordinate of the position.
      * @param {boolean} toggle - Whether to toggle off the selection if already selected
-     * @return {undefined} - The tileID selected.
+     * @return {int} - The tileID selected.
      */
     selectAt(x, y, toggle = false) {
         this.selectGraphic.visible = true;
-        let tileID = this.hexIDAtPosition({x: x, y: y});
-        let neighbors = this.neighborsOf(tileID);
-        // console.log(tileID, neighbors);
-        if ( neighbors.includes(tileID) ) {
-            console.log("neighbor");
-        }
+        let tileID = this.hexIDAtPosition({x: x, y: y});        
+        
+        // Deselect if already selected
         if ( toggle && tileID == this.selectedtileID ) {
             this.deselect();
             return -1;
         }
+         
+        // If tile owned by human player
+        let oldTilePlayer = Player.getOwner(this.selectedtileID);   
+        if(oldTilePlayer === Player.humanPlayer) {
+            let neighbors = this.neighborsOf(tileID);
+            if ( neighbors.includes(this.selectedtileID) ) {       
+                oldTilePlayer.moveAllUnits(this.selectedtileID, tileID);
+                this.updateOverLays();
+            }
+        }
+
         this.selectedtileID = tileID;
         this.selectGraphic.setPosition(this.hexCenters[tileID].x, this.hexCenters[tileID].y);
-        updateTileDlg( this, Player.players[this.owner[tileID]], tileID )
+        updateTileDlg( this, Player.getOwner(tileID), tileID );
         fadeIn(tileDlg);
         console.log(tileID);
         return tileID;
@@ -335,18 +321,18 @@ export class Map extends HexGrid {
             let oceanAlphaElevation = Math.pow(elevation/this.seaLevel, 3); // Based on Elevation
             let oceanAlpha = Math.max( 0, ( oceanAlphaHex * 0.1 ) + ( oceanAlphaCircle * 0.15 ) + ( oceanAlphaElevation * 0.75 ) );
             color = Phaser.Display.Color.GetColor32(0, 120, 120);
-            this.elevationGraphics.fillStyle(color, oceanAlpha);
+            this.baseMapGraphic.fillStyle(color, oceanAlpha);
         } else { // Land
             color = Phaser.Display.Color.GetColor(Math.pow(1.018,elevation)+(elevation/3), 178-(elevation/1.45), Math.round(180*Math.pow(0.98,elevation)));
-            this.elevationGraphics.fillStyle(color);
+            this.baseMapGraphic.fillStyle(color);
         }
-        this.elevationGraphics.fillPoints(hexagon.points, true);
+        this.baseMapGraphic.fillPoints(hexagon.points, true);
     }
 
     updateTileDisplay(updateData = 'elevation') {
         switch(updateData) {
             case 'civs':
-                this.tileDisplay = new Uint16Array(this.civs.buffer);
+                this.tileDisplay = new Uint16Array(Player.allCivs().buffer);
                 break;
             case 'soldiers':
             // code block
@@ -366,19 +352,30 @@ export class Map extends HexGrid {
             default:
                 // code block
         }
-        this.draw();
+        this.updateGraphics();
     }
 
     draw() {
+        this.baseMapGraphic.clear();
         for (let tileID = 0; tileID <= this.maxHexID; tileID++) {
             this.drawLandHexagon(tileID, this.elevations[tileID] ,this.hexCenters[tileID].x, this.hexCenters[tileID].y);   
-            if (this.showGrid) this.drawHexagonBorder(this.elevationGraphics, this.hexCenters[tileID].x, this.hexCenters[tileID].y);
-            if ( this.tileDisplay[tileID] ) {
-                let text = this.tileDisplay[tileID].toString();
-                let textGraphic = this.scene.add.text(this.hexCenters[tileID].x - (text.length * 10), this.hexCenters[tileID].y - 20, text, { font: '35px monospace', fill: '#b1e1f6' });
-                console.log(textGraphic);
-                // textGraphic.setDepth(100);
-            }
+            if (this.showGrid) this.drawHexagonBorder(this.baseMapGraphic, this.hexCenters[tileID].x, this.hexCenters[tileID].y);
         }
+        this.updateTextGraphic();
+    }
+
+    updateGraphics() {
+        this.draw();
+        let mapOverlays = Object.values(this.mapOverlays);
+        mapOverlays.forEach((mapOverlay) => {
+            mapOverlay.draw();
+        });
+    }
+
+    updateOverLays() {
+        let mapOverlays = Object.values(this.mapOverlays);
+        mapOverlays.forEach((mapOverlay) => {
+            mapOverlay.draw();
+        });
     }
 }
