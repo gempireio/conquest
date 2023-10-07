@@ -310,9 +310,54 @@ export class Map extends HexGrid {
         Phaser.Geom.Polygon.Translate(hexagon, x, y);
 
         // Set color: background for ocean, gradient based on elevation for land
-        let color;
         if (elevation <= this.seaLevel) { // Ocean
             //color = Phaser.Display.Color.HexStringToColor(this.oceanColor).color;
+            let oceanAlphaHex = 0.9 - (this.layerOf(tileID) / this.layerOf(this.maxHexID) * 1.3 ) // Based on layers
+            let oceanAlphaCircle = 0.9 - (Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)) / Math.sqrt(Math.pow(this.maxX, 2) + Math.pow(this.maxY, 2)) * 1.5); // Based on distance from center/edges x, y coordinates
+            let oceanAlphaElevation = Math.pow(elevation/this.seaLevel, 3); // Based on Elevation
+            let oceanAlpha = Math.max( 0, ( oceanAlphaHex * 0.1 ) + ( oceanAlphaCircle * 0.15 ) + ( oceanAlphaElevation * 0.75 ) );
+            let color = Phaser.Display.Color.GetColor32(5, 90, 100);
+            this.baseMapGraphic.fillStyle(color, oceanAlpha);
+        } else { // Land
+            let r = Math.max(0, elevation * ( 1.5 - (0.01 * elevation)));
+            let g = Math.max(10, elevation * ( 1.9 - (0.007 * elevation) ) + 20);
+            let b = 155 - ( elevation * (1.9 - ( 0.006 * elevation ) ) );
+            
+            // Sand and Dirt Color near coast
+            if (elevation < this.seaLevel + 60) { 
+                let weight = (elevation - this.seaLevel) / 60;
+                r = (r * (weight)) + (150 * (1 - weight));
+                g = (g * (weight)) + (140 * (1 - weight)); 
+                b = (b * (weight)) + (90 * (1 - weight)  );
+            } 
+
+            // Brownish Gray Towards Peaks
+            let weight = elevation / 255;
+            r = (65 * weight) + (r * (1 - weight));
+            g = (55 * weight) + (g * (1 - weight));
+            b = (35 * weight) + (b * (1 - weight));
+
+            let color = Phaser.Display.Color.GetColor(r, g, b);
+            this.baseMapGraphic.fillStyle(color);
+        }
+        this.baseMapGraphic.fillPoints(hexagon.points, true);
+    }
+
+    /**
+     * Backup For Old Elevation HeightMap
+     * Draws a filled land hexagon (pointy side up) at given coordinates.
+     * @tileID the tileID of the hexagon to draw
+     * @elevation the elevation of the hexagon to draw
+     * @param x the center x coordinate to draw to
+     * @param y the center y coordinate to draw to
+     */
+    drawElevationLandHexagon(tileID, elevation, x, y) {      
+        const hexagon = new Phaser.Geom.Polygon(this.hexagonPoints);
+        Phaser.Geom.Polygon.Translate(hexagon, x, y);
+
+        // Set color: background for ocean, gradient based on elevation for land
+        let color;
+        if (elevation <= this.seaLevel) { // Ocean
             let oceanAlphaHex = 0.9 - (this.layerOf(tileID) / this.layerOf(this.maxHexID) * 1.3 ) // Based on layers
             let oceanAlphaCircle = 0.9 - (Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)) / Math.sqrt(Math.pow(this.maxX, 2) + Math.pow(this.maxY, 2)) * 1.5); // Based on distance from center/edges x, y coordinates
             let oceanAlphaElevation = Math.pow(elevation/this.seaLevel, 3); // Based on Elevation
@@ -320,7 +365,11 @@ export class Map extends HexGrid {
             color = Phaser.Display.Color.GetColor32(0, 120, 120);
             this.baseMapGraphic.fillStyle(color, oceanAlpha);
         } else { // Land
-            color = Phaser.Display.Color.GetColor(Math.pow(1.018,elevation)+(elevation/3), 178-(elevation/1.45), Math.round(180*Math.pow(0.98,elevation)));
+            let r = Math.pow(1.018,elevation)+(elevation/3);
+            let g = 178 - (elevation/1.45);
+            let b = Math.round(180*Math.pow(0.98,elevation));
+            let color = Phaser.Display.Color.GetColor(r,g,b);
+            // color.gray(255);
             this.baseMapGraphic.fillStyle(color);
         }
         this.baseMapGraphic.fillPoints(hexagon.points, true);
