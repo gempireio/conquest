@@ -64,9 +64,14 @@ class Game extends Phaser.Scene {
 
             pointer.lastClick = this.time.now;
             pointer.lastDownX = pointer.worldX;
-            pointer.lastDownY = pointer.worldY;
+            pointer.lastDownY = pointer.worldY;     
+        });
 
-            let tileID = map.selectAt(pointer.worldX, pointer.worldY, true);          
+        this.input.on('pointerup', (pointer) => {
+            if (!this.isDragging) {
+                let tileID = map.selectAt(pointer.worldX, pointer.worldY, true);
+            }     
+            this.isDragging = false;          
         });
     
         // Mouse move event
@@ -74,8 +79,10 @@ class Game extends Phaser.Scene {
             // Change cursor if mouse is down
             if (pointer.isDown) {
                 this.input.manager.canvas.style.cursor = 'url("images/gem_scroll_32.png"), move';
+                this.isDragging = true;  
             } else {            
                 this.input.manager.canvas.style.cursor = 'auto';
+                this.isDragging = false;
             }
         });
 
@@ -123,9 +130,11 @@ class Game extends Phaser.Scene {
                 let drag1Vector = dragScale.drag1Vector;
                 cam.scrollX -= drag1Vector.x / cam.zoom;
                 cam.scrollY -= drag1Vector.y / cam.zoom;
+                this.isDragging = true;
             }).on('pinch', function (dragScale) {
                 let scaleFactor = dragScale.scaleFactor;
                 cam.zoom *= scaleFactor;
+                this.isDragging = false;
             }, this);
 
         // Zoom and Fade In Intro

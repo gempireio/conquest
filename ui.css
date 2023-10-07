@@ -1,4 +1,5 @@
 .window {
+	pointer-events: none;
 	position: absolute;
 	width: clamp( 150px + 16vw, 18vw, 300px );
 	margin: clamp( 5px, 2vw, 50px );
@@ -14,6 +15,7 @@
 }
 
 .window-title {
+	pointer-events: auto;
 	font-weight: 550;
 	width: 80%;
 	display: inline-block; 
