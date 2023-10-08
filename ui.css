@@ -36,6 +36,7 @@
 }
 
 .close-button {
+	pointer-events: auto;
 	margin: 5px;
 	color: rgb(240, 200, 210, 0.4);
 	cursor: default;

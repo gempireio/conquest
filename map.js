@@ -390,6 +390,7 @@ export class Map extends HexGrid {
         mapOverlays.forEach((mapOverlay) => {
             mapOverlay.draw();
         });
+        this.updateTextGraphic();
     }
 
     updateOverLays() {

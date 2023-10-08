@@ -56,28 +56,52 @@ export class Player {
         this.influence[middleTileID] = middleValue;
         let neighbors = Player.map.neighborsOf( middleTileID );
         neighbors.forEach((tileID) => {
-            if( this.influence[tileID] < middleValue / 5) {
-                this.influence[tileID] = middleValue / 5;
+            if( this.influence[tileID] < middleValue / 15) {
+                this.influence[tileID] = middleValue / 15;
             }         
         });
     }
 
     chooseStartTiles(units, startTiles) {
-        // Pick tile not already taken
-        for (let i = 0; i < startTiles; i++){
-            let newTileID;
+        // Pick first tile
+        let firstTileID;
+        do {
+            firstTileID = Math.round(Player.map.randtileID() / 3);      
+        } while (Player.map.elevations[firstTileID] <= Player.map.seaLevel || Player.allOwnedTiles.has(firstTileID));
+        this.captureTile(firstTileID);
+
+        // Pick other tile around first tile
+        for (let i = 1; i < startTiles; i++) {
+            let randomTileID;
             do {
-                newTileID = Math.round(Player.map.randtileID() / 3);      
-            } while (Player.map.elevations[newTileID] <= Player.map.seaLevel || Player.allOwnedTiles.has(newTileID));
-            Player.map.generateTileName(newTileID);
-            this.captureTile(newTileID);
+                randomTileID = Player.map.randomHexID( Player.map.hexIDAtPosition( this.avgPosition() ), Player.map.layers/30 + 8 );       
+            } while (Player.map.elevations[randomTileID] <= Player.map.seaLevel || Player.allOwnedTiles.has(randomTileID));
+            this.captureTile(randomTileID);
         }
     
-        // Add civs to tile
+        // Add units to tiles
         for (const tileID of this.ownedTiles) {
-            let civs = Math.round(Math.random() * units/startTiles*2) + 1;
+            let civs = Math.round(Math.random() * (units / startTiles)) + 1;
+            let soldiers = Math.round(Math.random() * (units / startTiles / 3)) + 1;
+            units -= civs + soldiers;
+            startTiles--;
             this.addCivs(tileID, civs);
+            this.addSoldiers(tileID, soldiers);
         }
+    }
+
+    avgPosition() {
+        let totalX = 0;
+        let totalY = 0;
+        let count = 0;
+        for (const tileID of this.ownedTiles) {
+            let tilePosition = Player.map.hexCenters[tileID];
+            totalX += tilePosition.x;
+            totalY += tilePosition.y;
+            count++;
+        } 
+        if (count == 0) return { x: 0, y: 0 };
+        return { x: totalX / count, y: totalY / count };
     }
 
     addCivs(tileID, civs) {
@@ -87,6 +111,16 @@ export class Player {
 
     removeCivs(tileID, civs) {
         this.civs[tileID] -= civs;
+        this.updateOwnershipStatus(tileID);
+    }
+
+    addSoldiers(tileID, soldiers) {
+        this.soldiers[tileID] += soldiers;
+        this.updateOwnershipStatus(tileID);
+    }
+
+    removeSoldiers(tileID, soldiers) {
+        this.soldiers[tileID] -= soldiers;
         this.updateOwnershipStatus(tileID);
     }
 
@@ -160,7 +194,7 @@ export class Player {
     captureTile(tileID) {
         Player.allOwnedTiles.add(tileID);
         this.ownedTiles.add(tileID); 
-        this.setInfluence( tileID, this.calculateTileInfluence( this.civs[tileID], 0) );   
+        this.setInfluence( tileID, this.calculateTileInfluence( this.civs[tileID] + this.soldiers[tileID], 0) );   
         Player.map.mapOverlays['allInfluence'].setLayer(this.playerID, this.color, this.influence);
         if (Player.getOwnerID(tileID) === Player.humanPlayerID) {
             Player.map.mapOverlays['playerInfluence'].setLayer(0, this.color, this.influence);
@@ -183,7 +217,6 @@ export class Player {
                 highestUnits = units;
                 highestUnitsTileID = tileID;
             }
-            this.civs[tileID] = Math.ceil(Math.random() * units/this.ownedTiles.size*2) + 1;
         }
         let tilePosition = Player.map.hexCenters[highestUnitsTileID];
         return {tileID: highestUnitsTileID, x: tilePosition.x, y: tilePosition.y}

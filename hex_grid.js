@@ -31,20 +31,25 @@ export class HexGrid {
         this.hexagonPoints = [0, -2/SQRT3X2*scale, 0.5*scale, -1/SQRT3X2*scale, 0.5*scale, 1/SQRT3X2*scale, 0, 2/SQRT3X2*scale, -0.5*scale, 1/SQRT3X2*scale, -0.5*scale, -1/SQRT3X2*scale];
         
         // Calculate center positions of hexagons
-        this.hexCenters = [];
-        this.directions = [];
         this.calculateHexagonCenters();
 
         // Calculate min and max X and Y values
         this.calculateGridBorders();
     }
 
+    /**
+     * Sets the scale of the HexGrid.
+     * @param {number} scale - the new scale value
+     */
     setScale( scale ){
         this.scale = scale;
         this.calculateHexagonCenters();
     }
 
     calculateHexagonCenters() {
+        this.hexCenters = [];
+        this.directions = [];
+
         // Set direction constants
         const RIGHT = this.vector2(1, 0);
         const UP_RIGHT = this.vector2(0.5, -3/SQRT3X2);
@@ -322,7 +327,6 @@ export class HexGrid {
         }
     }
 
-
     /**
      * The up-right neighbor of the given hexID.
      *
@@ -496,4 +500,14 @@ export class HexGrid {
         return neighbors;
     }
 
+    randomHexID( centerHexID, radius ) {
+        let centerPosition = this.hexCenters[centerHexID];
+        let randomDistance = this.scale * radius * Math.random();
+        let randomDirection = 2 * Math.PI * Math.random();
+        let pickedPosition = {
+            x: centerPosition.x + randomDistance * Math.cos(randomDirection),
+            y: centerPosition.y + randomDistance * Math.sin(randomDirection)
+        };
+        return this.hexIDAtPosition( pickedPosition );
+    }
 }

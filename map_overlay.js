@@ -49,7 +49,6 @@ export class MapOverlay {
     }
 
     draw() {      
-        console.log(this);
         // Hide graphic and return if this mapOverlay is not active
         if (!this.active) {
             console.log("not active");

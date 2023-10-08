@@ -3,20 +3,19 @@ import {Player} from './player.js';
 import {Debug} from './debug.js';
 
 const URL_PARAMS = new URLSearchParams(window.location.search);
-const GRID_LAYERS = Math.max( 5, URL_PARAMS.get('l') ? parseInt(URL_PARAMS.get('l')) : 60 );
+const GRID_LAYERS = Math.max( 6, URL_PARAMS.get('l') ? parseInt(URL_PARAMS.get('l')) : 60 );
 const SEA_LEVEL = URL_PARAMS.get('sl') ? parseInt(URL_PARAMS.get('sl')) : 35;
 const MAX_ZOOM = 4;
 const MIN_ZOOM = 6 / GRID_LAYERS;
 const SHOW_GRID = URL_PARAMS.get('grid') ? URL_PARAMS.get('grid') : false;
 const SHOW_DEBUG_TEXT = URL_PARAMS.get('debug') ? URL_PARAMS.get('debug') : false;
-const STARTING_UNITS = 15;
+const STARTING_UNITS = 30;
 const TURN_TIME = 30;
 
 let debugObj;
 let map;
 let lasTimerReset = 0;
 
-let mapGraphics;
 let cam;
 let screenWidth;
 let screenHeight;
@@ -48,10 +47,10 @@ class Game extends Phaser.Scene {
             this.zoomUpdate(zoomDelta);
         });
     
-        // Click event
+        // Mouse down event
         this.input.on('pointerdown', (pointer) => {
             // Zoom in on double click
-            if( this.time.now - pointer.lastClick < 400 ){   
+            if( this.time.now - pointer.lastClick < 300 ){   
                 let zoom = Math.min(( cam.zoom * 3 + MAX_ZOOM / 3 ) / 2, MAX_ZOOM);
                 cam.pan( pointer.worldX, pointer.worldY, 500, Phaser.Math.Easing.Bounce.Out, true );  
                 cam.zoomTo( zoom, 1000, Phaser.Math.Easing.Bounce.Out, true);   
@@ -59,6 +58,9 @@ class Game extends Phaser.Scene {
                 pointer.lastClick = this.time.now;
                 pointer.lastDownX = pointer.worldX;
                 pointer.lastDownY = pointer.worldY;
+
+                // Treat as dragging to maintain tile selection
+                this.isDragging = true; 
                 return;
             }
 
@@ -67,6 +69,7 @@ class Game extends Phaser.Scene {
             pointer.lastDownY = pointer.worldY;     
         });
 
+        // Mouse up event
         this.input.on('pointerup', (pointer) => {
             if (!this.isDragging) {
                 let tileID = map.selectAt(pointer.worldX, pointer.worldY, true);
@@ -114,7 +117,7 @@ class Game extends Phaser.Scene {
         cam.setBounds(map.minX * 1.035, map.minY * 1.035, map.width * 1.07, map.height * 1.07, true);
         cam.setZoom(MIN_ZOOM);
         cam.setRoundPixels(true);
-        this.createPlayers(Math.max(2, Math.round(GRID_LAYERS/15)), Math.max(1, Math.round(GRID_LAYERS/20)));
+        this.createPlayers(Math.max(2, Math.round(GRID_LAYERS/10) + 1), Math.max(3, Math.round(GRID_LAYERS/30) + 2));
 
         // Key down event
         let keyC = this.input.keyboard.addKey('C');
