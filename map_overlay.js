@@ -51,7 +51,6 @@ export class MapOverlay {
     draw() {      
         // Hide graphic and return if this mapOverlay is not active
         if (!this.active) {
-            console.log("not active");
             this.graphic.visible = false;
             return;
         }
@@ -65,7 +64,7 @@ export class MapOverlay {
                     if (this.values[i][tileID]) {
                         let color = this.colors[i];
                         let alpha = Math.sqrt( this.values[i][tileID] / 255 );
-                        this.drawHexagonFill(this.map.hexCenters[tileID].x, this.map.hexCenters[tileID].y, color.color, alpha); 
+                        this.drawHexagonFill(this.map.hexCenters[tileID].x, this.map.hexCenters[tileID].y, color, alpha); 
                     }           
                 }       
             }

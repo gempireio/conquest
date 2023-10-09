@@ -41,8 +41,7 @@ export class Player {
         this.initializeResources(startingUnits*3);
         this.initializeMetrics();
         this.chooseStartTiles(startingUnits, startTiles);
-        this.setPlayerName();
-        
+        this.setPlayerName();  
     }
 
     // calculateTileInfluence( units, buildings ){
@@ -90,6 +89,9 @@ export class Player {
                 randomTileID = Player.map.randomHexID( Player.map.hexIDAtPosition( this.avgPosition() ), Player.map.layers/30 + 8 );       
             } while (Player.map.elevations[randomTileID] <= Player.map.seaLevel || Player.allOwnedTiles.has(randomTileID));
             this.captureTile(randomTileID);
+            
+            // Lift Fog of War at average Position
+            this.revealTile(Player.map.hexIDAtPosition( this.avgPosition() ));
         }
     
         // Add units to tiles
@@ -137,6 +139,21 @@ export class Player {
         this.updateOwnershipStatus(tileID);
     }
 
+    revealTile(tileID) {
+        this.fogOfWar[tileID] = 0;
+        for (let i = 0; i < 50; i++){
+            let randomTileID = Player.map.randomHexID(tileID, Math.random() * 3);
+            this.fogOfWar[randomTileID] *= 0.9;
+        }     
+        for (let i = 0; i < 100; i++){
+            let randomTileID = Player.map.randomHexID(tileID, Math.random() * 10);
+            this.fogOfWar[randomTileID] *= 0.95;
+        } 
+        if (Player.humanPlayerID === this.playerID) {
+            this.updateFogOfWar();
+        }
+    }
+
     moveAllUnits(from, to) {
         // TODO: Check for conflicts/collisions
         this.civs[to] += this.civs[from];
@@ -147,6 +164,7 @@ export class Player {
         this.ownedTiles.delete(from);
         this.updateOwnershipStatus(from);
         this.updateOwnershipStatus(to);
+        this.revealTile(to);
         Player.map.updateGraphics();
     }
 
@@ -164,10 +182,14 @@ export class Player {
         Player.allOwnedTiles.add(tileID);
         this.ownedTiles.add(tileID); 
         this.updateInfluence(tileID);  
-        Player.map.mapOverlays['allInfluence'].setLayer(this.playerID, this.color, this.influence);
+        Player.map.mapOverlays['allInfluence'].setLayer(this.playerID, this.color.color, this.influence);
         if (Player.getOwnerID(tileID) === Player.humanPlayerID) {
-            Player.map.mapOverlays['humanPlayerInfluence'].setLayer(0, this.color, this.influence);
+            Player.map.mapOverlays['humanPlayerInfluence'].setLayer(0, this.color.color, this.influence);
         }  
+    }
+
+    updateFogOfWar() {
+        Player.map.mapOverlays['fogOfWar'].setLayer(0, 0x030609, this.fogOfWar);
     }
 
     /**
@@ -187,6 +209,7 @@ export class Player {
         this.soldiers = new Uint16Array(Player.maxTileID + 1);
         this.buildings = new Uint8Array(Player.maxTileID + 1);
         this.influence = new Uint8Array(Player.maxTileID + 1);   
+        this.fogOfWar = new Uint8Array(Player.maxTileID + 1).fill(255);
     }
 
     /**
@@ -223,11 +246,12 @@ export class Player {
     captureTile(tileID) {
         Player.allOwnedTiles.add(tileID);
         this.ownedTiles.add(tileID); 
-        this.updateInfluence(tileID);    
-        Player.map.mapOverlays['allInfluence'].setLayer(this.playerID, this.color, this.influence);
+        this.updateInfluence(tileID);   
+        this.revealTile(tileID);
+        Player.map.mapOverlays['allInfluence'].setLayer(this.playerID, this.color.color, this.influence);
         if (Player.getOwnerID(tileID) === Player.humanPlayerID) {
-            Player.map.mapOverlays['humanPlayerInfluence'].setLayer(0, this.color, this.influence);
-        }  
+            Player.map.mapOverlays['humanPlayerInfluence'].setLayer(0, this.color.color, this.influence);
+        }        
     }
 
     randomOwnedTile() {
@@ -302,6 +326,7 @@ export class Player {
     static chooseHumanPlayer() {
         Player.humanPlayerID = Math.ceil(Math.random() * (Player.players.length - 1));
         Player.humanPlayer = Player.players[Player.humanPlayerID];
-        Player.map.mapOverlays['playerInfluence'].setLayer(0, Player.humanPlayer.color, Player.humanPlayer.influence);
+        Player.map.mapOverlays['playerInfluence'].setLayer(0, Player.humanPlayer.color.color, Player.humanPlayer.influence);
+        Player.map.mapOverlays['fogOfWar'].setLayer(0, 0x030609, Player.humanPlayer.fogOfWar);
     }
 }

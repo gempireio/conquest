@@ -36,7 +36,8 @@ export class Map extends HexGrid {
 
         this.mapOverlays = {
             allInfluence: new MapOverlay( this, "allInfluence", 1, 0.5 ),
-            playerInfluence: new MapOverlay( this, "humanPlayerInfluence", 2, 0.8 )
+            playerInfluence: new MapOverlay( this, "humanPlayerInfluence", 2, 0.8 ),
+            fogOfWar: new MapOverlay( this, "fogOfWar", 20, 0.99 )
         }
 
         this.generateElevations();
@@ -97,6 +98,7 @@ export class Map extends HexGrid {
         this.selectGraphic.lineStyle(3, color, 0.7);    
         this.selectGraphic.strokePoints(hexagon.points, true);
         this.selectGraphic.visible = false;
+        this.selectGraphic.setDepth(30);
     }
 
     createTextGraphic() {
@@ -235,9 +237,12 @@ export class Map extends HexGrid {
      * @param {boolean} toggle - Whether to toggle off the selection if already selected
      * @return {int} - The tileID selected.
      */
-    selectAt(x, y, toggle = false) {
+    selectAt(x, y, toggle = false) {       
+        let tileID = this.hexIDAtPosition({x: x, y: y});   
+        if ( Player.humanPlayer.fogOfWar[tileID] > 230) {
+            return;
+        }     
         this.selectGraphic.visible = true;
-        let tileID = this.hexIDAtPosition({x: x, y: y});        
         
         // Deselect if already selected
         if ( toggle && tileID == this.selectedtileID ) {
