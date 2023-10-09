@@ -35,8 +35,8 @@ export class Map extends HexGrid {
         this.landCover = new Uint8Array(this.maxHexID + 1);
 
         this.mapOverlays = {
-            allInfluence: new MapOverlay( this, "allInfluence", 10, 0.4 ),
-            playerInfluence: new MapOverlay( this, "playerInfluence", 20, 0.7 )
+            allInfluence: new MapOverlay( this, "allInfluence", 1, 0.5 ),
+            playerInfluence: new MapOverlay( this, "humanPlayerInfluence", 2, 0.8 )
         }
 
         this.generateElevations();
@@ -101,7 +101,7 @@ export class Map extends HexGrid {
 
     createTextGraphic() {
         this.textGraphic = this.scene.add.graphics(); 
-        this.textGraphic.setDepth(120);
+        this.textGraphic.setDepth(10);
         this.tileText = Array(this.maxHexID + 1);
     }
 
@@ -111,10 +111,11 @@ export class Map extends HexGrid {
         for (let tileID = 0; tileID <= this.maxHexID; tileID++) {
             if (civs[tileID] + soldiers[tileID]) {
                 let text = "C: " + civs[tileID] + "\nS: " + soldiers[tileID];
-                if(this.tileText[tileID]) {
+                if(this.tileText[tileID] && this.tileText[tileID].active) {
                     this.tileText[tileID].setText(text);
                 } else {
                     this.tileText[tileID] = this.scene.add.text(this.hexCenters[tileID].x - 26, this.hexCenters[tileID].y - 22, text, { font: '18px monospace', fill: '#b1e1f6' });
+                    this.tileText[tileID].setDepth(10);
                 }        
             } else { 
                 // Destroy text graphic object if no civs or soldiers
@@ -375,21 +376,17 @@ export class Map extends HexGrid {
         this.baseMapGraphic.fillPoints(hexagon.points, true);
     }
 
-    draw() {
+    drawBaseMap() {
         this.baseMapGraphic.clear();
         for (let tileID = 0; tileID <= this.maxHexID; tileID++) {
             this.drawLandHexagon(tileID, this.elevations[tileID] ,this.hexCenters[tileID].x, this.hexCenters[tileID].y);   
             if (this.showGrid) this.drawHexagonBorder(this.baseMapGraphic, this.hexCenters[tileID].x, this.hexCenters[tileID].y);
         }
-        this.updateTextGraphic();
+        this.baseMapGraphic.generateTexture('baseMap');
     }
 
     updateGraphics() {
-        this.draw();
-        let mapOverlays = Object.values(this.mapOverlays);
-        mapOverlays.forEach((mapOverlay) => {
-            mapOverlay.draw();
-        });
+        this.updateOverLays();
         this.updateTextGraphic();
     }
 

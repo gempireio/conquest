@@ -45,22 +45,35 @@ export class Player {
         
     }
 
-    calculateTileInfluence( units, buildings ){
-        let influence = 30 * buildings + units + 200;
-        // if (owned) influence += 100;
-        if ( influence > 255 ) influence = 255;
-        return influence
-    }
+    // calculateTileInfluence( units, buildings ){
+    //     let influence = 30 * buildings + units + 200;
+    //     // if (owned) influence += 100;
+    //     if ( influence > 255 ) influence = 255;
+    //     return influence
+    // }
 
-    setInfluence( middleTileID, middleValue ){
+    updateInfluence( middleTileID ){
+        let middleValue = Math.min(255, this.buildings[middleTileID] + ( this.civs[middleTileID] * 2 ) + ( this.soldiers[middleTileID] * 3 ));
         this.influence[middleTileID] = middleValue;
         let neighbors = Player.map.neighborsOf( middleTileID );
-        neighbors.forEach((tileID) => {
-            if( this.influence[tileID] < middleValue / 15) {
-                this.influence[tileID] = middleValue / 15;
-            }         
-        });
+
+        // TODO: Fix trail of previously occupied tiles. Erase bordering influence when leaving.
+        // neighbors.forEach((tileID) => {
+        //     if( this.influence[tileID] < middleValue / 12 ) {
+        //         this.influence[tileID] = middleValue / 12;
+        //     }         
+        // });
     }
+
+    // setInfluence( middleTileID, middleValue ) {
+    //     this.influence[middleTileID] = middleValue;
+    //     let neighbors = Player.map.neighborsOf( middleTileID );
+    //     neighbors.forEach((tileID) => {
+    //         if( this.influence[tileID] < middleValue / 15) {
+    //             this.influence[tileID] = middleValue / 15;
+    //         }         
+    //     });
+    // }
 
     chooseStartTiles(units, startTiles) {
         // Pick first tile
@@ -134,15 +147,27 @@ export class Player {
         this.ownedTiles.delete(from);
         this.updateOwnershipStatus(from);
         this.updateOwnershipStatus(to);
-        Player.map.updateOverLays();
+        Player.map.updateGraphics();
     }
 
     updateOwnershipStatus(tileID) {
         if(this.civs[tileID] + this.soldiers[tileID] + this.buildings[tileID]) {
             this.ownedTiles.add(tileID);
+            this.updateInfluence(tileID);  
         } else {
             this.ownedTiles.delete(tileID);
+            this.updateInfluence(tileID);  
         }
+    }
+
+    updateInfluenceOverlay(){
+        Player.allOwnedTiles.add(tileID);
+        this.ownedTiles.add(tileID); 
+        this.updateInfluence(tileID);  
+        Player.map.mapOverlays['allInfluence'].setLayer(this.playerID, this.color, this.influence);
+        if (Player.getOwnerID(tileID) === Player.humanPlayerID) {
+            Player.map.mapOverlays['humanPlayerInfluence'].setLayer(0, this.color, this.influence);
+        }  
     }
 
     /**
@@ -191,13 +216,17 @@ export class Player {
         }
     }
 
+    /**
+     * Capture a tile and update the player's influence without moving units
+     * @param {int} tileID - the ID of the tile to capture
+     */
     captureTile(tileID) {
         Player.allOwnedTiles.add(tileID);
         this.ownedTiles.add(tileID); 
-        this.setInfluence( tileID, this.calculateTileInfluence( this.civs[tileID] + this.soldiers[tileID], 0) );   
+        this.updateInfluence(tileID);    
         Player.map.mapOverlays['allInfluence'].setLayer(this.playerID, this.color, this.influence);
         if (Player.getOwnerID(tileID) === Player.humanPlayerID) {
-            Player.map.mapOverlays['playerInfluence'].setLayer(0, this.color, this.influence);
+            Player.map.mapOverlays['humanPlayerInfluence'].setLayer(0, this.color, this.influence);
         }  
     }
 

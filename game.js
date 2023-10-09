@@ -117,7 +117,7 @@ class Game extends Phaser.Scene {
         cam.setBounds(map.minX * 1.035, map.minY * 1.035, map.width * 1.07, map.height * 1.07, true);
         cam.setZoom(MIN_ZOOM);
         cam.setRoundPixels(true);
-        this.createPlayers(Math.max(2, Math.round(GRID_LAYERS/10) + 1), Math.max(3, Math.round(GRID_LAYERS/30) + 2));
+        this.createPlayers(Math.max(2, Math.round(GRID_LAYERS/10) + 1), Math.max(3, Math.round(Math.pow(1.01, GRID_LAYERS) * 2) + 1));
 
         // Key down event
         let keyC = this.input.keyboard.addKey('C');
@@ -156,6 +156,7 @@ class Game extends Phaser.Scene {
         fadeOutLoadingScreen();  
             
         console.log("draw graphics");
+        map.drawBaseMap();
         map.updateGraphics();
     }
     
