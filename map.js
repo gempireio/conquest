@@ -24,6 +24,7 @@ export class Map extends HexGrid {
     // ocean
 
     constructor( layers, seaLevel, oceanColor, scene ) {
+        // Distance between two tile centers is 100
         super(layers, 100);
         this.seaLevel = seaLevel;
         this.oceanColor = oceanColor;
@@ -254,8 +255,10 @@ export class Map extends HexGrid {
         let oldTilePlayer = Player.getOwner(this.selectedtileID);   
         if(oldTilePlayer === Player.humanPlayer) {
             let neighbors = this.neighborsOf(tileID);
+            // Move Units
             if ( neighbors.includes(this.selectedtileID) ) {       
                 oldTilePlayer.moveAllUnits(this.selectedtileID, tileID);
+                this.setCameraBoundsToFogOfWar();
             }
         }
 
@@ -265,6 +268,15 @@ export class Map extends HexGrid {
         fadeIn(tileDlg);
         console.log(tileID);
         return tileID;
+    }
+
+    setCameraBoundsToFogOfWar() {
+        let bounds = Player.humanPlayer.revealedBounds();
+        let width = bounds.maxX - bounds.minX;
+        let height = bounds.maxY - bounds.minY;
+        let cam = this.scene.cameras.main;
+        cam.minZoom = 1700 / Math.max(width, height);
+        cam.setBounds(bounds.minX * 1.1, bounds.minY * 1.1, width * 1.2, height * 1.2);
     }
 
     deselect() {

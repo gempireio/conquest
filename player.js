@@ -152,6 +152,8 @@ export class Player {
         if (Player.humanPlayerID === this.playerID) {
             this.updateFogOfWar();
         }
+
+        this.revealedBounds()
     }
 
     moveAllUnits(from, to) {
@@ -275,6 +277,22 @@ export class Player {
         return {tileID: highestUnitsTileID, x: tilePosition.x, y: tilePosition.y}
     }
 
+    revealedBounds(){
+        let minX = Infinity;
+        let minY = Infinity;
+        let maxX = -Infinity; 
+        let maxY = -Infinity;
+        for (let tileID = 0; tileID <= Player.maxTileID; tileID++) {
+            if (this.fogOfWar[tileID] < 230) {
+                minX = Player.map.hexCenters[tileID].x < minX ? Player.map.hexCenters[tileID].x : minX; 
+                minY = Player.map.hexCenters[tileID].y < minY ? Player.map.hexCenters[tileID].y : minY;
+                maxX = Player.map.hexCenters[tileID].x > maxX ? Player.map.hexCenters[tileID].x : maxX;
+                maxY = Player.map.hexCenters[tileID].y > maxY ? Player.map.hexCenters[tileID].y : maxY;
+            }
+        }
+        return {minX: minX, minY: minY, maxX: maxX, maxY: maxY};
+    }
+
     static allCivs() {
         let allCivs = new Uint16Array(Player.maxTileID + 1);
         for (let playerID = 1; playerID < Player.players.length; playerID++) {
@@ -327,6 +345,6 @@ export class Player {
         Player.humanPlayerID = Math.ceil(Math.random() * (Player.players.length - 1));
         Player.humanPlayer = Player.players[Player.humanPlayerID];
         Player.map.mapOverlays['playerInfluence'].setLayer(0, Player.humanPlayer.color.color, Player.humanPlayer.influence);
-        Player.map.mapOverlays['fogOfWar'].setLayer(0, 0x030609, Player.humanPlayer.fogOfWar);
+        Player.map.mapOverlays['fogOfWar'].setLayer(0, 0x050810, Player.humanPlayer.fogOfWar);
     }
 }

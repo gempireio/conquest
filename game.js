@@ -114,8 +114,9 @@ class Game extends Phaser.Scene {
         console.log("add cameras");
         // Main Camera
         cam = this.cameras.main;
-        cam.setBounds(map.minX * 1.035, map.minY * 1.035, map.width * 1.07, map.height * 1.07, true);
+        cam.setBounds(map.minX * 1.035, map.minY * 1.035, map.width * 1.07, map.height * 1.07);
         cam.setZoom(MIN_ZOOM);
+        cam.minZoom = MIN_ZOOM;
         cam.setRoundPixels(true);
         this.createPlayers(Math.max(2, Math.round(GRID_LAYERS/10) + 1), Math.max(3, Math.round(Math.pow(1.01, GRID_LAYERS) * 2) + 1));
 
@@ -156,7 +157,8 @@ class Game extends Phaser.Scene {
         fadeOutLoadingScreen();  
             
         console.log("draw graphics");
-        map.drawBaseMap();
+        map.setCameraBoundsToFogOfWar();
+        map.drawBaseMap(); 
         map.updateGraphics();
     }
     
@@ -197,10 +199,10 @@ class Game extends Phaser.Scene {
 
     zoomUpdate(zoomDelta) {
         if (zoomDelta == 0) return;
-
+        console.log(cam.zoom);
         // Prevent from zooming in/out too far
         let oldZoom = cam.zoom;
-        let newZoom = Math.max( MIN_ZOOM, Math.min(MAX_ZOOM, cam.zoom * (1 + zoomDelta) ) );
+        let newZoom = Math.max( cam.minZoom, Math.min(MAX_ZOOM, cam.zoom * (1 + zoomDelta) ) );
  
         // Zoom to mouse pointer            
         cam.pan(this.mouse.worldX - (this.mouse.worldX - cam.midPoint.x) * ((oldZoom/newZoom)), this.mouse.worldY - ( this.mouse.worldY - cam.midPoint.y) * ((oldZoom/newZoom)), 100, Phaser.Math.Easing.Elastic.Out, true);
