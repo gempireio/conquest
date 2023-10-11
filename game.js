@@ -66,7 +66,8 @@ class Game extends Phaser.Scene {
 
             pointer.lastClick = this.time.now;
             pointer.lastDownX = pointer.worldX;
-            pointer.lastDownY = pointer.worldY;     
+            pointer.lastDownY = pointer.worldY;   
+            this.dragIntensity = 0;  
         });
 
         // Mouse up event
@@ -74,19 +75,25 @@ class Game extends Phaser.Scene {
             if (!this.isDragging) {
                 let tileID = map.selectAt(pointer.worldX, pointer.worldY, true);
             }     
-            this.isDragging = false;          
+            this.isDragging = false; 
+            this.dragIntensity = 0;         
         });
     
         // Mouse move event
         this.input.on('pointermove', (pointer) => {
+            this.input.manager.canvas.style.cursor = 'auto';
+            this.isDragging = false;
+
             // Change cursor if mouse is down
             if (pointer.isDown) {
-                this.input.manager.canvas.style.cursor = 'url("images/gem_scroll_32.png"), move';
-                this.isDragging = true;  
-            } else {            
-                this.input.manager.canvas.style.cursor = 'auto';
-                this.isDragging = false;
-            }
+                this.dragIntensity++;
+                console.log(this.dragIntensity);
+                // Prevent small drag movements
+                if (this.dragIntensity > 10) {
+                    this.input.manager.canvas.style.cursor = 'url("images/gem_scroll_32.png"), move';
+                    this.isDragging = true; 
+                }
+            } 
         });
 
         // Looped Timer Events
@@ -208,6 +215,7 @@ class Game extends Phaser.Scene {
         cam.pan(this.mouse.worldX - (this.mouse.worldX - cam.midPoint.x) * ((oldZoom/newZoom)), this.mouse.worldY - ( this.mouse.worldY - cam.midPoint.y) * ((oldZoom/newZoom)), 100, Phaser.Math.Easing.Elastic.Out, true);
         cam.zoomTo( newZoom, 150, Phaser.Math.Easing.Back.Out, true );    
 
+        this.dragIntensity = 0;
         this.lastZoomUpdate = this.time.now;
     }
 
