@@ -275,8 +275,8 @@ export class Map extends HexGrid {
         let width = bounds.maxX - bounds.minX;
         let height = bounds.maxY - bounds.minY;
         let cam = this.scene.cameras.main;
-        cam.minZoom = 1700 / Math.max(width, height);
-        cam.setBounds(bounds.minX * 1.1, bounds.minY * 1.1, width * 1.2, height * 1.2);
+        cam.minZoom = 1000 / Math.max(width, height);
+        cam.setBounds(bounds.minX * 1.15, bounds.minY * 1.15, width * 1.3, height * 1.3);
     }
 
     deselect() {

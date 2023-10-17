@@ -29,12 +29,10 @@ export class HexGrid {
 
         // Calculate properties
         this.maxHexID = 3 * (layers + 1) * layers;
-        this.hexagonPoints = [0, -2/SQRT3X2*skew*scale, 0.5*scale, -1/SQRT3X2*skew*scale, 0.5*scale, 1/SQRT3X2*skew*scale, 0, 2/SQRT3X2*skew*scale, -0.5*scale, 1/SQRT3X2*skew*scale, -0.5*scale, -1/SQRT3X2*skew*scale];
         
-        // Calculate center positions of hexagons
+        // Calculate values needed for drawing hex grid
+        this.calculatehexagonPoints();
         this.calculateHexagonCenters();
-
-        // Calculate min and max X and Y values
         this.calculateGridBorders();
     }
 
@@ -42,9 +40,24 @@ export class HexGrid {
      * Sets the scale of the HexGrid.
      * @param {number} scale - the new scale value
      */
-    setScale( scale ){
+    setScale(scale){
         this.scale = scale;
+        this.calculatehexagonPoints();
         this.calculateHexagonCenters();
+    }
+
+    /**
+     * Sets the skew of the HexGrid.
+     * @param {number} skew - the new skew value
+     */
+    setSkew(skew) {
+        this.skew = skew;      
+        this.calculatehexagonPoints();
+        this.calculateHexagonCenters();  
+    }
+
+    calculatehexagonPoints() {
+        this.hexagonPoints = [0, -2/SQRT3X2*this.skew*this.scale, 0.5*this.scale, -1/SQRT3X2*this.skew*this.scale, 0.5*this.scale, 1/SQRT3X2*this.skew*this.scale, 0, 2/SQRT3X2*this.skew*this.scale, -0.5*this.scale, 1/SQRT3X2*this.skew*this.scale, -0.5*this.scale, -1/SQRT3X2*this.skew*this.scale];
     }
 
     calculateHexagonCenters() {

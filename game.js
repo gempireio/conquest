@@ -11,11 +11,11 @@ const SHOW_GRID = URL_PARAMS.get('grid') ? URL_PARAMS.get('grid') : false;
 const SHOW_DEBUG_TEXT = URL_PARAMS.get('debug') ? URL_PARAMS.get('debug') : false;
 const STARTING_UNITS = 30;
 const TURN_TIME = 30;
+const LOD_ZOOM = [0.15, 0.25, 0.4, 0.65, 1];
 
 let debugObj;
 let map;
 let lasTimerReset = 0;
-
 let cam;
 
 class Game extends Phaser.Scene {
@@ -68,21 +68,22 @@ class Game extends Phaser.Scene {
 
         // Mouse up event
         this.input.on('pointerup', (pointer) => {
+            this.input.manager.canvas.style.cursor = 'auto';
             if (!this.isDragging) {
                 let width = this.sys.game.canvas.width;
                 let height = this.sys.game.canvas.height;
                 let newScrollX = cam.scrollX;
                 let newScrollY = cam.scrollY;
-                if (width - pointer.x < width/10 + 20) {
-                    newScrollX += cam.zoom * 2 + 90;
+                if (width - pointer.x < width/13*cam.zoom + 25) {
+                    newScrollX += cam.zoom * 2.5 + 90;
                 }
-                if (pointer.x < width/10 + 20) {
-                    newScrollX -= cam.zoom * 2 + 90;
+                if (pointer.x < width/13*cam.zoom + 25) {
+                    newScrollX -= cam.zoom * 2.5 + 90;
                 }
-                if (height - pointer.y < height/11 + 15) {
+                if (height - pointer.y < height/15*cam.zoom + 20) {
                     newScrollY += cam.zoom * 2 + 70;
                 }
-                if (pointer.y < height/11 + 15) {
+                if (pointer.y < height/15*cam.zoom + 20) {
                     newScrollY -= cam.zoom * 2 + 70;
                 }
                 this.add.tween({
@@ -100,19 +101,18 @@ class Game extends Phaser.Scene {
     
         // Mouse move event
         this.input.on('pointermove', (pointer) => {
-            this.input.manager.canvas.style.cursor = 'auto';
-            this.isDragging = false;
+            // this.isDragging = false;
 
-            // Change cursor if mouse is down
-            if (pointer.isDown) {
-                this.dragIntensity++;
- 
-                // Prevent small drag movements
-                if (this.dragIntensity > 10) {
-                    this.input.manager.canvas.style.cursor = 'url("images/gem_scroll_32.png"), move';
-                    this.isDragging = true; 
-                }
-            } 
+            // // Change cursor if mouse is down
+            // if (pointer.isDown) {
+            //     this.dragIntensity++;
+            //     this.input.manager.canvas.style.cursor = 'url("images/gem_scroll_32.png"), move';
+
+            //     // Prevent small drag movements
+            //     if (this.dragIntensity > 10) {      
+            //         this.isDragging = true; 
+            //     }
+            // } 
         });
 
         // Looped Timer Events
@@ -161,6 +161,7 @@ class Game extends Phaser.Scene {
                 scene.dragIntensity++;
                 // Prevent small drag movements
                 if (scene.dragIntensity > 10) {
+                    scene.input.manager.canvas.style.cursor = 'url("images/gem_scroll_32.png"), move';
                     let drag1Vector = dragScale.drag1Vector;
                     cam.scrollX -= drag1Vector.x / cam.zoom;
                     cam.scrollY -= drag1Vector.y / cam.zoom;
@@ -225,6 +226,7 @@ class Game extends Phaser.Scene {
     }
 
     zoomUpdate(scaleFactor) {
+        console.log(cam.zoom);
         if (scaleFactor == 1) return;
 
         // Prevent from zooming in/out too far
@@ -237,6 +239,12 @@ class Game extends Phaser.Scene {
 
         this.dragIntensity = 0;
         this.lastZoomUpdate = this.time.now;
+
+        // TODO: Adjust skew
+        // let targetSkew = Math.max(0.4, Math.min(1, 0.15/cam.zoom ) );
+        // map.setSkew( (map.skew * 0.6 ) + (targetSkew * 0.4) );
+        // map.drawBaseMap(); 
+        // map.updateGraphics();
     }
 
     createPlayers( playerCount, startTiles ) {

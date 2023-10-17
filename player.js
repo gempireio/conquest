@@ -283,7 +283,7 @@ export class Player {
         let maxX = -Infinity; 
         let maxY = -Infinity;
         for (let tileID = 0; tileID <= Player.maxTileID; tileID++) {
-            if (this.fogOfWar[tileID] < 230) {
+            if (this.fogOfWar[tileID] < 250) {
                 minX = Player.map.hexCenters[tileID].x < minX ? Player.map.hexCenters[tileID].x : minX; 
                 minY = Player.map.hexCenters[tileID].y < minY ? Player.map.hexCenters[tileID].y : minY;
                 maxX = Player.map.hexCenters[tileID].x > maxX ? Player.map.hexCenters[tileID].x : maxX;
