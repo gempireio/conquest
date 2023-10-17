@@ -1,7 +1,7 @@
 .window {
 	pointer-events: none;
 	position: absolute;
-	width: clamp( 150px + 16vw, 18vw, 300px );
+	width: clamp( 180px + 16vw, 18vw, 300px );
 	margin: clamp( 5px, 2vw, 50px );
 	z-index: 9;
 	background-color: rgba(151, 186, 255, 0.75);
@@ -32,7 +32,7 @@
 
 .window-content {
 	padding: clamp( 1px + 1vw, 1vw, 25px );
-	font-size: clamp( 14px + 2vw, 2vw, 25px );
+	font-size: clamp( 17px + 2.1vw, 2.2vw, 25px );
 }
 
 .close-button {
@@ -61,7 +61,7 @@
 
 .title-bar {
 	/* background-color: rgb(14, 46, 134); */
-	font-size: clamp( 16px + 2.2vw, 2.5vw, 30px );
+	font-size: clamp( 18px + 2.2vw, 2.5vw, 30px );
 	padding:3px;
 }
 
