@@ -25,7 +25,7 @@ export class Map extends HexGrid {
 
     constructor( layers, seaLevel, oceanColor, scene ) {
         // Distance between two tile centers is 100
-        super(layers, 100);
+        super(layers, 100, 0.9);
         this.seaLevel = seaLevel;
         this.oceanColor = oceanColor;
         this.scene = scene;

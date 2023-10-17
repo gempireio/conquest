@@ -21,14 +21,15 @@ export class HexGrid {
     // TODO 
     // Offset
 
-    constructor( layers, scale = 1 ) {
+    constructor( layers, scale = 1, skew = 1 ) {
         // Set input properties
         this.layers = layers;
         this.scale = scale;
+        this.skew = skew;
 
         // Calculate properties
         this.maxHexID = 3 * (layers + 1) * layers;
-        this.hexagonPoints = [0, -2/SQRT3X2*scale, 0.5*scale, -1/SQRT3X2*scale, 0.5*scale, 1/SQRT3X2*scale, 0, 2/SQRT3X2*scale, -0.5*scale, 1/SQRT3X2*scale, -0.5*scale, -1/SQRT3X2*scale];
+        this.hexagonPoints = [0, -2/SQRT3X2*skew*scale, 0.5*scale, -1/SQRT3X2*skew*scale, 0.5*scale, 1/SQRT3X2*skew*scale, 0, 2/SQRT3X2*skew*scale, -0.5*scale, 1/SQRT3X2*skew*scale, -0.5*scale, -1/SQRT3X2*skew*scale];
         
         // Calculate center positions of hexagons
         this.calculateHexagonCenters();
@@ -52,11 +53,11 @@ export class HexGrid {
 
         // Set direction constants
         const RIGHT = this.vector2(1, 0);
-        const UP_RIGHT = this.vector2(0.5, -3/SQRT3X2);
-        const UP_LEFT = this.vector2(-0.5, -3/SQRT3X2);
+        const UP_RIGHT = this.vector2(0.5, -3/SQRT3X2*this.skew);
+        const UP_LEFT = this.vector2(-0.5, -3/SQRT3X2*this.skew);
         const LEFT = this.vector2(-1, 0);
-        const DOWN_LEFT = this.vector2(-0.5, 3/SQRT3X2);
-        const DOWN_RIGHT = this.vector2(0.5, 3/SQRT3X2);
+        const DOWN_LEFT = this.vector2(-0.5, 3/SQRT3X2*this.skew);
+        const DOWN_RIGHT = this.vector2(0.5, 3/SQRT3X2*this.skew);
         const BASE_DIRECTIONS = [ RIGHT, DOWN_RIGHT, DOWN_LEFT, LEFT, UP_LEFT, UP_RIGHT];
 
         // Scale direction vectors
