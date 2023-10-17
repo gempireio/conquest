@@ -5,7 +5,7 @@ import {Debug} from './debug.js';
 const URL_PARAMS = new URLSearchParams(window.location.search);
 const GRID_LAYERS = Math.max( 6, URL_PARAMS.get('l') ? parseInt(URL_PARAMS.get('l')) : 60 );
 const SEA_LEVEL = URL_PARAMS.get('sl') ? parseInt(URL_PARAMS.get('sl')) : 35;
-const MAX_ZOOM = 4;
+const MAX_ZOOM = 2;
 const MIN_ZOOM = 6 / GRID_LAYERS;
 const SHOW_GRID = URL_PARAMS.get('grid') ? URL_PARAMS.get('grid') : false;
 const SHOW_DEBUG_TEXT = URL_PARAMS.get('debug') ? URL_PARAMS.get('debug') : false;
@@ -17,8 +17,6 @@ let map;
 let lasTimerReset = 0;
 
 let cam;
-let screenWidth;
-let screenHeight;
 
 class Game extends Phaser.Scene {
 
@@ -33,18 +31,16 @@ class Game extends Phaser.Scene {
         }
 
         console.log("preload");   
-        screenWidth = this.sys.game.canvas.width;
-        screenHeight = this.sys.game.canvas.height;
 
         // Scroll Wheel event
         this.input.on('wheel', (wheel) => {
-            let zoomDelta;
+            let scaleFactor;
             if (wheel.deltaY < 0) {
-                zoomDelta = 0.1 + Math.random() * 0.1;
+                scaleFactor = 1 + 0.1 + Math.random() * 0.1;
             } else {    
-                zoomDelta = -0.1 - Math.random() * 0.1;
+                scaleFactor = 1 - 0.1 - Math.random() * 0.1;
             }
-            this.zoomUpdate(zoomDelta);
+            this.zoomUpdate(scaleFactor);
         });
     
         // Mouse down event
@@ -73,6 +69,29 @@ class Game extends Phaser.Scene {
         // Mouse up event
         this.input.on('pointerup', (pointer) => {
             if (!this.isDragging) {
+                let width = this.sys.game.canvas.width;
+                let height = this.sys.game.canvas.height;
+                let newScrollX = cam.scrollX;
+                let newScrollY = cam.scrollY;
+                if (width - pointer.x < width/10 + 20) {
+                    newScrollX += cam.zoom * 2 + 90;
+                }
+                if (pointer.x < width/10 + 20) {
+                    newScrollX -= cam.zoom * 2 + 90;
+                }
+                if (height - pointer.y < height/11 + 15) {
+                    newScrollY += cam.zoom * 2 + 70;
+                }
+                if (pointer.y < height/11 + 15) {
+                    newScrollY -= cam.zoom * 2 + 70;
+                }
+                this.add.tween({
+                    targets: this.cameras.main,
+                    scrollX: newScrollX,
+                    scrollY: newScrollY,
+                    duration: 250,
+                    ease: 'Back.Out'
+                });
                 let tileID = map.selectAt(pointer.worldX, pointer.worldY, true);
             }     
             this.isDragging = false; 
@@ -87,7 +106,7 @@ class Game extends Phaser.Scene {
             // Change cursor if mouse is down
             if (pointer.isDown) {
                 this.dragIntensity++;
-                console.log(this.dragIntensity);
+ 
                 // Prevent small drag movements
                 if (this.dragIntensity > 10) {
                     this.input.manager.canvas.style.cursor = 'url("images/gem_scroll_32.png"), move';
@@ -137,15 +156,18 @@ class Game extends Phaser.Scene {
 
         // Mouse pinch event
         let dragScale = this.plugins.get('rexpinchplugin').add(this);
+        let scene = this;
         dragScale.on('drag1', function (dragScale) {
-                let drag1Vector = dragScale.drag1Vector;
-                cam.scrollX -= drag1Vector.x / cam.zoom;
-                cam.scrollY -= drag1Vector.y / cam.zoom;
-                this.isDragging = true;
+                scene.dragIntensity++;
+                // Prevent small drag movements
+                if (scene.dragIntensity > 10) {
+                    let drag1Vector = dragScale.drag1Vector;
+                    cam.scrollX -= drag1Vector.x / cam.zoom;
+                    cam.scrollY -= drag1Vector.y / cam.zoom;
+                    scene.isDragging = true; 
+                }
             }).on('pinch', function (dragScale) {
-                let scaleFactor = dragScale.scaleFactor;
-                cam.zoom *= scaleFactor;
-                this.isDragging = false;
+                scene.zoomUpdate(dragScale.scaleFactor);
             }, this);
 
         // Zoom and Fade In Intro
@@ -188,28 +210,26 @@ class Game extends Phaser.Scene {
         // Zoom in
         if (this.keys.Q.isDown || this.keys.Z.isDown || this.keys.NUMPAD_ADD.isDown) {
             if ( this.time.now - this.lastZoomUpdate > 35 ) {
-                this.zoomUpdate(0.05);
+                this.zoomUpdate(1.05);
             }           
         } 
         // Zoom out
         if (this.keys.E.isDown || this.keys.X.isDown || this.keys.NUMPAD_SUBTRACT.isDown) {
             if ( this.time.now - this.lastZoomUpdate > 35 ) {
-                this.zoomUpdate(-0.05);
+                this.zoomUpdate(0.95);
             }
         } 
 
         // Update Debug Output
         if (SHOW_DEBUG_TEXT) debugObj.updateDebugText(this);
     }
-    
 
+    zoomUpdate(scaleFactor) {
+        if (scaleFactor == 1) return;
 
-    zoomUpdate(zoomDelta) {
-        if (zoomDelta == 0) return;
-        console.log(cam.zoom);
         // Prevent from zooming in/out too far
         let oldZoom = cam.zoom;
-        let newZoom = Math.max( cam.minZoom, Math.min(MAX_ZOOM, cam.zoom * (1 + zoomDelta) ) );
+        let newZoom = Math.max( cam.minZoom, Math.min(MAX_ZOOM, cam.zoom * (scaleFactor) ) );
  
         // Zoom to mouse pointer            
         cam.pan(this.mouse.worldX - (this.mouse.worldX - cam.midPoint.x) * ((oldZoom/newZoom)), this.mouse.worldY - ( this.mouse.worldY - cam.midPoint.y) * ((oldZoom/newZoom)), 100, Phaser.Math.Easing.Elastic.Out, true);
