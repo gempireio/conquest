@@ -11,7 +11,6 @@ const SHOW_GRID = URL_PARAMS.get('grid') ? URL_PARAMS.get('grid') : false;
 const SHOW_DEBUG_TEXT = URL_PARAMS.get('debug') ? URL_PARAMS.get('debug') : false;
 const STARTING_UNITS = 30;
 const TURN_TIME = 30;
-const LOD_ZOOM = [0.15, 0.25, 0.4, 0.65, 1];
 
 let debugObj;
 let map;
@@ -226,7 +225,6 @@ class Game extends Phaser.Scene {
     }
 
     zoomUpdate(scaleFactor) {
-        console.log(cam.zoom);
         if (scaleFactor == 1) return;
 
         // Prevent from zooming in/out too far
@@ -239,6 +237,8 @@ class Game extends Phaser.Scene {
 
         this.dragIntensity = 0;
         this.lastZoomUpdate = this.time.now;
+
+        map.updateLOD(newZoom);
 
         // TODO: Adjust skew
         // let targetSkew = Math.max(0.4, Math.min(1, 0.15/cam.zoom ) );

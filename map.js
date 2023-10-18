@@ -8,6 +8,8 @@ const PRE = ["Alt", "Am", "Bor", "Cal", "Cam", "Den", "El", "Ex", "Fin", "Gat", 
 const MID = ["", "ham",  "an", "for", "ork", "ist", "ead", "ma", "bor", "ter"];
 const SUFF = ["", "a", "y", "id", "or", "il", "ex"];
 
+const LOD_FROM_ZOOM = [0.1, 0.2, 0.35, 0.55, 1, 1.5];
+
 export class Map extends HexGrid {
 
     // Land Cover
@@ -29,6 +31,7 @@ export class Map extends HexGrid {
         this.seaLevel = seaLevel;
         this.oceanColor = oceanColor;
         this.scene = scene;
+        this.lod = 3;
 
         this.showGrid = false;
 
@@ -108,7 +111,8 @@ export class Map extends HexGrid {
         this.tileText = Array(this.maxHexID + 1);
     }
 
-    updateTextGraphic() {
+    updateTextGraphics() {
+        // TODO: Only update one tile at a time when needed
         let civs = Player.allCivs();
         let soldiers = Player.allSoldiers();
         for (let tileID = 0; tileID <= this.maxHexID; tileID++) {
@@ -124,6 +128,12 @@ export class Map extends HexGrid {
                 // Destroy text graphic object if no civs or soldiers
                 if(this.tileText[tileID]) this.tileText[tileID].destroy();
             }
+        } 
+    }
+
+    destroyTextGraphics() {
+        for (let tileID = 0; tileID <= this.maxHexID; tileID++) {
+            if(this.tileText[tileID]) this.tileText[tileID].destroy();
         } 
     }
 
@@ -404,7 +414,11 @@ export class Map extends HexGrid {
 
     updateGraphics() {
         this.updateOverLays();
-        this.updateTextGraphic();
+        if (this.lod > 2) {
+            this.updateTextGraphics();
+        } else {
+            this.destroyTextGraphics();
+        }      
     }
 
     updateOverLays() {
@@ -412,5 +426,16 @@ export class Map extends HexGrid {
         mapOverlays.forEach((mapOverlay) => {
             mapOverlay.draw();
         });
+    }
+
+    updateLOD(zoom) {
+        let lod = this.getLODFromZoom(zoom);
+        if(lod == this.lod) return;
+        this.lod = lod;
+        this.updateGraphics();
+    }
+
+    getLODFromZoom(zoom) {
+        return LOD_FROM_ZOOM.map(val => Math.abs(val - zoom)).indexOf(Math.min(...LOD_FROM_ZOOM.map(val => Math.abs(val - zoom))));
     }
 }
