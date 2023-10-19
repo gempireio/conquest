@@ -95,7 +95,7 @@ export class Map extends HexGrid {
     createSelectGraphic() {
         const hexagon = new Phaser.Geom.Polygon(this.hexagonPoints);
         const color = 0xc1d1ff;
-        this.selectedtileID = -1;
+        this.selectedTileID = -1;
         this.selectGraphic = this.scene.add.graphics();   
         this.selectGraphic.fillStyle(color, 0.1);
         this.selectGraphic.fillPoints(hexagon.points, true);  
@@ -242,7 +242,7 @@ export class Map extends HexGrid {
     }
 
     /**
-     * Sets the selectedtileID to the hexagon that contains the given coordiantes
+     * Sets the selectedTileID to the hexagon that contains the given coordiantes
      * @param {number} x - The x-coordinate of the position.
      * @param {number} y - The y-coordinate of the position.
      * @param {boolean} toggle - Whether to toggle off the selection if already selected
@@ -256,23 +256,33 @@ export class Map extends HexGrid {
         this.selectGraphic.visible = true;
         
         // Deselect if already selected
-        if ( toggle && tileID == this.selectedtileID ) {
+        if ( toggle && tileID == this.selectedTileID ) {
             this.deselect();
             return -1;
         }
          
-        // If tile owned by human player
-        let oldTilePlayer = Player.getOwner(this.selectedtileID);   
+        // Conditions based on tile ownership
+        let oldTilePlayer = Player.getOwner(this.selectedTileID);   
+        let newTilePlayer = Player.getOwner(tileID);  
+
+        // Previously selected tile owned by human player
         if(oldTilePlayer === Player.humanPlayer) {
             let neighbors = this.neighborsOf(tileID);
-            // Move Units
-            if ( neighbors.includes(this.selectedtileID) ) {       
-                oldTilePlayer.moveAllUnits(this.selectedtileID, tileID);
+
+            // New tile is neighbor of previously selected tile
+            if ( neighbors.includes(this.selectedTileID) ) {      
+              
+                // New tile empty or owned by human player
+                if ( !newTilePlayer || newTilePlayer === Player.humanPlayerID ) {
+                    oldTilePlayer.moveUnits(this.selectedTileID, tileID, 2, 2);
+                } else {
+                    oldTilePlayer.attack(this.selectedTileID, tileID, civs, soldiers);
+                }     
                 this.setCameraBoundsToFogOfWar();
             }
         }
 
-        this.selectedtileID = tileID;
+        this.selectedTileID = tileID;
         this.selectGraphic.setPosition(this.hexCenters[tileID].x, this.hexCenters[tileID].y);
         updateTileDlg( this, Player.getOwner(tileID), tileID );
         fadeIn(tileDlg);
@@ -286,12 +296,12 @@ export class Map extends HexGrid {
         let height = bounds.maxY - bounds.minY;
         let cam = this.scene.cameras.main;
         cam.minZoom = 1000 / Math.max(width, height);
-        cam.setBounds(bounds.minX * 1.15, bounds.minY * 1.15, width * 1.3, height * 1.3);
+        cam.setBounds(bounds.minX * 1.2, bounds.minY * 1.2, width * 1.4, height * 1.4);
     }
 
     deselect() {
         this.selectGraphic.visible = false;
-        this.selectedtileID = -1;   
+        this.selectedTileID = -1;   
         fadeOut(tileDlg);
     }
 
