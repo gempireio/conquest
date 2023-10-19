@@ -157,6 +157,7 @@ export class Player {
         this.civs[tileID] += civs;
         this.soldiers[tileID] += soldiers;
         this.updateOwnershipStatus(tileID);
+        
     }
 
     destroyUnits(tileID, civs, soldiers) {
@@ -169,18 +170,17 @@ export class Player {
         civs = Math.min(civs, this.civs[from]);
         soldiers = Math.min(soldiers, this.soldiers[from]);
         let defender = Player.getOwner(to);
-        let attackerLosses = Math.floor((defender.civs[to]/2 + defender.soldiers[to]) * Math.random() * 2);
-        let defenderLosses = Math.floor((civs/4 + soldiers) * Math.random() * 2);
-        let attackerLostCivs, attackerLostSoldiers, defenderLostCivs, defenderLostSoldiers = 0;
-        
+        console.log("Attacking c" + defender.civs[to] + " s" + defender.soldiers[to] + " with c" + civs + " s" + soldiers);
+        let attackerLosses = Math.ceil((defender.civs[to]/2 + defender.soldiers[to]) * Math.random() * 2);
+        let defenderLosses = Math.ceil((civs/5 + soldiers/1.5) * Math.random() * 2);
+        let attackerWin = false;
+        let attackerLostCivs, attackerLostSoldiers, defenderLostCivs, defenderLostSoldiers;
+        attackerLostCivs = attackerLostSoldiers = defenderLostCivs = defenderLostSoldiers = 0;
+        console.log("Total Losses: A" + attackerLosses + " D" + defenderLosses);
         // Attacker lost all soldiers
         if (attackerLosses >= soldiers) {
             attackerLostSoldiers = soldiers;
-            attackerLostCivs = attackerLosses - soldiers;
-            // Attacker lost all civs
-            if (attackerLostCivs > civs) {
-                attackerLostCivs = civs;
-            }
+            attackerLostCivs = Math.min(attackerLosses - soldiers, civs);
         } else {
             attackerLostSoldiers = attackerLosses;
         }
@@ -188,16 +188,15 @@ export class Player {
         // Defender lost all soldiers and battle
         if (defenderLosses >= defender.soldiers[to]) {
             console.log("Attacker Wins");
+            attackerWin = true;
             defenderLostSoldiers = defender.soldiers[to];
-            defenderLostCivs = defenderLosses - defender.soldiers[to];
-            // Defender lost all civs
-            if (defenderLostCivs > defender.civs[to]) {
-                defenderLostCivs = defender.civs[to];
-            } 
+            defenderLostCivs = Math.floor( defender.civs[to] * Math.random());
             
-            // Convert defending units
+            // Convert surviving civs
             let convertedCivs = defender.civs[to] - defenderLostCivs;
             this.civs[to] = convertedCivs;
+            defender.civs[to] = 0;
+            console.log("Converted Civs: " + convertedCivs);
 
             // Move Attacking Units   
             this.moveUnits(from, to, civs - attackerLostCivs, soldiers - attackerLostSoldiers);
@@ -210,19 +209,21 @@ export class Player {
         // Remove destroyed units
         this.destroyUnits(from, attackerLostCivs, attackerLostSoldiers);
         defender.destroyUnits(to, defenderLostCivs, defenderLostSoldiers);
+        Player.map.updateGraphics();
         console.log("Attacker Losses: c" + attackerLostCivs + " s" + attackerLostSoldiers);
         console.log("Defender Losses: c" + defenderLostCivs + " s" + defenderLostSoldiers);
+        return attackerWin;
     }
 
     updateOwnershipStatus(tileID) {
         if(this.civs[tileID] + this.soldiers[tileID] + this.buildings[tileID]) {
             this.ownedTiles.add(tileID);
-            this.allOwnedTiles.add(tileID);
+            Player.allOwnedTiles.add(tileID);
             this.updateInfluence(tileID);  
         } else {
             if (this.ownedTiles.has(tileID)) {
                 this.ownedTiles.delete(tileID);
-                this.allOwnedTiles.delete(tileID);
+                Player.allOwnedTiles.delete(tileID);
                 this.updateInfluence(tileID);  
             }
         }

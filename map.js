@@ -273,10 +273,15 @@ export class Map extends HexGrid {
             if ( neighbors.includes(this.selectedTileID) ) {      
               
                 // New tile empty or owned by human player
-                if ( !newTilePlayer || newTilePlayer === Player.humanPlayerID ) {
-                    oldTilePlayer.moveUnits(this.selectedTileID, tileID, 2, 2);
+                if ( !newTilePlayer || newTilePlayer === Player.humanPlayer ) {
+                    oldTilePlayer.moveUnits(this.selectedTileID, tileID, 15, 15);
                 } else {
-                    oldTilePlayer.attack(this.selectedTileID, tileID, civs, soldiers);
+                    // New tile is enemy, so attack
+                    let win = oldTilePlayer.attack(this.selectedTileID, tileID, 15, 15);
+                    if (!win) {
+                        this.deselect();
+                        return;
+                    }
                 }     
                 this.setCameraBoundsToFogOfWar();
             }
