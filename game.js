@@ -232,7 +232,7 @@ class Game extends Phaser.Scene {
         let newZoom = Math.max( cam.minZoom, Math.min(MAX_ZOOM, cam.zoom * (scaleFactor) ) );
  
         // Zoom to mouse pointer            
-        cam.pan(this.mouse.worldX - (this.mouse.worldX - cam.midPoint.x) * ((oldZoom/newZoom)), this.mouse.worldY - ( this.mouse.worldY - cam.midPoint.y) * ((oldZoom/newZoom)), 100, Phaser.Math.Easing.Elastic.Out, true);
+        cam.pan(this.mouse.worldX - (this.mouse.worldX - cam.midPoint.x) * ((oldZoom/newZoom)), this.mouse.worldY - ( this.mouse.worldY - cam.midPoint.y) * ((oldZoom/newZoom)), 100, Phaser.Math.Easing.Back.Out, true);
         cam.zoomTo( newZoom, 150, Phaser.Math.Easing.Back.Out, true );    
 
         this.dragIntensity = 0;
