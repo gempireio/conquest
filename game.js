@@ -10,11 +10,10 @@ const MIN_ZOOM = 6 / GRID_LAYERS;
 const SHOW_GRID = URL_PARAMS.get('grid') ? URL_PARAMS.get('grid') : false;
 const SHOW_DEBUG_TEXT = URL_PARAMS.get('debug') ? URL_PARAMS.get('debug') : false;
 const STARTING_UNITS = 30;
-const TURN_TIME = 30;
+const TURN_TIME = 3000;
 
 let debugObj;
 let map;
-let lasTimerReset = 0;
 let cam;
 
 class Game extends Phaser.Scene {
@@ -182,13 +181,14 @@ class Game extends Phaser.Scene {
         let startTile = Player.humanPlayer.highestUnitTile();
         cam.pan( startTile.x, startTile.y, 1500, Phaser.Math.Easing.Back.Out, true );  
         cam.shake(1500, 0.004);
-        this.lastZoomUpdate = this.time.now;    
+          
         fadeOutLoadingScreen();  
             
         console.log("draw graphics");
         map.setCameraBoundsToFogOfWar();
         map.drawBaseMap(); 
         map.updateGraphics();
+        this.setStartVariables();
     }
     
     update(timestamp, elapsed) {
@@ -220,8 +220,24 @@ class Game extends Phaser.Scene {
             }
         } 
 
+        if ( this.time.now - this.turnStartTime > TURN_TIME ) {
+            this.endTurn();
+        }
+
         // Update Debug Output
         if (SHOW_DEBUG_TEXT) debugObj.updateDebugText(this);
+    }
+
+    setStartVariables() {
+        this.lastZoomUpdate = this.time.now;      
+        this.turnStartTime = this.time.now;
+        this.turn = 0;
+    }
+
+    endTurn() {
+        this.turn++;
+        console.log(this.turn);
+        this.turnStartTime = this.time.now;
     }
 
     zoomUpdate(scaleFactor) {

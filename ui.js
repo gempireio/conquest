@@ -125,13 +125,23 @@ function activeWindow(elmnt) {
     }
 }
 
-function updateTileDlg( map, player, tileID ) {
+function updateTileDlg( map, player, humanPlayer, tileID ) {
     if (player) {
         document.getElementById("civs").innerHTML = player.civs[tileID];
         document.getElementById("soldiers").innerHTML = player.soldiers[tileID];
     } else {
         document.getElementById("civs").innerHTML = 0;
         document.getElementById("soldiers").innerHTML = 0;
+    }
+
+    if (humanPlayer) {
+        document.getElementById("ownership").innerHTML = humanPlayer.ownedTiles.has(tileID);
+        document.getElementById("fog_of_war").innerHTML = humanPlayer.fogOfWar[tileID];
+        document.getElementById("influence").innerHTML = humanPlayer.influence[tileID];
+    } else {
+        document.getElementById("ownership").innerHTML = 0;
+        document.getElementById("fog_of_war").innerHTML = 0;
+        document.getElementById("influence").innerHTML = 0;
     }
     document.getElementById("tile-name").innerHTML = map.tileNames[tileID];
     document.getElementById("elevation").innerHTML = map.elevations[tileID];

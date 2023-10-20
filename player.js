@@ -119,20 +119,23 @@ export class Player {
     }
 
     revealTile(tileID) {
+        this.darkenFogOfWarEveryWhere(3);
         this.fogOfWar[tileID] = 0;
-        for (let i = 0; i < 50; i++){
+        for (let i = 0; i < 20; i++){
             let randomTileID = Player.map.randomHexID(tileID, Math.random() * 3);
-            this.fogOfWar[randomTileID] *= 0.9;
+            this.fogOfWar[randomTileID] *= 0.6;
         }     
+        for (let i = 0; i < 50; i++){
+            let randomTileID = Player.map.randomHexID(tileID, Math.random() * 5);
+            this.fogOfWar[randomTileID] *= 0.8;
+        } 
         for (let i = 0; i < 100; i++){
             let randomTileID = Player.map.randomHexID(tileID, Math.random() * 10);
-            this.fogOfWar[randomTileID] *= 0.95;
+            this.fogOfWar[randomTileID] *= 0.9;
         } 
         if (Player.humanPlayerID === this.playerID) {
             this.updateFogOfWar();
         }
-
-        this.revealedBounds()
     }
 
     moveUnits(from, to, civs, soldiers) {
@@ -170,7 +173,8 @@ export class Player {
         civs = Math.min(civs, this.civs[from]);
         soldiers = Math.min(soldiers, this.soldiers[from]);
         let defender = Player.getOwner(to);
-        console.log("Attacking c" + defender.civs[to] + " s" + defender.soldiers[to] + " with c" + civs + " s" + soldiers);
+        console.log("Attacking c" + civs + " s" + soldiers);
+        console.log("Defending c" + defender.civs[to] + " s" + defender.soldiers[to]);
         let attackerLosses = Math.ceil((defender.civs[to]/2 + defender.soldiers[to]) * Math.random() * 2);
         let defenderLosses = Math.ceil((civs/5 + soldiers/1.5) * Math.random() * 2);
         let attackerWin = false;
@@ -187,10 +191,10 @@ export class Player {
 
         // Defender lost all soldiers and battle
         if (defenderLosses >= defender.soldiers[to]) {
-            console.log("Attacker Wins");
+            console.log("Attacker Wins (or Draw)");
             attackerWin = true;
             defenderLostSoldiers = defender.soldiers[to];
-            defenderLostCivs = Math.floor( defender.civs[to] * Math.random());
+            defenderLostCivs = Math.round( defender.civs[to] * Math.random());
             
             // Convert surviving civs
             let convertedCivs = defender.civs[to] - defenderLostCivs;
@@ -200,10 +204,18 @@ export class Player {
 
             // Move Attacking Units   
             this.moveUnits(from, to, civs - attackerLostCivs, soldiers - attackerLostSoldiers);
+            this.revealTile(to)
         } else {
             // Defender Wins
             console.log("Defender Wins");
             defenderLostSoldiers = defenderLosses;
+            this.darkenFogOfWarAroundTile(from);
+        }
+
+        // Draw. All units from both sides died.
+        if (attackerLostCivs + attackerLostSoldiers >= civs + soldiers && defenderLostCivs + defenderLostSoldiers >= defender.civs[to] + defender.soldiers[to]) {
+            console.log("Draw. All units died.");
+            attackerWin = false;
         }
 
         // Remove destroyed units
@@ -237,6 +249,28 @@ export class Player {
         if (Player.getOwnerID(tileID) === Player.humanPlayerID) {
             Player.map.mapOverlays['humanPlayerInfluence'].setLayer(0, this.color.color, this.influence);
         }  
+    }
+
+    darkenFogOfWarEveryWhere(intensity) {
+        for (let tileID = 0; tileID <= Player.maxTileID; tileID++) {
+            if (this.influence[tileID] == 0) {
+                this.fogOfWar[tileID] = Math.min(255, ( this.fogOfWar[tileID] * (1 + (intensity/100)) ) + intensity);
+            } else {
+                for (let i = 0; i < 30; i++){
+                    let randomTileID = Player.map.randomHexID(tileID, Math.random() * 4);
+                    this.fogOfWar[randomTileID] *= 0.7;
+                }  
+            } 
+        }
+    }
+
+    darkenFogOfWarAroundTile(tileID) {
+        for (let i = 0; i < 100; i++){
+            let randomTileID = Player.map.randomHexID(tileID, Math.random() * 7);
+            if (this.influence[randomTileID] == 0) {
+                this.fogOfWar[randomTileID] = Math.min(255, this.fogOfWar[randomTileID] * 1.1 + 5);
+            } 
+        }
     }
 
     updateFogOfWar() {

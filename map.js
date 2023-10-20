@@ -250,7 +250,7 @@ export class Map extends HexGrid {
      */
     selectAt(x, y, toggle = false) {       
         let tileID = this.hexIDAtPosition({x: x, y: y});   
-        if ( Player.humanPlayer.fogOfWar[tileID] > 230) {
+        if ( Player.humanPlayer.fogOfWar[tileID] > 250) {
             return;
         }     
         this.selectGraphic.visible = true;
@@ -282,14 +282,14 @@ export class Map extends HexGrid {
                         this.deselect();
                         return;
                     }
-                }     
-                this.setCameraBoundsToFogOfWar();
+                }               
             }
+            this.setCameraBoundsToFogOfWar();
         }
 
         this.selectedTileID = tileID;
         this.selectGraphic.setPosition(this.hexCenters[tileID].x, this.hexCenters[tileID].y);
-        updateTileDlg( this, Player.getOwner(tileID), tileID );
+        updateTileDlg( this, Player.getOwner(tileID), Player.humanPlayer, tileID );
         fadeIn(tileDlg);
         console.log(tileID);
         return tileID;
@@ -300,8 +300,9 @@ export class Map extends HexGrid {
         let width = bounds.maxX - bounds.minX;
         let height = bounds.maxY - bounds.minY;
         let cam = this.scene.cameras.main;
-        cam.minZoom = 1000 / Math.max(width, height);
-        cam.setBounds(bounds.minX * 1.2, bounds.minY * 1.2, width * 1.4, height * 1.4);
+
+        cam.minZoom = 1500 / Math.max(width, height);
+        cam.setBounds(bounds.minX * 1.3, bounds.minY * 1.3, width * 1.6, height * 1.6);
     }
 
     deselect() {
