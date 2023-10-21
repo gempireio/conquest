@@ -121,7 +121,7 @@ export class Map extends HexGrid {
                 if(this.tileText[tileID] && this.tileText[tileID].active) {
                     this.tileText[tileID].setText(text);
                 } else {
-                    this.tileText[tileID] = this.scene.add.text(this.hexCenters[tileID].x - 26, this.hexCenters[tileID].y - 22, text, { font: '18px monospace', fill: '#b1e1f6' });
+                    this.tileText[tileID] = this.scene.add.text(this.hexCenters[tileID].x - 27, this.hexCenters[tileID].y - 22, text, { font: '17px monospace', fill: '#b1e1f6' });
                     this.tileText[tileID].setDepth(10);
                 }        
             } else { 
