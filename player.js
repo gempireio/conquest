@@ -121,16 +121,16 @@ export class Player {
     revealTile(tileID) {
         this.darkenFogOfWarEveryWhere(3);
         this.fogOfWar[tileID] = 0;
-        for (let i = 0; i < 20; i++){
+        for (let i = 0; i < 30; i++){
             let randomTileID = Player.map.randomHexID(tileID, Math.random() * 3);
             this.fogOfWar[randomTileID] *= 0.6;
         }     
         for (let i = 0; i < 50; i++){
-            let randomTileID = Player.map.randomHexID(tileID, Math.random() * 5);
+            let randomTileID = Player.map.randomHexID(tileID, Math.random() * 4);
             this.fogOfWar[randomTileID] *= 0.8;
         } 
         for (let i = 0; i < 100; i++){
-            let randomTileID = Player.map.randomHexID(tileID, Math.random() * 10);
+            let randomTileID = Player.map.randomHexID(tileID, Math.random() * 6);
             this.fogOfWar[randomTileID] *= 0.9;
         } 
         if (Player.humanPlayerID === this.playerID) {

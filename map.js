@@ -301,8 +301,28 @@ export class Map extends HexGrid {
         let height = bounds.maxY - bounds.minY;
         let cam = this.scene.cameras.main;
 
+        // cam.setBounds(bounds.minX * 1.015 + 10, bounds.minY * 1.015 + 10, width * 1.03 + 20, height * 1.03 + 20);
         cam.minZoom = 1500 / Math.max(width, height);
-        cam.setBounds(bounds.minX * 1.3, bounds.minY * 1.3, width * 1.6, height * 1.6);
+        if (cam.zoom < cam.minZoom) {
+            this.scene.add.tween({
+                targets: cam,
+                zoom: cam.minZoom,
+                duration: 1200,
+                ease: 'Back.Out'
+            });
+        }
+        let tween = this.scene.add.tween({
+            targets: cam._bounds,
+            x: bounds.minX - 100,
+            y: bounds.minY - 100,
+            width: width + 200,
+            height: height + 200,
+            duration: 3000,
+            ease: 'Back.Out'
+        });
+        tween.setCallback('onComplete', () => {
+           cam.setBounds(bounds.minX - 100, bounds.minY - 100, width + 200, height + 200);
+        });
     }
 
     deselect() {

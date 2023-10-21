@@ -138,7 +138,7 @@ class Game extends Phaser.Scene {
         console.log("add cameras");
         // Main Camera
         cam = this.cameras.main;
-        cam.setBounds(map.minX * 1.035, map.minY * 1.035, map.width * 1.07, map.height * 1.07);
+        // cam.setBounds(map.minX * 1.05, map.minY * 1.05, map.width * 1.1, map.height * 1.1);
         cam.setZoom(MIN_ZOOM);
         cam.minZoom = MIN_ZOOM;
         cam.setRoundPixels(true);
@@ -170,25 +170,29 @@ class Game extends Phaser.Scene {
             }, this);
 
         // Zoom and Fade In Intro
-        //cam.fadeIn(3000);
+        cam.fadeIn(3000);
         const tweenConfig = {
             targets: cam,
-            zoom: ( MIN_ZOOM + MAX_ZOOM ) / 3,
+            zoom: ( MIN_ZOOM + MAX_ZOOM ) / 2,
             duration: 3000,
             ease: 'Bounce.Out'
         } 
         this.tweens.add(tweenConfig);
         let startTile = Player.humanPlayer.highestUnitTile();
         cam.pan( startTile.x, startTile.y, 1500, Phaser.Math.Easing.Back.Out, true );  
-        cam.shake(1500, 0.004);
+        cam.shake(2000, 0.004);
           
         fadeOutLoadingScreen();  
             
         console.log("draw graphics");
-        map.setCameraBoundsToFogOfWar();
         map.drawBaseMap(); 
         map.updateGraphics();
         this.setStartVariables();
+
+        // Code executed only after intro animations
+        this.time.addEvent({ delay: 3000, loop: false, callback: () => {
+            map.setCameraBoundsToFogOfWar();
+        }});
     }
     
     update(timestamp, elapsed) {
@@ -248,8 +252,8 @@ class Game extends Phaser.Scene {
         let newZoom = Math.max( cam.minZoom, Math.min(MAX_ZOOM, cam.zoom * (scaleFactor) ) );
  
         // Zoom to mouse pointer            
-        cam.pan(this.mouse.worldX - (this.mouse.worldX - cam.midPoint.x) * ((oldZoom/newZoom)), this.mouse.worldY - ( this.mouse.worldY - cam.midPoint.y) * ((oldZoom/newZoom)), 100, Phaser.Math.Easing.Back.Out, true);
-        cam.zoomTo( newZoom, 150, Phaser.Math.Easing.Back.Out, true );    
+        cam.pan(this.mouse.worldX - (this.mouse.worldX - cam.midPoint.x) * ((oldZoom/newZoom)), this.mouse.worldY - ( this.mouse.worldY - cam.midPoint.y) * ((oldZoom/newZoom)), 250, Phaser.Math.Easing.Back.Out, true);
+        cam.zoomTo( newZoom, 350, Phaser.Math.Easing.Back.Out, true );    
 
         this.dragIntensity = 0;
         this.lastZoomUpdate = this.time.now;

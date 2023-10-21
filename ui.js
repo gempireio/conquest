@@ -6,7 +6,6 @@ document.getElementsByTagName("head")[0].appendChild(metaTag);
 const lastWindow = document.getElementsByClassName("window-group")[0].lastElementChild.id.substring(6);
 const active = document.getElementsByClassName("window");
 
-
 createWindows();
 
 function createWindows() {
