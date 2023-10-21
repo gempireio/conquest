@@ -10,7 +10,7 @@ const MIN_ZOOM = 6 / GRID_LAYERS;
 const SHOW_GRID = URL_PARAMS.get('grid') ? URL_PARAMS.get('grid') : false;
 const SHOW_DEBUG_TEXT = URL_PARAMS.get('debug') ? URL_PARAMS.get('debug') : false;
 const STARTING_UNITS = 30;
-const TURN_TIME = 3000;
+const TURN_TIME = 30000;
 
 let debugObj;
 let map;
@@ -239,8 +239,8 @@ class Game extends Phaser.Scene {
     }
 
     endTurn() {
-        this.turn++;
-        console.log(this.turn);
+        console.log("End Turn " + this.turn);
+        this.turn++;  
         this.turnStartTime = this.time.now;
     }
 
