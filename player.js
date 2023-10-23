@@ -154,8 +154,7 @@ export class Player {
         this.updateOwnershipStatus(from);
         this.updateOwnershipStatus(to);
         this.revealTile(to);
-        Player.map.updateGraphics();
-        
+        Player.map.updateGraphics(); 
     }
 
     addUnits(tileID, civs, soldiers) {
@@ -177,8 +176,12 @@ export class Player {
         let defender = Player.getOwner(to);
         console.log("Attacking c" + civs + " s" + soldiers);
         console.log("Defending c" + defender.civs[to] + " s" + defender.soldiers[to]);
-        let attackerLosses = Math.ceil((defender.civs[to]/2 + defender.soldiers[to]) * Math.random() * 2);
-        let defenderLosses = Math.ceil((civs/5 + soldiers/1.5) * Math.random() * 2);
+        let attackerPower = (civs/5 + soldiers/1.1);
+        let defenderPower = (defender.civs[to]/3 + defender.soldiers[to]);
+        let attackerMultiplier = Math.pow(Math.random(), 0.3) + (Math.pow(Math.random(), 10)  * 10);
+        let defenderMultipler = Math.pow(Math.random(), 0.3) + (Math.pow(Math.random(), 10)  * 10);
+        let attackerLosses = Math.round(defenderPower * defenderMultipler);
+        let defenderLosses = Math.round(attackerPower * attackerMultiplier);
         let attackerWin = false;
         let attackerLostCivs, attackerLostSoldiers, defenderLostCivs, defenderLostSoldiers;
         attackerLostCivs = attackerLostSoldiers = defenderLostCivs = defenderLostSoldiers = 0;
@@ -191,22 +194,29 @@ export class Player {
             attackerLostSoldiers = attackerLosses;
         }
 
-        // Defender lost all soldiers and battle
+        // Defender lost all soldiers
         if (defenderLosses >= defender.soldiers[to]) {
-            console.log("Attacker Wins (or Draw)");
-            attackerWin = true;
             defenderLostSoldiers = defender.soldiers[to];
-            defenderLostCivs = Math.round( defender.civs[to] * Math.random());
-            
-            // Convert surviving civs
-            let convertedCivs = defender.civs[to] - defenderLostCivs;
-            this.civs[to] = convertedCivs;
-            defender.civs[to] = 0;
-            console.log("Converted Civs: " + convertedCivs);
+            defenderLostCivs = Math.min( defender.civs[to], defenderLosses - defenderLostSoldiers);
 
-            // Move Attacking Units   
-            this.moveUnits(from, to, civs - attackerLostCivs, soldiers - attackerLostSoldiers);
-            this.revealTile(to)
+            // Defender given second chance if surviving civs outnumber attacking units.
+            if (defender.civs[to] - defenderLostCivs > civs + soldiers - attackerLosses) {
+                console.log("Defender Wins (All Soldiers Killed)");
+                this.darkenFogOfWarAroundTile(from);
+            } else {
+                console.log("Attacker Wins (or Draw)");
+                attackerWin = true;
+
+                // Convert surviving civs
+                let convertedCivs = defender.civs[to] - defenderLostCivs;
+                this.civs[to] = convertedCivs;
+                defender.civs[to] = 0;
+                console.log("Converted Civs: " + convertedCivs);
+
+                // Move Attacking Units   
+                this.moveUnits(from, to, civs - attackerLostCivs, soldiers - attackerLostSoldiers);
+                this.revealTile(to)
+            }
         } else {
             // Defender Wins
             console.log("Defender Wins");
@@ -381,6 +391,7 @@ export class Player {
     startTurn() {
         console.log("Start Of Player " + this.name + "(" + this.playerID + ") Turn");
         this.reproduce();
+        Player.map.updateGraphics(); 
     }
 
     endTurn() {
@@ -402,9 +413,7 @@ export class Player {
 
     totalCivs() {
         let totalCivs = 0;
-        console.log(this.ownedTiles);
         for (const tileID of this.ownedTiles) {
-            console.log(tileID);
             totalCivs += this.civs[tileID];
         }
         return totalCivs;
