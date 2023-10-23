@@ -139,6 +139,7 @@ export class Player {
     }
 
     moveUnits(from, to, civs, soldiers) {
+        
         // Only move what is available
         civs = Math.min(civs, this.civs[from]);
         soldiers = Math.min(soldiers, this.soldiers[from]);
@@ -154,6 +155,7 @@ export class Player {
         this.updateOwnershipStatus(to);
         this.revealTile(to);
         Player.map.updateGraphics();
+        
     }
 
     addUnits(tileID, civs, soldiers) {
@@ -298,7 +300,7 @@ export class Player {
     }
 
     /**
-    * Resources:
+    * Player Resources:
     * 0: Gems
     * 1: Food
     * 2: Metal
@@ -306,14 +308,14 @@ export class Player {
     * 4: Wood
      */
     initializeResources( maxAmount ) {
-        this.resoucres = new Uint16Array(5);
-        for (let i in this.resoucres) {
-            this.resoucres[i] = Math.ceil(Math.random() * maxAmount);
+        this.resources = new Uint16Array(5);
+        for (let i in this.resources) {
+            this.resources[i] = Math.ceil(Math.random() * maxAmount);
         }
     }
 
     /**
-    * Metrics:
+    * Player Metrics:
     * 0: Morale
     * 1: Health
     */
@@ -341,7 +343,7 @@ export class Player {
 
     randomOwnedTile() {
         let owndedTilesArray = Array.from(this.ownedTiles);    
-        let tileID = owndedTilesArray[Math.floor(Math.random() * items.length)];
+        let tileID = owndedTilesArray[Math.floor(Math.random() * owndedTilesArray.length)];
         let tilePosition = Player.map.hexCenters[tileID];
         return {tileID: tileID, x: tilePosition.x, y: tilePosition.y}
     }
@@ -357,7 +359,7 @@ export class Player {
             }
         }
         let tilePosition = Player.map.hexCenters[highestUnitsTileID];
-        return {tileID: highestUnitsTileID, x: tilePosition.x, y: tilePosition.y}
+        return {tileID: highestUnitsTileID, units: highestUnits, x: tilePosition.x, y: tilePosition.y}
     }
 
     revealedBounds(){
@@ -374,6 +376,46 @@ export class Player {
             }
         }
         return {minX: minX, minY: minY, maxX: maxX, maxY: maxY};
+    }
+
+    startTurn() {
+        console.log("Start Of Player " + this.name + "(" + this.playerID + ") Turn");
+        this.reproduce();
+    }
+
+    endTurn() {
+        console.log("End Of Player " + this.name + "(" + this.playerID + ") Turn");
+    }
+
+    reproduce() {
+        let newCivs = Math.ceil((this.totalCivs() * 0.01) + (this.totalSoldiers() * 0.005));
+        let highestUnits = this.highestUnitTile().units;
+        while (newCivs > 0) {
+            let randomTileId = this.randomOwnedTile().tileID;
+            let tileUnits = this.civs[randomTileId] + this.soldiers[randomTileId];
+            if ( tileUnits > highestUnits / ( Math.random() * 10 + 1 ) ) {
+                this.addUnits(randomTileId, 1, 0);
+                newCivs--;
+            }
+        }   
+    }
+
+    totalCivs() {
+        let totalCivs = 0;
+        console.log(this.ownedTiles);
+        for (const tileID of this.ownedTiles) {
+            console.log(tileID);
+            totalCivs += this.civs[tileID];
+        }
+        return totalCivs;
+    }
+
+    totalSoldiers() {
+        let totalSoldiers = 0;
+        for (const tileID of this.ownedTiles) {
+            totalSoldiers += this.soldiers[tileID];
+        }
+        return totalSoldiers;
     }
 
     static allCivs() {

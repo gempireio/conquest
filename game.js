@@ -10,7 +10,7 @@ const MIN_ZOOM = 6 / GRID_LAYERS;
 const SHOW_GRID = URL_PARAMS.get('grid') ? URL_PARAMS.get('grid') : false;
 const SHOW_DEBUG_TEXT = URL_PARAMS.get('debug') ? URL_PARAMS.get('debug') : false;
 const STARTING_UNITS = 30;
-const TURN_TIME = 30000;
+const TURN_TIME = 1000;
 
 let debugObj;
 let map;
@@ -235,13 +235,21 @@ class Game extends Phaser.Scene {
     setStartVariables() {
         this.lastZoomUpdate = this.time.now;      
         this.turnStartTime = this.time.now;
-        this.turn = 0;
+        this.round = 0;
+        this.turnPlayer = 1;
     }
 
     endTurn() {
-        console.log("End Turn " + this.turn);
-        this.turn++;  
+        this.currentPlayer.endTurn();
+        let nextPlayerID = this.currentPlayer.playerID + 1;
+        if (nextPlayerID >= Player.players.length) {
+            nextPlayerID = 1;
+            console.log("End Of Round " + this.round);
+            this.round++;         
+        }
+        this.currentPlayer = Player.players[nextPlayerID];
         this.turnStartTime = this.time.now;
+        this.currentPlayer.startTurn();
     }
 
     zoomUpdate(scaleFactor) {
@@ -273,6 +281,7 @@ class Game extends Phaser.Scene {
             new Player(map, STARTING_UNITS, startTiles);
         }
         Player.chooseHumanPlayer();
+        this.currentPlayer = Player.players[1];
     }
 }
 
