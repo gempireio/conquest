@@ -10,7 +10,7 @@ const MIN_ZOOM = 6 / GRID_LAYERS;
 const SHOW_GRID = URL_PARAMS.get('grid') ? URL_PARAMS.get('grid') : false;
 const SHOW_DEBUG_TEXT = URL_PARAMS.get('debug') ? URL_PARAMS.get('debug') : false;
 const STARTING_UNITS = 30;
-const TURN_TIME = 1000;
+const TURN_TIME = 100;
 
 let debugObj;
 let map;
@@ -178,7 +178,7 @@ class Game extends Phaser.Scene {
             ease: 'Bounce.Out'
         } 
         this.tweens.add(tweenConfig);
-        let startTile = Player.humanPlayer.highestUnitTile();
+        let startTile = Player.humanPlayer.highestUnitsTile();
         cam.pan( startTile.x, startTile.y, 1500, Phaser.Math.Easing.Back.Out, true );  
         cam.shake(2000, 0.004);
           

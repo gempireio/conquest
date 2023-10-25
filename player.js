@@ -160,8 +160,7 @@ export class Player {
     addUnits(tileID, civs, soldiers) {
         this.civs[tileID] += civs;
         this.soldiers[tileID] += soldiers;
-        this.updateOwnershipStatus(tileID);
-        
+        this.updateOwnershipStatus(tileID);  
     }
 
     destroyUnits(tileID, civs, soldiers) {
@@ -358,7 +357,7 @@ export class Player {
         return {tileID: tileID, x: tilePosition.x, y: tilePosition.y}
     }
 
-    highestUnitTile() {
+    highestUnitsTile() {
         let highestUnits = 0;
         let highestUnitsTileID = 0;
         for (const tileID of this.ownedTiles) {
@@ -400,14 +399,25 @@ export class Player {
 
     reproduce() {
         let newCivs = Math.ceil((this.totalCivs() * 0.01) + (this.totalSoldiers() * 0.005));
-        let highestUnits = this.highestUnitTile().units;
+        
+        // Add to highest unit tile first
+        let highestUnitsTile = this.highestUnitsTile();
+        let highestUnits = highestUnitsTile.units;
+        let tileID = highestUnitsTile.tileID;
+        let civs = Math.floor( newCivs * Math.random() / 2 );
+
+        // Randomly add to other tiles until all new Civs placed
         while (newCivs > 0) {
             // TODO: Limit to developed land once buildings are implemented
-            let randomTileId = this.randomOwnedTile().tileID;
-            let tileUnits = this.civs[randomTileId] + this.soldiers[randomTileId];
-            let units = Math.floor( newCivs * Math.random() * ( tileUnits / highestUnits / 3 ) );
-            this.addUnits(randomTileId, units, 0);
-            newCivs -= units;
+            
+            // Add Civs
+            this.addUnits(tileID, civs, 0);
+            newCivs -= civs;
+
+            // Choose new Tile
+            tileID = this.randomOwnedTile().tileID;
+            let tileUnits = this.civs[tileID] + this.soldiers[tileID];
+            civs = Math.ceil( newCivs * Math.random() * ( tileUnits / highestUnits ) );
         }   
     }
 
