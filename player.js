@@ -198,8 +198,8 @@ export class Player {
             defenderLostSoldiers = defender.soldiers[to];
             defenderLostCivs = Math.min( defender.civs[to], defenderLosses - defenderLostSoldiers);
 
-            // Defender given second chance if surviving civs outnumber attacking units.
-            if (defender.civs[to] - defenderLostCivs > civs + soldiers - attackerLosses) {
+            // Defender given second chance if surviving civs outnumber attacking units strength.
+            if (defender.civs[to] - defenderLostCivs > civs + (soldiers*5) - attackerLosses) {
                 console.log("Defender Wins (All Soldiers Killed)");
             } else {
                 console.log("Attacker Wins (or Draw)");

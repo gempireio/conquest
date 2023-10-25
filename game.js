@@ -3,14 +3,14 @@ import {Player} from './player.js';
 import {Debug} from './debug.js';
 
 const URL_PARAMS = new URLSearchParams(window.location.search);
-const GRID_LAYERS = Math.max( 6, URL_PARAMS.get('l') ? parseInt(URL_PARAMS.get('l')) : 60 );
+const GRID_LAYERS = Math.max( 6, URL_PARAMS.get('l') ? parseInt(URL_PARAMS.get('l')) : 30 );
 const SEA_LEVEL = URL_PARAMS.get('sl') ? parseInt(URL_PARAMS.get('sl')) : 35;
 const MAX_ZOOM = 2;
 const MIN_ZOOM = 6 / GRID_LAYERS;
 const SHOW_GRID = URL_PARAMS.get('grid') ? URL_PARAMS.get('grid') : false;
 const SHOW_DEBUG_TEXT = URL_PARAMS.get('debug') ? URL_PARAMS.get('debug') : false;
 const STARTING_UNITS = 30;
-const TURN_TIME = 100;
+const TURN_TIME = 3000;
 
 let debugObj;
 let map;
