@@ -274,10 +274,10 @@ export class Map extends HexGrid {
               
                 // New tile empty or owned by human player
                 if ( !newTilePlayer || newTilePlayer === Player.humanPlayer ) {
-                    oldTilePlayer.moveUnits(this.selectedTileID, tileID, 15, 15);
+                    oldTilePlayer.moveUnits(this.selectedTileID, tileID, 150, 15);
                 } else {
                     // New tile is enemy, so attack
-                    let win = oldTilePlayer.attack(this.selectedTileID, tileID, 15, 15);
+                    let win = oldTilePlayer.attack(this.selectedTileID, tileID, 150, 15);
                     if (!win) {
                         this.deselect();
                         return;

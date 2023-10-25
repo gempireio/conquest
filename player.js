@@ -175,8 +175,8 @@ export class Player {
         let defender = Player.getOwner(to);
         console.log("Attacking c" + civs + " s" + soldiers);
         console.log("Defending c" + defender.civs[to] + " s" + defender.soldiers[to]);
-        let attackerPower = (civs/5 + soldiers/1.1);
-        let defenderPower = (defender.civs[to]/3 + defender.soldiers[to]);
+        let attackerPower = (civs/10 + soldiers/1.1);
+        let defenderPower = (defender.civs[to]/7 + defender.soldiers[to]);
         let attackerMultiplier = Math.pow(Math.random(), 0.3) + (Math.pow(Math.random(), 10)  * 10);
         let defenderMultipler = Math.pow(Math.random(), 0.3) + (Math.pow(Math.random(), 10)  * 10);
         let attackerLosses = Math.round(defenderPower * defenderMultipler);
@@ -201,7 +201,6 @@ export class Player {
             // Defender given second chance if surviving civs outnumber attacking units.
             if (defender.civs[to] - defenderLostCivs > civs + soldiers - attackerLosses) {
                 console.log("Defender Wins (All Soldiers Killed)");
-                this.darkenFogOfWarAroundTile(from);
             } else {
                 console.log("Attacker Wins (or Draw)");
                 attackerWin = true;
@@ -219,14 +218,18 @@ export class Player {
         } else {
             // Defender Wins
             console.log("Defender Wins");
-            defenderLostSoldiers = defenderLosses;
-            this.darkenFogOfWarAroundTile(from);
+            defenderLostSoldiers = defenderLosses;   
         }
 
-        // Draw. All units from both sides died.
-        if (attackerLostCivs + attackerLostSoldiers >= civs + soldiers && defenderLostCivs + defenderLostSoldiers >= defender.civs[to] + defender.soldiers[to]) {
-            console.log("Draw. All units died.");
+        // Attacker lost all units
+        if (attackerLostCivs + attackerLostSoldiers >= civs + soldiers) {
+            this.darkenFogOfWarAroundTile(from);      
             attackerWin = false;
+
+            // Draw. All units from both sides died.
+            if (defenderLostCivs + defenderLostSoldiers >= defender.civs[to] + defender.soldiers[to]) {
+                console.log("Draw. All units died.");  
+            }         
         }
 
         // Remove destroyed units
