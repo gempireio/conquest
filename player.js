@@ -402,12 +402,12 @@ export class Player {
         let newCivs = Math.ceil((this.totalCivs() * 0.01) + (this.totalSoldiers() * 0.005));
         let highestUnits = this.highestUnitTile().units;
         while (newCivs > 0) {
+            // TODO: Limit to developed land once buildings are implemented
             let randomTileId = this.randomOwnedTile().tileID;
             let tileUnits = this.civs[randomTileId] + this.soldiers[randomTileId];
-            if ( tileUnits > highestUnits / ( Math.random() * 10 + 1 ) ) {
-                this.addUnits(randomTileId, 1, 0);
-                newCivs--;
-            }
+            let units = Math.floor( newCivs * Math.random() * ( tileUnits / highestUnits / 3 ) );
+            this.addUnits(randomTileId, units, 0);
+            newCivs -= units;
         }   
     }
 
