@@ -225,7 +225,7 @@ class Game extends Phaser.Scene {
         } 
 
         if ( this.time.now - this.turnStartTime > TURN_TIME ) {
-            this.endTurn();
+            this.nextTurn();
         }
 
         // Update Debug Output
@@ -239,17 +239,17 @@ class Game extends Phaser.Scene {
         this.turnPlayer = 1;
     }
 
-    endTurn() {
-        this.currentPlayer.endTurn();
-        let nextPlayerID = this.currentPlayer.playerID + 1;
+    nextTurn() {
+        Player.currentPlayer.endTurn();
+        let nextPlayerID = Player.currentPlayer.playerID + 1;
         if (nextPlayerID >= Player.players.length) {
             nextPlayerID = 1;
             console.log("End Of Round " + this.round);
             this.round++;         
         }
-        this.currentPlayer = Player.players[nextPlayerID];
+        Player.currentPlayer = Player.players[nextPlayerID];
         this.turnStartTime = this.time.now;
-        this.currentPlayer.startTurn();
+        Player.currentPlayer.startTurn();
     }
 
     zoomUpdate(scaleFactor) {
@@ -281,7 +281,7 @@ class Game extends Phaser.Scene {
             new Player(map, STARTING_UNITS, startTiles);
         }
         Player.chooseHumanPlayer();
-        this.currentPlayer = Player.players[1];
+        Player.currentPlayer = Player.players[1];
     }
 }
 

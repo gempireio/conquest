@@ -1,3 +1,5 @@
+import {UnitGroup} from './unit_group.js';
+
 // Empire Names
 const PRE = ["Ger", "Brit", "Am", "Cal", "Den", "Est", "Fin", "Gin", "Hin", "Ig", "Jar", "Kan", "Lon", "Mer", "Nan", "Orph", "Pol", "Qar", "Rash", "Saf", "", "Zor"];
 const MID = ["", "ham",  "an", "for", "ork", "ish", "ead", "ma", "bor", "ter"];
@@ -28,6 +30,7 @@ export class Player {
     static allOwnedTiles = new Set();
     static humanPlayerID = 0;
     static players = [0];
+    static currentPlayer;
 
     constructor(map, startingUnits, startTiles) {
         Player.maxTileID = map.maxHexID;
@@ -37,6 +40,7 @@ export class Player {
         this.playerLevel = "Clan"; 
         this.color = Phaser.Display.Color.RandomRGB(30,200);   
         this.ownedTiles = new Set();
+        this.unitGroups = new Set();
         this.createDataArrays();
         this.initializeResources(startingUnits*3);
         this.initializeMetrics();
@@ -139,7 +143,12 @@ export class Player {
     }
 
     moveUnits(from, to, civs, soldiers) {
-        
+        this.unitGroups.add(new UnitGroup(this, Math.min(civs, this.civs[from]), Math.min(soldiers, this.soldiers[from]), from, to, 5));
+        Player.map.updateGraphics(); 
+    }
+
+    oldMoveUnits(from, to, civs, soldiers) {
+         
         // Only move what is available
         civs = Math.min(civs, this.civs[from]);
         soldiers = Math.min(soldiers, this.soldiers[from]);
@@ -393,11 +402,19 @@ export class Player {
     startTurn() {
         console.log("Start Of Player " + this.name + "(" + this.playerID + ") Turn");
         this.reproduce();
+        for (const unitGroup of this.unitGroups) {
+            unitGroup.startTurn();
+            if (unitGroup.progress() >= 1) this.unitGroups.delete(unitGroup);
+        }
         Player.map.updateGraphics(); 
     }
 
     endTurn() {
         console.log("End Of Player " + this.name + "(" + this.playerID + ") Turn");
+        for (const unitGroup of this.unitGroups) {
+            unitGroup.endTurn();
+        }
+        Player.map.updateGraphics(); 
     }
 
     reproduce() {
@@ -438,6 +455,20 @@ export class Player {
             totalSoldiers += this.soldiers[tileID];
         }
         return totalSoldiers;
+    }
+
+    turnsAway() {
+        let totalPlayers = Player.players.length - 1;
+        return (this.playerID - Player.currentPlayer.playerID + totalPlayers) % totalPlayers;
+    }
+
+    progressToNextTurn() {
+        const totalPlayers = Player.players.length - 1;
+        let turnsAway = this.playerID - Player.currentPlayer.playerID;
+        if (turnsAway < 0) {
+            turnsAway = totalPlayers + turnsAway;         
+        }
+        return 1 - (turnsAway / totalPlayers);
     }
 
     static allCivs() {

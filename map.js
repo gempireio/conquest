@@ -275,6 +275,7 @@ export class Map extends HexGrid {
                 // New tile empty or owned by human player
                 if ( !newTilePlayer || newTilePlayer === Player.humanPlayer ) {
                     oldTilePlayer.moveUnits(this.selectedTileID, tileID, 150, 15);
+                    this.deselect();
                 } else {
                     // New tile is enemy, so attack
                     let win = oldTilePlayer.attack(this.selectedTileID, tileID, 150, 15);
@@ -450,6 +451,7 @@ export class Map extends HexGrid {
 
     updateGraphics() {
         this.updateOverLays();
+        this.updateUnitGroups();
         if (this.lod > 2) {
             this.updateTextGraphics();
         } else {
@@ -462,6 +464,14 @@ export class Map extends HexGrid {
         mapOverlays.forEach((mapOverlay) => {
             mapOverlay.draw();
         });
+    }
+
+    updateUnitGroups() {
+        for (let playerID = 1; playerID < Player.players.length; playerID++) {
+            for (const unitGroup of Player.players[playerID].unitGroups) {
+                console.log(unitGroup.progress(), Player.players[playerID].progressToNextTurn());
+            }
+        }
     }
 
     updateLOD(zoom) {
