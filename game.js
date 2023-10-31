@@ -130,7 +130,7 @@ class Game extends Phaser.Scene {
     create() {
         console.log("create");
         this.cursors = this.input.keyboard.createCursorKeys();
-        this.keys = this.input.keyboard.addKeys('W,A,S,D,Q,E,Z,X,NUMPAD_ADD,NUMPAD_SUBTRACT');
+        this.keys = this.input.keyboard.addKeys('W,A,S,D,Q,E,Z,X,NUMPAD_ADD,NUMPAD_SUBTRACT,SPACE');
         this.mouse = this.input.mousePointer;
         this.touch1 = this.input.pointer1;
         this.input.addPointer(1);
@@ -224,6 +224,10 @@ class Game extends Phaser.Scene {
                 this.zoomUpdate(0.95);
             }
         } 
+
+        if (this.keys.SPACE.isDown && Player.currentPlayer.isHumanPlayer()){
+            this.nextTurn();
+        }
 
         if ( this.time.now - this.turnStartTime > this.currentTurnTime ) {
             this.nextTurn();
