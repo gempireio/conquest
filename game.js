@@ -135,7 +135,6 @@ class Game extends Phaser.Scene {
         this.touch1 = this.input.pointer1;
         this.input.addPointer(1);
         this.touch2 = this.input.pointer2;
-        this.lastSlowUpdate = this.time.now;
     
         console.log("add cameras");
         // Main Camera
@@ -226,7 +225,7 @@ class Game extends Phaser.Scene {
             }
         } 
 
-        if ( this.time.now - this.turnStartTime > TURN_TIME ) {
+        if ( this.time.now - this.turnStartTime > this.currentTurnTime ) {
             this.nextTurn();
         }
 
@@ -241,12 +240,11 @@ class Game extends Phaser.Scene {
     slowUpdate() {
         if (Player.currentPlayer.isHumanPlayer()){
             setProgressColor(true);
-            setProgress( (((this.time.now - this.turnStartTime) / TURN_TIME) * 100) );
+            setProgress( (((this.time.now - this.turnStartTime) / this.currentTurnTime) * 100) );
         } else {
             setProgressColor(false);
             let playerTurnPercent = 1 / (Player.players.length - 1);
-            let currentTurnProgress = (this.time.now - this.turnStartTime) / TURN_TIME;
-
+            let currentTurnProgress = (this.time.now - this.turnStartTime) / this.currentTurnTime;
             setProgress( ( (currentTurnProgress * playerTurnPercent) + Player.humanPlayer.progressToNextTurn() ) * 100 );
         }
         this.lastSlowUpdate = this.time.now;  
@@ -255,14 +253,16 @@ class Game extends Phaser.Scene {
     setStartVariables() {
         this.lastZoomUpdate = this.time.now;      
         this.turnStartTime = this.time.now;
+        this.currentTurnTime = TURN_TIME * Math.random() / 3;
+        this.lastSlowUpdate = this.time.now;
         this.round = 0;
         this.turnPlayer = 1;
     }
 
     nextTurn() {
-        console.log(Player.humanPlayer.progressToNextTurn());
         Player.currentPlayer.endTurn();
-        // if (Player.currentPlayer.isHumanPlayer()) setProgress(1);
+
+        // Increment Player and Round
         let nextPlayerID = Player.currentPlayer.playerID + 1;
         if (nextPlayerID >= Player.players.length) {
             nextPlayerID = 1;
@@ -270,8 +270,15 @@ class Game extends Phaser.Scene {
             this.round++;         
         }
         Player.currentPlayer = Player.players[nextPlayerID];
+
+        // Retstart Turn Timer
         this.turnStartTime = this.time.now;
-        // if (Player.currentPlayer.isHumanPlayer()) setProgress(1);
+        if (Player.currentPlayer.isHumanPlayer()) {
+            this.currentTurnTime = TURN_TIME;
+        } else {
+            this.currentTurnTime = TURN_TIME * Math.random() / 3;
+        }
+
         Player.currentPlayer.startTurn();
     }
 
