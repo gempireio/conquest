@@ -10,7 +10,8 @@ const MIN_ZOOM = 6 / GRID_LAYERS;
 const SHOW_GRID = URL_PARAMS.get('grid') ? URL_PARAMS.get('grid') : false;
 const SHOW_DEBUG_TEXT = URL_PARAMS.get('debug') ? URL_PARAMS.get('debug') : false;
 const STARTING_UNITS = 30;
-const TURN_TIME = 3000;
+const TURN_TIME = 10000;
+const SLOW_UPDATE_INTERVAL = 150;
 
 let debugObj;
 let map;
@@ -134,6 +135,7 @@ class Game extends Phaser.Scene {
         this.touch1 = this.input.pointer1;
         this.input.addPointer(1);
         this.touch2 = this.input.pointer2;
+        this.lastSlowUpdate = this.time.now;
     
         console.log("add cameras");
         // Main Camera
@@ -228,8 +230,26 @@ class Game extends Phaser.Scene {
             this.nextTurn();
         }
 
+        if(this.time.now - this.lastSlowUpdate > SLOW_UPDATE_INTERVAL) {
+            this.slowUpdate();
+        }
+
         // Update Debug Output
         if (SHOW_DEBUG_TEXT) debugObj.updateDebugText(this);
+    }
+
+    slowUpdate() {
+        if (Player.currentPlayer.isHumanPlayer()){
+            setProgressColor(true);
+            setProgress( (((this.time.now - this.turnStartTime) / TURN_TIME) * 100) );
+        } else {
+            setProgressColor(false);
+            let playerTurnPercent = 1 / (Player.players.length - 1);
+            let currentTurnProgress = (this.time.now - this.turnStartTime) / TURN_TIME;
+
+            setProgress( ( (currentTurnProgress * playerTurnPercent) + Player.humanPlayer.progressToNextTurn() ) * 100 );
+        }
+        this.lastSlowUpdate = this.time.now;  
     }
 
     setStartVariables() {
@@ -240,7 +260,9 @@ class Game extends Phaser.Scene {
     }
 
     nextTurn() {
+        console.log(Player.humanPlayer.progressToNextTurn());
         Player.currentPlayer.endTurn();
+        // if (Player.currentPlayer.isHumanPlayer()) setProgress(1);
         let nextPlayerID = Player.currentPlayer.playerID + 1;
         if (nextPlayerID >= Player.players.length) {
             nextPlayerID = 1;
@@ -249,6 +271,7 @@ class Game extends Phaser.Scene {
         }
         Player.currentPlayer = Player.players[nextPlayerID];
         this.turnStartTime = this.time.now;
+        // if (Player.currentPlayer.isHumanPlayer()) setProgress(1);
         Player.currentPlayer.startTurn();
     }
 

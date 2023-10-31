@@ -143,7 +143,7 @@ export class Player {
     }
 
     moveUnits(from, to, civs, soldiers) {
-        this.unitGroups.add(new UnitGroup(this, Math.min(civs, this.civs[from]), Math.min(soldiers, this.soldiers[from]), from, to, 5));
+        this.unitGroups.add(new UnitGroup(this, Math.min(civs, this.civs[from]), Math.min(soldiers, this.soldiers[from]), from, to, 1));
         Player.map.updateGraphics(); 
     }
 
@@ -463,12 +463,19 @@ export class Player {
     }
 
     progressToNextTurn() {
-        const totalPlayers = Player.players.length - 1;
-        let turnsAway = this.playerID - Player.currentPlayer.playerID;
-        if (turnsAway < 0) {
-            turnsAway = totalPlayers + turnsAway;         
-        }
-        return 1 - (turnsAway / totalPlayers);
+        const totalTurns = Player.players.length - 2;
+        const turn = Player.currentPlayer.playerID - this.playerID -((+(Player.currentPlayer.playerID > this.playerID)) * (1 + totalTurns) - totalTurns);
+        return turn / totalTurns;
+
+        // let turn = this.playerID - Player.currentPlayer.playerID;
+        // if (turnsAway < 0) {
+        //     turnsAway = totalPlayers + turnsAway;         
+        // }
+        // return turn / totalPlayers;
+    }
+
+    isHumanPlayer() {
+        return this.playerID === Player.humanPlayerID;
     }
 
     static allCivs() {

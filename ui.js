@@ -1,7 +1,7 @@
-const metaTag = document.createElement("meta");
-metaTag.name = "viewport";
-metaTag.content = "user-scalable=0";
-document.getElementsByTagName("head")[0].appendChild(metaTag);
+// const metaTag = document.createElement("meta");
+// metaTag.name = "viewport";
+// metaTag.content = "user-scalable=0";
+// document.getElementsByTagName("head")[0].appendChild(metaTag);
 
 const lastWindow = document.getElementsByClassName("window-group")[0].lastElementChild.id.substring(6);
 const active = document.getElementsByClassName("window");
@@ -151,6 +151,20 @@ function setTileDlgTitleColor(color) {
     if(color.r + color.g + color.b > 0) {
         document.getElementById("tile-dlg-title").style.background = "rgb(" + color.r + "," + color.g + "," + color.b + ")";
     } else {
-        document.getElementById("tile-dlg-title").style.background = "rgb(14,46,134)"
+        document.getElementById("tile-dlg-title").style.background = "rgb(14,46,134)";
     }    
+}
+
+function setProgress(progress) {
+    document.getElementById("progress-ring").value = progress;  
+}
+
+function setProgressColor(humanTurn) {
+    if (humanTurn) {
+        document.getElementById("progress-ring").style.setProperty('--track-color', 'rgba(3, 123, 142, 0.8)');
+        document.getElementById("progress-ring").style.setProperty('--indicator-color', 'rgba(75, 41, 155, 0.95)');
+    } else {
+        document.getElementById("progress-ring").style.setProperty('--track-color', 'rgba(142, 3, 21, 0.4)');
+        document.getElementById("progress-ring").style.setProperty('--indicator-color', 'rgba(150, 41, 155, 0.7)');
+    }   
 }

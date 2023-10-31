@@ -81,3 +81,13 @@
 	margin: 3px;
 }
 
+sl-progress-ring {
+	--track-width: clamp( 5px, 0.5vh + 1.5vw, 40px );; 
+	--indicator-width: clamp( 8px, 1vh + 2vw, 48px );;
+	--size: clamp( 100px, 5vh + 10vw, 300px );
+	--track-color: rgba(3, 123, 142, 0.4);
+	--indicator-color: rgba(75, 41, 155, 0.8);
+	position: fixed;
+	bottom: clamp( 8px, 3px + 0.5vh, 60px );
+	right: clamp( 8px, 3px + 0.5vw, 60px );
+}
