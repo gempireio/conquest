@@ -10,7 +10,7 @@ const MIN_ZOOM = 6 / GRID_LAYERS;
 const SHOW_GRID = URL_PARAMS.get('grid') ? URL_PARAMS.get('grid') : false;
 const SHOW_DEBUG_TEXT = URL_PARAMS.get('debug') ? URL_PARAMS.get('debug') : false;
 const STARTING_UNITS = 30;
-const TURN_TIME = 10000;
+const TURN_TIME = 30000;
 const SLOW_UPDATE_INTERVAL = 150;
 
 let debugObj;
@@ -257,7 +257,7 @@ class Game extends Phaser.Scene {
     setStartVariables() {
         this.lastZoomUpdate = this.time.now;      
         this.turnStartTime = this.time.now;
-        this.currentTurnTime = TURN_TIME * Math.random() / 3;
+        this.currentTurnTime = TURN_TIME * Math.random() / 8;
         this.lastSlowUpdate = this.time.now;
         this.round = 0;
         this.turnPlayer = 1;
@@ -280,7 +280,7 @@ class Game extends Phaser.Scene {
         if (Player.currentPlayer.isHumanPlayer()) {
             this.currentTurnTime = TURN_TIME;
         } else {
-            this.currentTurnTime = TURN_TIME * Math.random() / 3;
+            this.currentTurnTime = TURN_TIME * Math.random() / 8;
         }
 
         Player.currentPlayer.startTurn();
